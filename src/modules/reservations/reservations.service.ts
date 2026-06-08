@@ -3,6 +3,8 @@ import type { AuthContext } from "@/platform/auth/context";
 import { requireCapability } from "@/platform/rbac";
 import { recordAudit } from "@/platform/audit";
 import { ConflictError, NotFoundError, ValidationError } from "@/platform/errors";
+import { nightsBetween } from "@/platform/intervals";
+import { folioService } from "@/modules/folio/folio.service";
 import { reservationsRepository } from "@/modules/reservations/reservations.repository";
 import type {
   CreateReservationInput,
@@ -141,11 +143,32 @@ export const reservationsService = {
   },
 
   async checkOut(ctx: AuthContext, id: string): Promise<Reservation> {
-    return this.transition(ctx, id, "CHECKED_OUT", (r) => {
-      if (r.status !== "CHECKED_IN") {
-        throw new ConflictError(`Cannot check out a reservation with status ${r.status}`);
-      }
+    requireCapability(ctx.role, "reservation:write");
+    const before = await getOrThrow(id);
+    if (before.status !== "CHECKED_IN") {
+      throw new ConflictError(`Cannot check out a reservation with status ${before.status}`);
+    }
+    const after = await reservationsRepository.update(id, { status: "CHECKED_OUT" });
+    await recordAudit({
+      actorStaffId: ctx.staffId,
+      propertyId: ctx.propertyId,
+      action: "STATE_CHANGE",
+      entityType: "Reservation",
+      entityId: id,
+      before,
+      after,
+      metadata: { from: before.status, to: "CHECKED_OUT" },
     });
+    // Auto-charge room nights to the reservation's folio (creates the folio if needed).
+    const nights = nightsBetween(before.checkInDate, before.checkOutDate);
+    await folioService.postRoomCharges(ctx, {
+      reservationId: id,
+      guestId: before.guestId,
+      nights,
+      ratePerNightMinor: before.ratePerNightMinor,
+      description: `${before.roomType.name} — ${nights} night(s)`,
+    });
+    return after;
   },
 
   async cancel(ctx: AuthContext, id: string): Promise<Reservation> {

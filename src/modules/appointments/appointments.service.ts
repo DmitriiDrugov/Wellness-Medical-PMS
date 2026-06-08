@@ -7,6 +7,7 @@ import { authService } from "@/modules/auth/auth.service";
 import { guestsService } from "@/modules/guests/guests.service";
 import { treatmentsService } from "@/modules/treatments/treatments.service";
 import { resourcesService } from "@/modules/resources/resources.service";
+import { folioService } from "@/modules/folio/folio.service";
 import { appointmentsRepository } from "@/modules/appointments/appointments.repository";
 import { computeEndTime, resourceMatchesTreatment } from "@/modules/appointments/conflicts";
 import type {
@@ -177,7 +178,17 @@ export const appointmentsService = {
     if (before.status !== "SCHEDULED") {
       throw new ConflictError(`Cannot complete an appointment with status ${before.status}`);
     }
-    return this.applyStatus(ctx, id, "COMPLETED", before);
+    const after = await this.applyStatus(ctx, id, "COMPLETED", before);
+    // A completed treatment linked to a stay is billable: post it to that folio.
+    if (before.reservationId) {
+      await folioService.postTreatmentCharge(ctx, {
+        reservationId: before.reservationId,
+        appointmentId: before.id,
+        description: before.treatment.name,
+        priceMinor: before.treatment.priceMinor,
+      });
+    }
+    return after;
   },
 
   async cancel(ctx: AuthContext, id: string): Promise<TreatmentAppointment> {
