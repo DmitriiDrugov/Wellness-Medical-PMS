@@ -1,0 +1,454 @@
+// Medical-Wellness PMS — Prisma schema
+// Three data planes: OPERATIONAL, FINANCIAL (folio), COMPLIANCE/AUDIT.
+// All money is stored as Int minor units (HUF x 100 = fillér). Currency lives on Property.
+// Single-property runtime, multi-property seam: aggregates carry propertyId.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ============================================================
+// ENUMS
+// ============================================================
+
+enum StaffRole {
+  RECEPTION
+  RESERVATION_ADMIN
+  THERAPIST
+  MANAGER
+  HOUSEKEEPING
+  ADMIN
+}
+
+enum ReservationStatus {
+  PENDING
+  CONFIRMED
+  CHECKED_IN
+  CHECKED_OUT
+  CANCELLED
+  NO_SHOW
+}
+
+enum AppointmentStatus {
+  SCHEDULED
+  COMPLETED
+  CANCELLED
+  NO_SHOW
+}
+
+enum HousekeepingStatus {
+  CLEAN
+  DIRTY
+  INSPECTED
+  OUT_OF_ORDER
+}
+
+enum FolioStatus {
+  OPEN
+  CLOSED
+}
+
+enum LineItemType {
+  ROOM
+  PACKAGE
+  TREATMENT
+  ADJUSTMENT
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  TRANSFER
+}
+
+enum ResourceType {
+  TREATMENT_ROOM
+  EQUIPMENT
+}
+
+enum ComplianceEventType {
+  NTAK_DAILY_REPORT
+  NAV_INVOICE
+}
+
+enum ComplianceEventStatus {
+  LOGGED
+  SENT
+  FAILED
+}
+
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  STATE_CHANGE
+  LOGIN
+  LOGOUT
+}
+
+// ============================================================
+// OPERATIONAL PLANE
+// ============================================================
+
+/// Organization / property identity. One row in the single-property MVP.
+/// Holds compliance identity required by NTAK/NAV payloads.
+model Property {
+  id            String   @id @default(cuid())
+  name          String
+  legalName     String
+  taxNumber     String // NAV
+  ntakRegNumber String // NTAK accommodation registration number
+  addressLine   String
+  city          String
+  postalCode    String
+  country       String   @default("HU")
+  timezone      String   @default("Europe/Budapest")
+  currency      String   @default("HUF")
+  createdAt     DateTime @default(now())
+
+  staff            Staff[]
+  roomTypes        RoomType[]
+  rooms            Room[]
+  reservations     Reservation[]
+  treatments       Treatment[]
+  packages         ServicePackage[]
+  resources        Resource[]
+  appointments     TreatmentAppointment[]
+  folios           Folio[]
+  housekeepingTasks HousekeepingTask[]
+  complianceEvents ComplianceEvent[]
+}
+
+/// Staff member = the authenticated user. Therapist is simply role = THERAPIST.
+model Staff {
+  id           String    @id @default(cuid())
+  propertyId   String
+  property     Property  @relation(fields: [propertyId], references: [id])
+  email        String    @unique
+  passwordHash String
+  role         StaffRole
+  firstName    String
+  lastName     String
+  isActive     Boolean   @default(true)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  refreshTokens        RefreshToken[]
+  therapistAppointments TreatmentAppointment[] @relation("TherapistAppointments")
+  housekeepingTasks    HousekeepingTask[]
+  auditLogs            AuditLog[]
+
+  @@index([propertyId])
+  @@index([role])
+}
+
+/// Hashed refresh tokens — enables refresh rotation and revocation on deactivation.
+model RefreshToken {
+  id        String    @id @default(cuid())
+  staffId   String
+  staff     Staff     @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  tokenHash String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+
+  @@index([staffId])
+}
+
+/// Guest profile. Org-shared in the MVP (not property-scoped). GDPR consent flags.
+model Guest {
+  id                       String    @id @default(cuid())
+  firstName                String
+  lastName                 String
+  email                    String?
+  phone                    String?
+  nationality              String?
+  dateOfBirth              DateTime?
+  addressLine              String?
+  city                     String?
+  postalCode               String?
+  country                  String?
+  gdprConsentDataProcessing Boolean  @default(false)
+  gdprConsentMarketing     Boolean   @default(false)
+  gdprConsentAt            DateTime?
+  deletedAt                DateTime? // soft delete (GDPR erasure)
+  createdAt                DateTime  @default(now())
+  updatedAt                DateTime  @updatedAt
+
+  reservations Reservation[]
+  appointments TreatmentAppointment[]
+  folios       Folio[]
+
+  @@index([email])
+  @@index([lastName])
+}
+
+model RoomType {
+  id            String   @id @default(cuid())
+  propertyId    String
+  property      Property @relation(fields: [propertyId], references: [id])
+  name          String
+  description   String?
+  basePriceMinor Int // per night, minor units
+  maxOccupancy  Int      @default(2)
+
+  rooms        Room[]
+  reservations Reservation[]
+
+  @@unique([propertyId, name])
+  @@index([propertyId])
+}
+
+model Room {
+  id                 String             @id @default(cuid())
+  propertyId         String
+  property           Property           @relation(fields: [propertyId], references: [id])
+  number             String
+  roomTypeId         String
+  roomType           RoomType           @relation(fields: [roomTypeId], references: [id])
+  floor              Int?
+  housekeepingStatus HousekeepingStatus @default(DIRTY)
+  createdAt          DateTime           @default(now())
+
+  reservations     Reservation[]
+  housekeepingTasks HousekeepingTask[]
+
+  @@unique([propertyId, number])
+  @@index([propertyId])
+  @@index([roomTypeId])
+}
+
+model Reservation {
+  id               String            @id @default(cuid())
+  propertyId       String
+  property         Property          @relation(fields: [propertyId], references: [id])
+  guestId          String
+  guest            Guest             @relation(fields: [guestId], references: [id])
+  roomTypeId       String
+  roomType         RoomType          @relation(fields: [roomTypeId], references: [id])
+  roomId           String? // allocated room (nullable until assigned)
+  room             Room?             @relation(fields: [roomId], references: [id])
+  checkInDate      DateTime
+  checkOutDate     DateTime
+  status           ReservationStatus @default(PENDING)
+  adults           Int               @default(1)
+  children         Int               @default(0)
+  ratePerNightMinor Int
+  notes            String?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+
+  folio        Folio?
+  appointments TreatmentAppointment[]
+
+  @@index([propertyId])
+  @@index([guestId])
+  @@index([roomId, checkInDate, checkOutDate])
+  @@index([status])
+}
+
+model Treatment {
+  id                  String       @id @default(cuid())
+  propertyId          String
+  property            Property     @relation(fields: [propertyId], references: [id])
+  name                String
+  description         String?
+  durationMinutes     Int
+  priceMinor          Int
+  requiredResourceType ResourceType
+  active              Boolean      @default(true)
+
+  appointments TreatmentAppointment[]
+  packageItems PackageItem[]
+
+  @@index([propertyId])
+}
+
+model ServicePackage {
+  id          String        @id @default(cuid())
+  propertyId  String
+  property    Property      @relation(fields: [propertyId], references: [id])
+  name        String
+  description String?
+  priceMinor  Int
+  active      Boolean       @default(true)
+
+  items PackageItem[]
+
+  @@index([propertyId])
+}
+
+model PackageItem {
+  id          String         @id @default(cuid())
+  packageId   String
+  package     ServicePackage @relation(fields: [packageId], references: [id], onDelete: Cascade)
+  treatmentId String
+  treatment   Treatment      @relation(fields: [treatmentId], references: [id])
+  quantity    Int            @default(1)
+
+  @@unique([packageId, treatmentId])
+  @@index([packageId])
+}
+
+model Resource {
+  id         String       @id @default(cuid())
+  propertyId String
+  property   Property     @relation(fields: [propertyId], references: [id])
+  name       String
+  type       ResourceType
+  capacity   Int          @default(1)
+  active     Boolean      @default(true)
+
+  appointments TreatmentAppointment[]
+
+  @@index([propertyId])
+  @@index([type])
+}
+
+model TreatmentAppointment {
+  id            String            @id @default(cuid())
+  propertyId    String
+  property      Property          @relation(fields: [propertyId], references: [id])
+  guestId       String
+  guest         Guest             @relation(fields: [guestId], references: [id])
+  treatmentId   String
+  treatment     Treatment         @relation(fields: [treatmentId], references: [id])
+  therapistId   String
+  therapist     Staff             @relation("TherapistAppointments", fields: [therapistId], references: [id])
+  resourceId    String
+  resource      Resource          @relation(fields: [resourceId], references: [id])
+  startTime     DateTime
+  endTime       DateTime
+  status        AppointmentStatus @default(SCHEDULED)
+  reservationId String?
+  reservation   Reservation?      @relation(fields: [reservationId], references: [id])
+  notes         String?
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  @@index([propertyId])
+  @@index([guestId])
+  @@index([therapistId, startTime, endTime])
+  @@index([resourceId, startTime, endTime])
+  @@index([status])
+}
+
+// ============================================================
+// FINANCIAL PLANE
+// ============================================================
+
+model Folio {
+  id            String      @id @default(cuid())
+  propertyId    String
+  property      Property    @relation(fields: [propertyId], references: [id])
+  guestId       String
+  guest         Guest       @relation(fields: [guestId], references: [id])
+  reservationId String?     @unique
+  reservation   Reservation? @relation(fields: [reservationId], references: [id])
+  status        FolioStatus @default(OPEN)
+  openedAt      DateTime    @default(now())
+  closedAt      DateTime?
+
+  lineItems FolioLineItem[]
+  payments  Payment[]
+
+  @@index([propertyId])
+  @@index([guestId])
+}
+
+model FolioLineItem {
+  id              String       @id @default(cuid())
+  folioId         String
+  folio           Folio        @relation(fields: [folioId], references: [id], onDelete: Cascade)
+  type            LineItemType
+  description     String
+  quantity        Int          @default(1)
+  unitPriceMinor  Int
+  amountMinor     Int // quantity * unitPriceMinor (stored for ledger immutability)
+  sourceType      String? // e.g. "Reservation", "TreatmentAppointment", "ServicePackage"
+  sourceId        String?
+  createdByStaffId String?
+  createdAt       DateTime     @default(now())
+
+  @@index([folioId])
+}
+
+model Payment {
+  id               String        @id @default(cuid())
+  folioId          String
+  folio            Folio         @relation(fields: [folioId], references: [id], onDelete: Cascade)
+  amountMinor      Int
+  method           PaymentMethod
+  reference        String?
+  recordedByStaffId String?
+  paidAt           DateTime      @default(now())
+
+  @@index([folioId])
+}
+
+// ============================================================
+// HOUSEKEEPING (operational, but its own lifecycle)
+// ============================================================
+
+model HousekeepingTask {
+  id               String             @id @default(cuid())
+  propertyId       String
+  property         Property           @relation(fields: [propertyId], references: [id])
+  roomId           String
+  room             Room               @relation(fields: [roomId], references: [id])
+  status           HousekeepingStatus
+  assignedToStaffId String?
+  assignedTo       Staff?             @relation(fields: [assignedToStaffId], references: [id])
+  notes            String?
+  createdAt        DateTime           @default(now())
+  completedAt      DateTime?
+
+  @@index([propertyId])
+  @@index([roomId])
+}
+
+// ============================================================
+// COMPLIANCE / AUDIT PLANE
+// ============================================================
+
+/// APPEND-ONLY. The repository exposes only create(); never update/delete.
+/// Production hardening: a Postgres rule/trigger or REVOKE UPDATE,DELETE (see ADR 0002).
+model AuditLog {
+  id           String      @id @default(cuid())
+  propertyId   String?
+  actorStaffId String?
+  actor        Staff?      @relation(fields: [actorStaffId], references: [id])
+  action       AuditAction
+  entityType   String
+  entityId     String
+  before       Json?
+  after        Json?
+  metadata     Json?
+  createdAt    DateTime    @default(now())
+
+  @@index([entityType, entityId])
+  @@index([actorStaffId])
+  @@index([createdAt])
+}
+
+/// Logged NTAK/NAV payloads the system WOULD send (gateway is stubbed in the MVP).
+model ComplianceEvent {
+  id                String                @id @default(cuid())
+  propertyId        String
+  property          Property              @relation(fields: [propertyId], references: [id])
+  type              ComplianceEventType
+  payload           Json
+  status            ComplianceEventStatus @default(LOGGED)
+  relatedEntityType String?
+  relatedEntityId   String?
+  createdAt         DateTime              @default(now())
+
+  @@index([propertyId])
+  @@index([type])
+}
