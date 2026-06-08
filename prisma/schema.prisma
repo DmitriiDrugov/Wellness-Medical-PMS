@@ -90,6 +90,32 @@ enum AuditAction {
   STATE_CHANGE
   LOGIN
   LOGOUT
+  READ // clinical-data access logging (Phase 6)
+}
+
+// --- Phase 6: Forms & Charting (clinical) ---
+
+enum FormType {
+  INTAKE
+  MEDICAL_HISTORY
+  CUSTOM
+}
+
+enum SubmissionStatus {
+  PENDING
+  COMPLETED
+}
+
+enum ConsentType {
+  TREATMENT
+  GDPR_DATA_PROCESSING
+  PHOTO
+  MARKETING
+}
+
+enum TreatmentRecordStatus {
+  DRAFT
+  SIGNED
 }
 
 // ============================================================
@@ -123,6 +149,10 @@ model Property {
   folios           Folio[]
   housekeepingTasks HousekeepingTask[]
   complianceEvents ComplianceEvent[]
+  formTemplates    FormTemplate[]
+  intakeSubmissions IntakeFormSubmission[]
+  consents         Consent[]
+  treatmentRecords TreatmentRecord[]
 }
 
 /// Staff member = the authenticated user. Therapist is simply role = THERAPIST.
@@ -143,6 +173,8 @@ model Staff {
   therapistAppointments TreatmentAppointment[] @relation("TherapistAppointments")
   housekeepingTasks    HousekeepingTask[]
   auditLogs            AuditLog[]
+  providedRecords      TreatmentRecord[]      @relation("RecordProvider")
+  signedRecords        TreatmentRecord[]      @relation("RecordSigner")
 
   @@index([propertyId])
   @@index([role])
@@ -184,6 +216,9 @@ model Guest {
   reservations Reservation[]
   appointments TreatmentAppointment[]
   folios       Folio[]
+  intakeSubmissions IntakeFormSubmission[]
+  consents     Consent[]
+  treatmentRecords TreatmentRecord[]
 
   @@index([email])
   @@index([lastName])
@@ -332,6 +367,8 @@ model TreatmentAppointment {
   createdAt     DateTime          @default(now())
   updatedAt     DateTime          @updatedAt
 
+  treatmentRecords TreatmentRecord[]
+
   @@index([propertyId])
   @@index([guestId])
   @@index([therapistId, startTime, endTime])
@@ -451,4 +488,103 @@ model ComplianceEvent {
 
   @@index([propertyId])
   @@index([type])
+}
+
+// ============================================================
+// CLINICAL PLANE (Phase 6 — health-adjacent data; strict RBAC + consent gate)
+// ============================================================
+
+/// Definition of an intake / medical-history / custom form. Editing bumps `version`.
+model FormTemplate {
+  id         String   @id @default(cuid())
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id])
+  name       String
+  type       FormType
+  schema     Json // question definitions
+  version    Int      @default(1)
+  active     Boolean  @default(true)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
+  submissions IntakeFormSubmission[]
+
+  @@unique([propertyId, name])
+  @@index([propertyId])
+}
+
+/// A guest's answers to a form template. `templateVersion` is captured so answers
+/// remain interpretable even if the template is later edited.
+model IntakeFormSubmission {
+  id              String           @id @default(cuid())
+  propertyId      String
+  property        Property         @relation(fields: [propertyId], references: [id])
+  guestId         String
+  guest           Guest            @relation(fields: [guestId], references: [id])
+  templateId      String
+  template        FormTemplate     @relation(fields: [templateId], references: [id])
+  templateVersion Int
+  answers         Json
+  status          SubmissionStatus @default(PENDING)
+  submittedAt     DateTime?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  @@index([propertyId])
+  @@index([guestId])
+}
+
+/// History-preserving consent. Revoke sets `revokedAt`; a new grant is a new row.
+/// Never hard-deleted. Current consent of a type = latest row with revokedAt = null.
+model Consent {
+  id         String      @id @default(cuid())
+  propertyId String
+  property   Property    @relation(fields: [propertyId], references: [id])
+  guestId    String
+  guest      Guest       @relation(fields: [guestId], references: [id])
+  type       ConsentType
+  version    String // policy/text version
+  text       String? // inline consent text
+  docRef     String? // opaque external document reference (no blobs stored)
+  grantedAt  DateTime    @default(now())
+  revokedAt  DateTime?
+  createdAt  DateTime    @default(now())
+
+  @@index([guestId, type])
+  @@index([propertyId])
+}
+
+/// Clinical SOAP record for a treatment. IMMUTABLE once SIGNED — corrections create
+/// an addendum (a new record whose `supersededById` points to the prior record).
+/// The signed original is never mutated. `aiGenerated` is set by the Phase 9 scribe.
+model TreatmentRecord {
+  id                     String                @id @default(cuid())
+  propertyId             String
+  property               Property              @relation(fields: [propertyId], references: [id])
+  treatmentAppointmentId String
+  appointment            TreatmentAppointment  @relation(fields: [treatmentAppointmentId], references: [id])
+  guestId                String
+  guest                  Guest                 @relation(fields: [guestId], references: [id])
+  providerId             String
+  provider               Staff                 @relation("RecordProvider", fields: [providerId], references: [id])
+  subjective             String?
+  objective              String?
+  assessment             String?
+  plan                   String?
+  productsUsed           Json?
+  photoRefs              Json? // array of opaque external keys
+  status                 TreatmentRecordStatus @default(DRAFT)
+  aiGenerated            Boolean               @default(false)
+  signedById             String?
+  signedBy               Staff?                @relation("RecordSigner", fields: [signedById], references: [id])
+  signedAt               DateTime?
+  supersededById         String?               @unique // set on an addendum -> the prior record it supersedes
+  supersedes             TreatmentRecord?      @relation("RecordSupersession", fields: [supersededById], references: [id])
+  supersededByRecord     TreatmentRecord?      @relation("RecordSupersession")
+  createdAt              DateTime              @default(now())
+  updatedAt              DateTime              @updatedAt
+
+  @@index([propertyId])
+  @@index([guestId])
+  @@index([treatmentAppointmentId])
 }

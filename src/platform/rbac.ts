@@ -26,7 +26,15 @@ export type Capability =
   | "folio:close"
   | "report:read"
   | "compliance:manage"
-  | "staff:manage";
+  | "staff:manage"
+  // Phase 6 — clinical
+  | "forms:manage"
+  | "submission:write"
+  | "clinical:read"
+  | "clinical:write"
+  | "consent:write"
+  | "consent:read"
+  | "consent:status:read";
 
 const ALL: Capability[] = [
   "guest:read", "guest:write",
@@ -36,6 +44,9 @@ const ALL: Capability[] = [
   "housekeeping:read", "housekeeping:manage",
   "folio:read", "folio:write", "folio:close",
   "report:read", "compliance:manage", "staff:manage",
+  "forms:manage", "submission:write",
+  "clinical:read", "clinical:write",
+  "consent:write", "consent:read", "consent:status:read",
 ];
 
 const MATRIX: Record<StaffRole, Capability[]> = {
@@ -45,6 +56,7 @@ const MATRIX: Record<StaffRole, Capability[]> = {
     "catalog:read",
     "appointment:read", "appointment:write",
     "folio:read", "folio:write", "folio:close",
+    "submission:write", "consent:write", "consent:status:read",
   ],
   RESERVATION_ADMIN: [
     "guest:read", "guest:write",
@@ -53,11 +65,15 @@ const MATRIX: Record<StaffRole, Capability[]> = {
     "appointment:read", "appointment:write",
     "folio:read", "folio:write",
     "report:read",
+    "submission:write", "consent:status:read",
   ],
   THERAPIST: [
     "guest:read",
     "catalog:read",
     "appointment:read", "appointment:write", "appointment:complete",
+    "submission:write",
+    "clinical:read", "clinical:write",
+    "consent:write", "consent:read", "consent:status:read",
   ],
   HOUSEKEEPING: [
     "housekeeping:read", "housekeeping:manage",

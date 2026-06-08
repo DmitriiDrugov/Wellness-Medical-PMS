@@ -221,6 +221,11 @@ export const appointmentsService = {
     return after;
   },
 
+  /** Cross-module interface (no RBAC): used by the clinical module for read-scoping. */
+  async hasAppointmentWithGuest(therapistId: string, guestId: string): Promise<boolean> {
+    return appointmentsRepository.existsForTherapistAndGuest(therapistId, guestId);
+  },
+
   async availability(ctx: AuthContext, query: AppointmentAvailabilityQuery) {
     requireCapability(ctx.role, "appointment:read");
     const busy = await appointmentsRepository.findBusy({

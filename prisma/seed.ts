@@ -11,6 +11,10 @@ const DEMO_PASSWORD = "Passw0rd!";
 
 async function clear() {
   // Delete in FK-safe order (children first).
+  await prisma.treatmentRecord.deleteMany();
+  await prisma.intakeFormSubmission.deleteMany();
+  await prisma.consent.deleteMany();
+  await prisma.formTemplate.deleteMany();
   await prisma.auditLog.deleteMany();
   await prisma.complianceEvent.deleteMany();
   await prisma.payment.deleteMany();
@@ -259,6 +263,30 @@ async function main() {
       reservationId: res1.id,
     },
   });
+
+  // --- Phase 6: clinical forms & consents ---
+  await prisma.formTemplate.create({
+    data: {
+      propertyId,
+      name: "Wellness Intake",
+      type: "INTAKE",
+      schema: {
+        questions: [
+          { key: "allergies", label: "Known allergies", type: "text" },
+          { key: "conditions", label: "Existing medical conditions", type: "text" },
+          { key: "pregnant", label: "Currently pregnant?", type: "boolean" },
+          { key: "goals", label: "Wellness goals", type: "text" },
+        ],
+      },
+    },
+  });
+
+  // Grant the consents required to author a TreatmentRecord for the checked-in guest.
+  for (const type of ["TREATMENT", "GDPR_DATA_PROCESSING"] as const) {
+    await prisma.consent.create({
+      data: { propertyId, guestId: guests[0]!.id, type, version: "v1", text: `${type} consent v1` },
+    });
+  }
 
   console.log("Seed complete:");
   console.log(`  Property: ${property.name} (${propertyId})`);

@@ -41,6 +41,14 @@ erDiagram
 
     Folio ||--o{ FolioLineItem : "charges"
     Folio ||--o{ Payment : "receives"
+
+    Guest ||--o{ IntakeFormSubmission : "submits"
+    Guest ||--o{ Consent : "grants"
+    Guest ||--o{ TreatmentRecord : "subject of"
+    FormTemplate ||--o{ IntakeFormSubmission : "instantiated as"
+    TreatmentAppointment ||--o{ TreatmentRecord : "documented by"
+    Staff ||--o{ TreatmentRecord : "authors/signs"
+    TreatmentRecord ||--o| TreatmentRecord : "addendum supersedes"
 ```
 
 ## Data planes
@@ -50,6 +58,7 @@ erDiagram
 | **Operational** | Property, Staff, Guest, RoomType, Room, Reservation, Treatment, ServicePackage, PackageItem, Resource, TreatmentAppointment, HousekeepingTask |
 | **Financial** | Folio, FolioLineItem, Payment |
 | **Compliance/Audit** | AuditLog (append-only), ComplianceEvent |
+| **Clinical** (Phase 6) | FormTemplate, IntakeFormSubmission, Consent, TreatmentRecord |
 
 ## Key invariants (enforced in the service layer)
 
@@ -60,3 +69,8 @@ erDiagram
   THERAPIST; resource type must match the treatment's `requiredResourceType`.
 - **Folio balance:** Σ `FolioLineItem.amountMinor` − Σ `Payment.amountMinor`.
 - **Audit:** every state-changing operation writes exactly one append-only `AuditLog` row.
+- **Consent gate (clinical):** a `TreatmentRecord` can be created only when the guest has
+  non-revoked `TREATMENT` and `GDPR_DATA_PROCESSING` consents.
+- **Clinical immutability:** a `TreatmentRecord` is immutable once `SIGNED`; corrections are new
+  addendum records (`supersededById` → prior record); the original is never mutated. Every
+  clinical read/write is audit-logged (`AuditAction.READ` for reads).

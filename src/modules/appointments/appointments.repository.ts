@@ -72,6 +72,12 @@ export const appointmentsRepository = {
     });
   },
 
+  /** Whether a therapist has any appointment (any status) with a guest. */
+  async existsForTherapistAndGuest(therapistId: string, guestId: string): Promise<boolean> {
+    const count = await prisma.treatmentAppointment.count({ where: { therapistId, guestId } });
+    return count > 0;
+  },
+
   /** Busy intervals for a therapist and/or resource within [from, to). */
   findBusy(params: { propertyId: string; therapistId?: string; resourceId?: string; from: Date; to: Date }) {
     const or: Prisma.TreatmentAppointmentWhereInput[] = [];

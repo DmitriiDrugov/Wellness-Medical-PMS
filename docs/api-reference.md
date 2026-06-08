@@ -84,3 +84,26 @@ Required capability per endpoint is shown in brackets; see [RBAC matrix](superpo
 | POST | `/api/compliance/ntak/daily-report` | compliance:manage | `{ date }` → builds + logs NTAK payload, persists ComplianceEvent |
 | POST | `/api/compliance/nav/invoice` | compliance:manage | `{ folioId }` → builds + logs NAV invoice payload, persists ComplianceEvent |
 | GET | `/api/compliance/events` | compliance:manage | logged compliance events |
+
+## Forms & Charting — Clinical (Phase 6)
+Clinical data is health-adjacent (GDPR / Infotörvény). Reception sees consent **status only**;
+housekeeping has no access. Every clinical read/write is audit-logged.
+
+| Method | Path | Capability | Body / Notes |
+|---|---|---|---|
+| GET / POST | `/api/form-templates` | submission:write / forms:manage | template definitions; PATCH bumps version |
+| GET / PATCH | `/api/form-templates/:id` | submission:write / forms:manage | |
+| POST | `/api/intake-submissions` | submission:write | `{ guestId, templateId, answers?, status? }` |
+| GET | `/api/intake-submissions` | submission:write | metadata only (no answers); query `guestId?, status?` |
+| GET | `/api/intake-submissions/:id` | clinical:read | full answers (therapist-scoped, audited) |
+| PATCH | `/api/intake-submissions/:id` | submission:write | update answers/status |
+| GET | `/api/guests/:id/consents` | consent:read | full consent records (therapist-scoped) |
+| POST | `/api/guests/:id/consents` | consent:write | grant `{ type, version, text?, docRef? }` |
+| GET | `/api/guests/:id/consents/status` | consent:status:read | per-type status only (granted/revoked/none) |
+| POST | `/api/consents/:id/revoke` | consent:write | sets revokedAt (history preserved) |
+| POST | `/api/treatment-records` | clinical:write | `{ treatmentAppointmentId, subjective?, objective?, assessment?, plan?, productsUsed?, photoRefs? }` — 409 if required consent missing |
+| GET | `/api/treatment-records` | clinical:read | query `guestId?, appointmentId?` (therapist-scoped) |
+| GET | `/api/treatment-records/:id` | clinical:read | therapist-scoped, audited |
+| PATCH | `/api/treatment-records/:id` | clinical:write | DRAFT only; 409 once signed |
+| POST | `/api/treatment-records/:id/sign` | clinical:write | human signature locks the record |
+| POST | `/api/treatment-records/:id/addendum` | clinical:write | new DRAFT superseding a signed record |
