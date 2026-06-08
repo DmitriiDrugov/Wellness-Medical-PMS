@@ -11,5 +11,12 @@ export default defineConfig({
     environment: "node",
     include: ["tests/**/*.test.ts", "src/**/*.test.ts"],
     globals: true,
+    // Test-only secrets so platform/config.ts loads without a real .env.
+    env: {
+      JWT_ACCESS_SECRET: "test-access-secret",
+      JWT_REFRESH_SECRET: "test-refresh-secret",
+      ACCESS_TOKEN_TTL: "900",
+      REFRESH_TOKEN_TTL: "2592000",
+    },
   },
 });
