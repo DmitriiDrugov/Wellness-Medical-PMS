@@ -34,4 +34,8 @@ export const authRepository = {
       data: { revokedAt: new Date() },
     });
   },
+
+  findAiAgent(propertyId: string) {
+    return prisma.staff.findFirst({ where: { propertyId, role: "AI_AGENT", isActive: true } });
+  },
 };

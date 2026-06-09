@@ -21,13 +21,21 @@ export const appointmentsRepository = {
     take: number;
     therapistId?: string;
     guestId?: string;
+    resourceId?: string;
     status?: AppointmentStatus;
+    from?: Date;
+    to?: Date;
   }) {
     const where: Prisma.TreatmentAppointmentWhereInput = {
       propertyId: params.propertyId,
       ...(params.therapistId ? { therapistId: params.therapistId } : {}),
       ...(params.guestId ? { guestId: params.guestId } : {}),
+      ...(params.resourceId ? { resourceId: params.resourceId } : {}),
       ...(params.status ? { status: params.status } : {}),
+      // Half-open overlap with the requested [from, to) window.
+      ...(params.from && params.to
+        ? { startTime: { lt: params.to }, endTime: { gt: params.from } }
+        : {}),
     };
     const [items, total] = await Promise.all([
       prisma.treatmentAppointment.findMany({
@@ -76,6 +84,15 @@ export const appointmentsRepository = {
   async existsForTherapistAndGuest(therapistId: string, guestId: string): Promise<boolean> {
     const count = await prisma.treatmentAppointment.count({ where: { therapistId, guestId } });
     return count > 0;
+  },
+
+  async guestIdsForTherapist(therapistId: string): Promise<string[]> {
+    const rows = await prisma.treatmentAppointment.findMany({
+      where: { therapistId },
+      select: { guestId: true },
+      distinct: ["guestId"],
+    });
+    return rows.map((r) => r.guestId);
   },
 
   /** Busy intervals for a therapist and/or resource within [from, to). */
