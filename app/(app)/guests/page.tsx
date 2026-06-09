@@ -168,11 +168,11 @@ function GuestDetail({
 
   async function recordGdprConsent() {
     if (!guest) return;
+    // Flip the guest's own GDPR flag (the column the pill/button read). The service
+    // stamps gdprConsentAt on transition. The clinical Consent ledger is a separate
+    // concern and is not what this profile pill reflects.
     const result = await consentMutation.submit(() =>
-      api.post(`/api/guests/${guest.id}/consents`, {
-        type: "GDPR_DATA_PROCESSING",
-        version: "1.0",
-      }),
+      api.patch(`/api/guests/${guest.id}`, { gdprConsentDataProcessing: true }),
     );
     if (result !== undefined) onReload();
   }

@@ -11,5 +11,8 @@ export const GET = handle(async (req) => {
   const ctx = requireAuth(req);
   const param = new URL(req.url).searchParams.get("role");
   const role = ROLES.find((r) => r === param);
-  return ok(await authService.listStaff(ctx, role));
+  const staff = await authService.listStaff(ctx, role);
+  // Slim to the picker shape (StaffRef): no email/isActive exposure to every
+  // appointment:read holder. passwordHash is already stripped by toProfile.
+  return ok(staff.map((s) => ({ id: s.id, firstName: s.firstName, lastName: s.lastName, role: s.role })));
 });
