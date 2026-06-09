@@ -30,6 +30,9 @@ async function clear() {
   await prisma.room.deleteMany();
   await prisma.roomType.deleteMany();
   await prisma.refreshToken.deleteMany();
+  await prisma.message.deleteMany();
+  await prisma.conversation.deleteMany();
+  await prisma.guestAccount.deleteMany();
   await prisma.guest.deleteMany();
   await prisma.staff.deleteMany();
   await prisma.property.deleteMany();
@@ -55,7 +58,7 @@ async function main() {
   });
   const propertyId = property.id;
 
-  // --- Staff (all 6 roles; 4 therapists) ---
+  // --- Staff (all 7 roles; 4 therapists + 1 AI agent) ---
   const staffData = [
     { email: "admin@hotel.test", role: "ADMIN", firstName: "Anna", lastName: "Admin" },
     { email: "manager@hotel.test", role: "MANAGER", firstName: "Márton", lastName: "Manager" },
@@ -66,6 +69,7 @@ async function main() {
     { email: "therapist2@hotel.test", role: "THERAPIST", firstName: "Tímea", lastName: "Takács" },
     { email: "therapist3@hotel.test", role: "THERAPIST", firstName: "Tibor", lastName: "Tar" },
     { email: "therapist4@hotel.test", role: "THERAPIST", firstName: "Teréz", lastName: "Tóth" },
+    { email: "ai@hotel.test", role: "AI_AGENT", firstName: "Aria", lastName: "AI" },
   ] as const;
 
   const staff = [];
@@ -194,6 +198,26 @@ async function main() {
     );
   }
 
+  // --- Demo guest account & AI conversation ---
+  const demoGuest = guests[0]!;
+  await prisma.guestAccount.create({
+    data: {
+      guestId: demoGuest.id,
+      email: demoGuest.email ?? "guest@demo.test",
+      passwordHash: await bcrypt.hash(DEMO_PASSWORD, 10),
+      activatedAt: new Date(),
+    },
+  });
+  const convo = await prisma.conversation.create({
+    data: { propertyId: property.id, guestId: demoGuest.id, handling: "AI" },
+  });
+  await prisma.message.create({
+    data: { conversationId: convo.id, senderKind: "GUEST", body: "Hi, what time does the spa open?" },
+  });
+  await prisma.message.create({
+    data: { conversationId: convo.id, senderKind: "AI", body: "Good day! Our spa is open 08:00–20:00 daily." },
+  });
+
   // --- Reservations + a folio ---
   const today = new Date();
   const addDays = (d: Date, n: number) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
@@ -290,10 +314,11 @@ async function main() {
 
   console.log("Seed complete:");
   console.log(`  Property: ${property.name} (${propertyId})`);
-  console.log(`  Staff: ${staff.length} (${therapists.length} therapists)`);
+  console.log(`  Staff: ${staff.length} (${therapists.length} therapists, 1 AI agent)`);
   console.log(`  Rooms: ${rooms.length} across ${roomTypes.length} room types`);
   console.log(`  Treatments: ${treatments.length}, Packages: 2, Resources: ${resources.length}`);
   console.log(`  Guests: ${guests.length}, Reservations: 2, Folio: 1, Appointment: 1`);
+  console.log(`  GuestAccount: 1 (${demoGuest.email}), Conversation: 1, Messages: 2`);
   console.log(`  Demo login password for all staff: ${DEMO_PASSWORD}`);
 }
 
