@@ -71,6 +71,9 @@ export const authService = {
     if (!existing) {
       throw new UnauthorizedError("Invalid or expired refresh token");
     }
+    if (!existing.staffId) {
+      throw new UnauthorizedError("Token does not belong to a staff account");
+    }
     const staff = await authRepository.findStaffById(existing.staffId);
     if (!staff || !staff.isActive) {
       throw new UnauthorizedError("Account is inactive");

@@ -25,6 +25,7 @@ export type Capability =
   | "folio:write"
   | "folio:close"
   | "report:read"
+  | "audit:read"
   | "compliance:manage"
   | "staff:manage"
   // Phase 6 — clinical
@@ -43,7 +44,7 @@ const ALL: Capability[] = [
   "appointment:read", "appointment:write", "appointment:complete",
   "housekeeping:read", "housekeeping:manage",
   "folio:read", "folio:write", "folio:close",
-  "report:read", "compliance:manage", "staff:manage",
+  "report:read", "audit:read", "compliance:manage", "staff:manage",
   "forms:manage", "submission:write",
   "clinical:read", "clinical:write",
   "consent:write", "consent:read", "consent:status:read",
@@ -80,6 +81,8 @@ const MATRIX: Record<StaffRole, Capability[]> = {
   ],
   MANAGER: ALL.filter((c) => c !== "staff:manage"),
   ADMIN: [...ALL],
+  // AI_AGENT capabilities are defined in the messaging module (Phase 7)
+  AI_AGENT: [],
 };
 
 export function can(role: StaffRole, capability: Capability): boolean {

@@ -24,6 +24,7 @@ enum StaffRole {
   MANAGER
   HOUSEKEEPING
   ADMIN
+  AI_AGENT
 }
 
 enum ReservationStatus {
@@ -118,6 +119,22 @@ enum TreatmentRecordStatus {
   SIGNED
 }
 
+enum ConversationHandling {
+  AI
+  HUMAN
+}
+
+enum ConversationStatus {
+  OPEN
+  CLOSED
+}
+
+enum MessageSenderKind {
+  GUEST
+  AI
+  STAFF
+}
+
 // ============================================================
 // OPERATIONAL PLANE
 // ============================================================
@@ -138,21 +155,22 @@ model Property {
   currency      String   @default("HUF")
   createdAt     DateTime @default(now())
 
-  staff            Staff[]
-  roomTypes        RoomType[]
-  rooms            Room[]
-  reservations     Reservation[]
-  treatments       Treatment[]
-  packages         ServicePackage[]
-  resources        Resource[]
-  appointments     TreatmentAppointment[]
-  folios           Folio[]
+  staff             Staff[]
+  roomTypes         RoomType[]
+  rooms             Room[]
+  reservations      Reservation[]
+  treatments        Treatment[]
+  packages          ServicePackage[]
+  resources         Resource[]
+  appointments      TreatmentAppointment[]
+  folios            Folio[]
   housekeepingTasks HousekeepingTask[]
-  complianceEvents ComplianceEvent[]
-  formTemplates    FormTemplate[]
+  complianceEvents  ComplianceEvent[]
+  formTemplates     FormTemplate[]
   intakeSubmissions IntakeFormSubmission[]
-  consents         Consent[]
-  treatmentRecords TreatmentRecord[]
+  consents          Consent[]
+  treatmentRecords  TreatmentRecord[]
+  conversations     Conversation[]
 }
 
 /// Staff member = the authenticated user. Therapist is simply role = THERAPIST.
@@ -169,28 +187,50 @@ model Staff {
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt
 
-  refreshTokens        RefreshToken[]
+  refreshTokens         RefreshToken[]
   therapistAppointments TreatmentAppointment[] @relation("TherapistAppointments")
-  housekeepingTasks    HousekeepingTask[]
-  auditLogs            AuditLog[]
-  providedRecords      TreatmentRecord[]      @relation("RecordProvider")
-  signedRecords        TreatmentRecord[]      @relation("RecordSigner")
+  housekeepingTasks     HousekeepingTask[]
+  auditLogs             AuditLog[]
+  providedRecords       TreatmentRecord[]      @relation("RecordProvider")
+  signedRecords         TreatmentRecord[]      @relation("RecordSigner")
+  assignedConversations Conversation[]         @relation("ConversationAssignee")
 
   @@index([propertyId])
   @@index([role])
 }
 
 /// Hashed refresh tokens — enables refresh rotation and revocation on deactivation.
+/// staffId OR guestAccountId is set (token belongs to either a staff member or a guest).
 model RefreshToken {
-  id        String    @id @default(cuid())
-  staffId   String
-  staff     Staff     @relation(fields: [staffId], references: [id], onDelete: Cascade)
-  tokenHash String    @unique
-  expiresAt DateTime
-  revokedAt DateTime?
-  createdAt DateTime  @default(now())
+  id             String        @id @default(cuid())
+  staffId        String?
+  staff          Staff?        @relation(fields: [staffId], references: [id], onDelete: Cascade)
+  guestAccountId String?
+  guestAccount   GuestAccount? @relation(fields: [guestAccountId], references: [id], onDelete: Cascade)
+  tokenHash      String        @unique
+  expiresAt      DateTime
+  revokedAt      DateTime?
+  createdAt      DateTime      @default(now())
 
   @@index([staffId])
+  @@index([guestAccountId])
+}
+
+/// Portal / self-service account for a guest. One-to-one with Guest.
+model GuestAccount {
+  id              String    @id @default(cuid())
+  guestId         String    @unique
+  guest           Guest     @relation(fields: [guestId], references: [id])
+  email           String    @unique
+  passwordHash    String?
+  inviteTokenHash String?
+  invitedAt       DateTime?
+  activatedAt     DateTime?
+  lastLoginAt     DateTime?
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  refreshTokens RefreshToken[]
 }
 
 /// Guest profile. Org-shared in the MVP (not property-scoped). GDPR consent flags.
@@ -213,12 +253,14 @@ model Guest {
   createdAt                DateTime  @default(now())
   updatedAt                DateTime  @updatedAt
 
-  reservations Reservation[]
-  appointments TreatmentAppointment[]
-  folios       Folio[]
+  reservations      Reservation[]
+  appointments      TreatmentAppointment[]
+  folios            Folio[]
   intakeSubmissions IntakeFormSubmission[]
-  consents     Consent[]
-  treatmentRecords TreatmentRecord[]
+  consents          Consent[]
+  treatmentRecords  TreatmentRecord[]
+  guestAccount      GuestAccount?
+  conversation      Conversation?
 
   @@index([email])
   @@index([lastName])
@@ -587,4 +629,43 @@ model TreatmentRecord {
   @@index([propertyId])
   @@index([guestId])
   @@index([treatmentAppointmentId])
+}
+
+// ============================================================
+// MESSAGING PLANE (Phase 7 — AI receptionist + guest portal)
+// ============================================================
+
+/// One conversation per guest per property (unique on guestId).
+model Conversation {
+  id              String               @id @default(cuid())
+  propertyId      String
+  property        Property             @relation(fields: [propertyId], references: [id])
+  guestId         String               @unique
+  guest           Guest                @relation(fields: [guestId], references: [id])
+  handling        ConversationHandling @default(AI)
+  status          ConversationStatus   @default(OPEN)
+  assignedStaffId String?
+  assignedStaff   Staff?               @relation("ConversationAssignee", fields: [assignedStaffId], references: [id])
+  lastMessageAt   DateTime             @default(now())
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+
+  messages Message[]
+
+  @@index([propertyId, status])
+  @@index([propertyId, handling])
+}
+
+model Message {
+  id             String            @id @default(cuid())
+  conversationId String
+  conversation   Conversation      @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  senderKind     MessageSenderKind
+  senderStaffId  String?
+  body           String
+  actionType     String?
+  actionId       String?
+  createdAt      DateTime          @default(now())
+
+  @@index([conversationId, createdAt])
 }
