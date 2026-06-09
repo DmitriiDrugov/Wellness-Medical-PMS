@@ -3,9 +3,12 @@
 import { useMemo, useState } from "react";
 import { api } from "@/web/api-client";
 import { useApi } from "@/web/use-api";
-import type { Reservation } from "@/web/types";
+import { useMutation } from "@/web/use-mutation";
+import type { Reservation, RoomListItem } from "@/web/types";
 import { PageHeader, Card, Icon, DataState } from "@/web/components/ui";
-import { fullName } from "@/web/format";
+import { ConfirmDialog } from "@/web/components/ConfirmDialog";
+import { fullName, formatDate } from "@/web/format";
+import { ReservationFormModal } from "./ReservationFormModal";
 
 function startOfWeek(d: Date): Date {
   const x = new Date(d);
@@ -47,17 +50,55 @@ export default function ReservationsPage() {
   const from = localKey(weekStart);
   const to = localKey(addDays(weekStart, 7));
 
-  const { data, loading, error } = useApi<Reservation[]>(
+  const { data, loading, error, reload } = useApi<Reservation[]>(
     () => api.get<Reservation[]>("/api/reservations", { from, to, pageSize: 100 }),
     [from, to],
   );
   const reservations = data ?? [];
 
-  // Group bookings into room rows (derived from the bookings in view — no rooms-list endpoint yet).
+  // Rooms list for assign-room picker
+  const allRooms = useApi<RoomListItem[]>(() => api.get<RoomListItem[]>("/api/rooms"), []);
+
+  // Modal / selection state
+  const [createOpen, setCreateOpen] = useState(false);
+  const [selected, setSelected] = useState<Reservation | null>(null);
+  const [cancelTarget, setCancelTarget] = useState<Reservation | null>(null);
+  const [assignRoomId, setAssignRoomId] = useState<string>("");
+
+  const action = useMutation();
+  const cancelMutation = useMutation();
+
+  async function lifecycle(id: string, op: "check-in" | "check-out") {
+    const ok = await action.submit(() => api.post(`/api/reservations/${id}/${op}`));
+    if (ok !== undefined) {
+      setSelected(null);
+      reload();
+    }
+  }
+  async function doCancel() {
+    if (!cancelTarget) return;
+    const ok = await cancelMutation.submit(() => api.post(`/api/reservations/${cancelTarget.id}/cancel`));
+    if (ok !== undefined) {
+      setCancelTarget(null);
+      setSelected(null);
+      reload();
+    }
+  }
+  async function assignRoom(id: string, roomId: string) {
+    if (!roomId) return;
+    const ok = await action.submit(() => api.post(`/api/reservations/${id}/assign-room`, { roomId }));
+    if (ok !== undefined) {
+      setAssignRoomId("");
+      setSelected(null);
+      reload();
+    }
+  }
+
+  // Group bookings into room rows (derived from the bookings in view - no rooms-list endpoint yet).
   const rows: RoomRow[] = useMemo(() => {
     const map = new Map<string, RoomRow>();
     for (const r of reservations) {
-      const key = r.room?.number ? `room:${r.room.number}` : `unassigned:${r.roomType?.name ?? "—"}`;
+      const key = r.room?.number ? `room:${r.room.number}` : `unassigned:${r.roomType?.name ?? "-"}`;
       const label = r.room ? `Room ${r.room.number}` : `Unassigned · ${r.roomType?.name ?? ""}`;
       if (!map.has(key)) map.set(key, { key, label, bookings: [] });
       map.get(key)!.bookings.push(r);
@@ -71,7 +112,7 @@ export default function ReservationsPage() {
         title="Reservations Calendar"
         subtitle="Room allocations and guest stays for the week."
         actions={
-          <button className="btn-primary">
+          <button className="btn-primary" onClick={() => setCreateOpen(true)}>
             <Icon name="add" className="text-[20px]" /> New Reservation
           </button>
         }
@@ -142,11 +183,14 @@ export default function ReservationsPage() {
                         className="z-10 mx-1 self-center"
                         style={{ gridColumn: `${startCol} / ${endCol}`, gridRow: 1 }}
                       >
-                        <div
+                        <button
+                          type="button"
                           title={`${fullName(b.guest?.firstName, b.guest?.lastName)} · ${b.status}`}
+                          onClick={() => { setSelected(b); setAssignRoomId(""); }}
                           className={[
-                            "flex items-center gap-1 truncate px-3 py-1.5 text-xs font-medium",
+                            "flex w-full items-center gap-1 truncate px-3 py-1.5 text-xs font-medium transition hover:brightness-95 active:brightness-90",
                             bookingTone(b.status),
+                            selected?.id === b.id ? "ring-2 ring-primary ring-offset-1" : "",
                             clippedLeft ? "rounded-l-none" : "rounded-l-full",
                             clippedRight ? "rounded-r-none" : "rounded-r-full",
                           ].join(" ")}
@@ -154,7 +198,7 @@ export default function ReservationsPage() {
                           {clippedLeft && <Icon name="chevron_left" className="text-[14px] opacity-70" />}
                           <span className="truncate">{fullName(b.guest?.firstName, b.guest?.lastName)}</span>
                           {clippedRight && <Icon name="chevron_right" className="ml-auto text-[14px] opacity-70" />}
-                        </div>
+                        </button>
                       </div>
                     );
                   })}
@@ -164,10 +208,119 @@ export default function ReservationsPage() {
           </div>
         </DataState>
       </Card>
+      {/* Lifecycle detail panel */}
+      {selected && (
+        <Card className="mt-4 p-4">
+          <div className="flex items-start justify-between gap-4">
+            <div>
+              <p className="font-semibold text-on-surface">
+                {fullName(selected.guest?.firstName, selected.guest?.lastName)}
+              </p>
+              <p className="mt-0.5 text-sm text-on-surface-variant">
+                {selected.roomType?.name ?? "-"} &middot; {formatDate(selected.checkInDate)} &rarr; {formatDate(selected.checkOutDate)} &middot;{" "}
+                <span className={`pill ${statusPill(selected.status)}`}>{selected.status}</span>
+              </p>
+            </div>
+            <button className="btn-ghost px-2" onClick={() => setSelected(null)} aria-label="Close">
+              <Icon name="close" />
+            </button>
+          </div>
+
+          {action.error && (
+            <p className="mt-2 rounded-lg bg-error-container/60 px-3 py-2 text-sm text-on-error-container">{action.error}</p>
+          )}
+
+          <div className="mt-3 flex flex-wrap items-end gap-2">
+            {/* Check-in */}
+            {(selected.status === "PENDING" || selected.status === "CONFIRMED") && (
+              <button
+                className="btn-primary"
+                disabled={action.submitting}
+                onClick={() => lifecycle(selected.id, "check-in")}
+              >
+                <Icon name="login" className="text-[18px]" /> Check in
+              </button>
+            )}
+
+            {/* Check-out */}
+            {selected.status === "CHECKED_IN" && (
+              <button
+                className="btn-primary"
+                disabled={action.submitting}
+                onClick={() => lifecycle(selected.id, "check-out")}
+              >
+                <Icon name="logout" className="text-[18px]" /> Check out
+              </button>
+            )}
+
+            {/* Assign room */}
+            {selected.status !== "CANCELLED" && selected.status !== "CHECKED_OUT" && selected.status !== "NO_SHOW" && (
+              <div className="flex items-center gap-2">
+                <select
+                  className="input py-1.5 text-sm"
+                  value={assignRoomId}
+                  onChange={(e) => setAssignRoomId(e.target.value)}
+                  disabled={action.submitting}
+                >
+                  <option value="">Assign room…</option>
+                  {(allRooms.data ?? [])
+                    .filter((r) => r.roomTypeId === selected.roomTypeId)
+                    .map((r) => (
+                      <option key={r.id} value={r.id}>
+                        Room {r.number} ({r.status})
+                      </option>
+                    ))}
+                </select>
+                <button
+                  className="btn-secondary"
+                  disabled={!assignRoomId || action.submitting}
+                  onClick={() => assignRoom(selected.id, assignRoomId)}
+                >
+                  Assign
+                </button>
+              </div>
+            )}
+
+            {/* Cancel */}
+            {selected.status !== "CANCELLED" && selected.status !== "CHECKED_OUT" && selected.status !== "NO_SHOW" && (
+              <button
+                className="btn-ghost text-error ml-auto"
+                disabled={action.submitting}
+                onClick={() => setCancelTarget(selected)}
+              >
+                <Icon name="cancel" className="text-[18px]" /> Cancel reservation
+              </button>
+            )}
+          </div>
+        </Card>
+      )}
+
       <p className="mt-4 text-xs text-on-surface-variant">
         Note: rows are derived from bookings in view. Showing every room (including empty ones) and flagging
-        “online / pending” bookings need a rooms-list endpoint and the Phase 7 <code>source</code> field.
+        "online / pending" bookings need a rooms-list endpoint and the Phase 7 <code>source</code> field.
       </p>
+
+      {/* Create modal - conditionally mounted so each open is a fresh mount */}
+      {createOpen && (
+        <ReservationFormModal
+          open={createOpen}
+          onClose={() => setCreateOpen(false)}
+          onSaved={() => { setCreateOpen(false); reload(); }}
+        />
+      )}
+
+      {/* Cancel confirmation */}
+      <ConfirmDialog
+        open={cancelTarget !== null}
+        title="Cancel reservation"
+        message={`Cancel the reservation for ${fullName(cancelTarget?.guest?.firstName, cancelTarget?.guest?.lastName)}? This cannot be undone.`}
+        confirmLabel="Cancel reservation"
+        danger
+        busy={cancelMutation.submitting}
+        error={cancelMutation.error}
+        onConfirm={doCancel}
+        onClose={() => setCancelTarget(null)}
+      />
     </div>
   );
 }
@@ -183,5 +336,18 @@ function bookingTone(status: Reservation["status"]): string {
       return "bg-surface-container-high text-on-surface-variant line-through";
     default: // PENDING / CONFIRMED
       return "bg-primary/15 text-primary";
+  }
+}
+
+function statusPill(status: Reservation["status"]): string {
+  switch (status) {
+    case "CHECKED_IN":
+      return "pill-success";
+    case "CHECKED_OUT":
+    case "CANCELLED":
+    case "NO_SHOW":
+      return "pill-neutral";
+    default:
+      return "pill-primary";
   }
 }
