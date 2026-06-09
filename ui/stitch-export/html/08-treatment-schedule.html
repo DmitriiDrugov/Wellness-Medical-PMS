@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+
+<html class="h-full" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sanctuary PMS - Treatment Schedule</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-background": "#1b1c1a",
+                    "on-surface": "#1b1c1a",
+                    "primary": "#05685f",
+                    "on-tertiary": "#ffffff",
+                    "surface-dim": "#dcdad7",
+                    "on-tertiary-container": "#f4fffc",
+                    "on-primary-fixed-variant": "#005049",
+                    "on-surface-variant": "#3f4947",
+                    "inverse-primary": "#86d5c9",
+                    "primary-fixed": "#a2f1e5",
+                    "secondary-fixed": "#dce4df",
+                    "tertiary": "#545e5c",
+                    "inverse-surface": "#30302f",
+                    "on-secondary-fixed-variant": "#414845",
+                    "secondary-fixed-dim": "#c0c8c4",
+                    "surface": "#fbf9f6",
+                    "surface-container-high": "#eae8e5",
+                    "primary-container": "#2f8177",
+                    "on-primary-container": "#f4fffc",
+                    "on-error": "#ffffff",
+                    "on-primary": "#ffffff",
+                    "on-tertiary-fixed-variant": "#3f4947",
+                    "surface-bright": "#fbf9f6",
+                    "surface-container-low": "#f5f3f0",
+                    "on-secondary": "#ffffff",
+                    "outline": "#6f7977",
+                    "surface-variant": "#e4e2df",
+                    "background": "#fbf9f6",
+                    "error-container": "#ffdad6",
+                    "on-tertiary-fixed": "#141d1c",
+                    "secondary": "#58605c",
+                    "surface-container-lowest": "#ffffff",
+                    "on-error-container": "#93000a",
+                    "outline-variant": "#bec9c6",
+                    "primary-fixed-dim": "#86d5c9",
+                    "tertiary-fixed": "#dae5e2",
+                    "secondary-container": "#dce4df",
+                    "surface-container": "#f0edea",
+                    "error": "#ba1a1a",
+                    "on-secondary-container": "#5e6662",
+                    "surface-container-highest": "#e4e2df",
+                    "on-primary-fixed": "#00201d",
+                    "inverse-on-surface": "#f3f0ed",
+                    "on-secondary-fixed": "#161d1a",
+                    "tertiary-fixed-dim": "#bec9c6",
+                    "surface-tint": "#0b6a61",
+                    "tertiary-container": "#6c7774"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-sm": "8px",
+                    "stack-md": "16px",
+                    "unit": "4px",
+                    "grid-gutter": "20px",
+                    "sidebar-width": "260px",
+                    "container-padding": "24px",
+                    "stack-lg": "32px"
+            },
+            "fontFamily": {
+                    "headline-xl": ["Inter"],
+                    "label-bold": ["Inter"],
+                    "body-sm": ["Inter"],
+                    "headline-lg-mobile": ["Inter"],
+                    "label-md": ["Inter"],
+                    "body-lg": ["Inter"],
+                    "body-md": ["Inter"],
+                    "headline-lg": ["Inter"],
+                    "headline-md": ["Inter"]
+            },
+            "fontSize": {
+                    "headline-xl": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                    "label-bold": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "body-sm": ["13px", {"lineHeight": "18px", "fontWeight": "400"}],
+                    "headline-lg-mobile": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                    "label-md": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "headline-lg": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "500"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        /* Custom scrollbar for scheduling view */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #dcdad7;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #bec9c6;
+        }
+        
+        .timeline-grid {
+            background-image: linear-gradient(to bottom, #F0EEEB 1px, transparent 1px);
+            background-size: 100% 60px; /* 60px per hour block */
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md h-full overflow-hidden flex antialiased">
+<!-- SideNavBar -->
+<nav class="w-sidebar-width h-screen fixed left-0 top-0 bg-surface shadow-[0px_4px_20px_rgba(62,142,132,0.05)] shadow-sm flex flex-col py-container-padding z-50 hidden md:flex">
+<!-- Brand/Header -->
+<div class="px-container-padding mb-stack-lg flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">spa</span>
+</div>
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-primary">Sanctuary PMS</h1>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Medical Wellness Admin</p>
+</div>
+</div>
+<!-- CTA -->
+<div class="px-container-padding mb-stack-md">
+<button class="w-full bg-primary text-on-primary py-3 rounded-lg font-label-bold text-label-bold flex items-center justify-center gap-2 hover:bg-primary-container transition-colors active:scale-95">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                Quick Booking
+            </button>
+</div>
+<!-- Navigation Tabs -->
+<div class="flex-1 overflow-y-auto px-4 space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-bold text-label-bold">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">calendar_month</span>
+<span class="font-label-bold text-label-bold">Reservations</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-label-bold text-label-bold">Guests</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-primary font-bold border-l-4 border-primary bg-surface-container-low transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">spa</span>
+<span class="font-label-bold text-label-bold">Treatments</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="font-label-bold text-label-bold">Packages</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">receipt_long</span>
+<span class="font-label-bold text-label-bold">Billing</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">assessment</span>
+<span class="font-label-bold text-label-bold">Reports</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">cleaning_services</span>
+<span class="font-label-bold text-label-bold">Housekeeping</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">history</span>
+<span class="font-label-bold text-label-bold">Audit Log</span>
+</a>
+</div>
+<!-- Footer Tabs -->
+<div class="px-4 mt-auto pt-4 border-t border-surface-variant space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-bold text-label-bold">Settings</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">help_outline</span>
+<span class="font-label-bold text-label-bold">Support</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Area Wrapper -->
+<div class="flex-1 flex flex-col md:ml-[260px] h-screen overflow-hidden bg-background">
+<!-- TopNavBar -->
+<header class="h-16 flex-shrink-0 bg-surface border-b border-surface-container-highest flex justify-between items-center px-container-padding w-full z-40">
+<!-- Left: Mobile Menu & Search -->
+<div class="flex items-center gap-4 flex-1">
+<button class="md:hidden text-on-surface-variant p-2 -ml-2 rounded-lg hover:bg-surface-variant focus:outline-none">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<div class="relative max-w-md w-full hidden sm:block focus-within:ring-2 focus-within:ring-primary/10 rounded-lg transition-all">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-outline">search</span>
+<input class="w-full bg-surface-container-low border border-surface-variant rounded-lg pl-10 pr-4 py-2 text-body-sm focus:outline-none focus:border-primary/50 transition-colors" placeholder="Search guests, bookings..." type="text"/>
+</div>
+</div>
+<!-- Center: Mobile Brand (hidden on desktop) -->
+<div class="font-headline-md text-headline-md font-bold text-primary md:hidden">
+                Sanctuary Admin
+            </div>
+<!-- Right: Actions & Profile -->
+<div class="flex items-center gap-4">
+<div class="hidden lg:flex items-center gap-2">
+<span class="font-label-md text-label-md text-on-surface-variant px-3 py-1 bg-surface-container rounded-full">Admin Role</span>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant">
+<button class="p-2 rounded-full hover:bg-surface-variant hover:text-primary transition-colors relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full"></span>
+</button>
+<button class="p-2 rounded-full hover:bg-surface-variant hover:text-primary transition-colors hidden sm:block">
+<span class="material-symbols-outlined">help</span>
+</button>
+</div>
+<div class="h-8 w-px bg-surface-variant mx-2"></div>
+<button class="flex items-center gap-2 focus:outline-none rounded-full p-1 hover:bg-surface-variant transition-colors">
+<img alt="User Profile Avatar" class="w-8 h-8 rounded-full border border-surface-variant" data-alt="A professional headshot of a female clinic administrator with a warm smile, softly lit against a neutral background. The lighting is bright and clean, typical of a modern medical-wellness spa environment. She has a natural, calm appearance, fitting the sanctuary aesthetic of the application." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBYnT8uhH0BEV4BJvCyXQAVEF_UvWRPQq7IOBhpT8feP9oUQPOTpnAEqU_jB5qeHWznFzv1lIT9UJTjZhfDogob4KGmkak0N73rXMpyE6IqbnYDWT9lqTecOEQe9-FaLdd4wOXRrtzIUY92rPs6Gsq-m-HSh5RLngjk1ZyD7ljpkQb_183wUlbTHkaGK3ivpIv11xdEBAHAK8h0nPH_wInI4t0Kyw3mHjW2Kz3SwnnOLBmGXlIqLercXsw-f_3Lo1_dmIGx3lg150E"/>
+</button>
+</div>
+</header>
+<!-- Page Content Canvas -->
+<main class="flex-1 flex flex-col overflow-hidden bg-background">
+<!-- Schedule Header & Toolbar -->
+<div class="px-container-padding py-stack-md flex-shrink-0 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-surface/50 backdrop-blur-sm border-b border-surface-variant">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface mb-1">Treatment Schedule</h2>
+<div class="flex items-center gap-2 text-on-surface-variant font-body-sm text-body-sm">
+<span class="material-symbols-outlined text-[18px]">calendar_today</span>
+<span>Thursday, October 24, 2023</span>
+</div>
+</div>
+<div class="flex items-center gap-3 w-full sm:w-auto">
+<!-- View Toggle -->
+<div class="flex bg-surface-container-low rounded-lg p-1 border border-surface-variant mr-2">
+<button class="px-4 py-1.5 rounded bg-surface shadow-sm font-label-md text-label-md text-primary">Daily</button>
+<button class="px-4 py-1.5 rounded font-label-md text-label-md text-on-surface-variant hover:text-on-surface transition-colors">Weekly</button>
+</div>
+<button class="p-2 border border-surface-variant rounded-lg text-on-surface hover:bg-surface-variant transition-colors">
+<span class="material-symbols-outlined">filter_list</span>
+</button>
+<button class="flex-1 sm:flex-none bg-primary text-on-primary px-4 py-2 rounded-lg font-label-bold text-label-bold hover:bg-primary-container transition-colors shadow-sm flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                        Book Appointment
+                    </button>
+</div>
+</div>
+<!-- Scheduler Canvas Area -->
+<div class="flex-1 overflow-auto relative bg-surface-container-lowest">
+<div class="min-w-[1000px] h-full flex flex-col">
+<!-- Resources Header Row (Therapists/Rooms) -->
+<div class="flex sticky top-0 z-20 bg-surface border-b border-surface-variant shadow-sm h-[70px]">
+<!-- Top-left corner -->
+<div class="w-[80px] flex-shrink-0 border-r border-surface-variant bg-surface-container-lowest flex items-end justify-end p-2 text-outline-variant font-label-md text-label-md">
+                            GMT-4
+                        </div>
+<!-- Columns -->
+<div class="flex-1 grid grid-cols-4 divide-x divide-surface-variant">
+<!-- Column 1 -->
+<div class="px-4 py-3 flex flex-col items-center justify-center bg-surface-container-lowest">
+<span class="font-label-bold text-label-bold text-on-surface">Dr. Sarah Jenkins</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Room 1 (Massage)</span>
+</div>
+<!-- Column 2 -->
+<div class="px-4 py-3 flex flex-col items-center justify-center bg-surface-container-lowest">
+<span class="font-label-bold text-label-bold text-on-surface">Michael Torres</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Room 2 (Acupuncture)</span>
+</div>
+<!-- Column 3 -->
+<div class="px-4 py-3 flex flex-col items-center justify-center bg-surface-container-lowest">
+<span class="font-label-bold text-label-bold text-on-surface">Elena Rostova</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Room 3 (Aesthetics)</span>
+</div>
+<!-- Column 4 -->
+<div class="px-4 py-3 flex flex-col items-center justify-center bg-surface-container-lowest">
+<span class="font-label-bold text-label-bold text-on-surface">David Chen</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Room 4 (Hydrotherapy)</span>
+</div>
+</div>
+</div>
+<!-- Timeline Body -->
+<div class="flex flex-1 relative min-h-[900px]">
+<!-- Time Axis (Left) -->
+<div class="w-[80px] flex-shrink-0 border-r border-surface-variant bg-surface-container-lowest z-10 timeline-grid">
+<!-- Time slots (60px height per hour mapping) -->
+<div class="h-[60px] relative"><span class="absolute -top-3 right-2 font-label-md text-label-md text-on-surface-variant">8 AM</span></div>
+<div class="h-[60px] relative"><span class="absolute -top-3 right-2 font-label-md text-label-md text-on-surface-variant">9 AM</span></div>
+<div class="h-[60px] relative"><span class="absolute -top-3 right-2 font-label-md text-label-md text-on-surface-variant">10 AM</span></div>
+<div class="h-[60px] relative"><span class="absolute -top-3 right-2 font-label-md text-label-md text-on-surface-variant">11 AM</span></div>
+<div class="h-[60px] relative"><span class="absolute -top-3 right-2 font-label-md text-label-md text-on-surface-variant">12 PM</span></div>
+<div class="h-[60px] relative"><span class="absolute -top-3 right-2 font-label-md text-label-md text-on-surface-variant">1 PM</span></div>
+<div class="h-[60px] relative"><span class="absolute -top-3 right-2 font-label-md text-label-md text-on-surface-variant">2 PM</span></div>
+<div class="h-[60px] relative"><span class="absolute -top-3 right-2 font-label-md text-label-md text-on-surface-variant">3 PM</span></div>
+<div class="h-[60px] relative"><span class="absolute -top-3 right-2 font-label-md text-label-md text-on-surface-variant">4 PM</span></div>
+<div class="h-[60px] relative"><span class="absolute -top-3 right-2 font-label-md text-label-md text-on-surface-variant">5 PM</span></div>
+</div>
+<!-- Main Grid Area -->
+<div class="flex-1 grid grid-cols-4 divide-x divide-surface-variant relative timeline-grid">
+<!-- Current Time Indicator Line (example at 10:30 AM -> 2.5 hours * 60px = 150px top) -->
+<div class="absolute left-0 right-0 h-px bg-error z-10 pointer-events-none" style="top: 150px;">
+<div class="absolute -left-2 -top-1.5 w-3 h-3 rounded-full bg-error"></div>
+</div>
+<!-- Col 1: Dr. Sarah Jenkins -->
+<div class="relative h-full">
+<!-- Blocked Time (Lunch) - 12:00 to 1:00 -->
+<div class="absolute w-[calc(100%-8px)] left-[4px] h-[60px] top-[240px] bg-surface-container rounded-md border border-surface-variant flex items-center justify-center opacity-70" style="background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, #e4e2df 10px, #e4e2df 12px);">
+<span class="font-label-bold text-label-bold text-outline">Blocked</span>
+</div>
+<!-- Appointment: Detox Massage (90 min) 8:30 - 10:00 -->
+<div class="absolute w-[calc(100%-8px)] left-[4px] h-[90px] top-[30px] bg-primary/10 border-l-4 border-primary rounded-r-md p-2 shadow-sm hover:shadow-md transition-shadow cursor-pointer group">
+<div class="font-label-bold text-label-bold text-on-primary-fixed mb-0.5 truncate">Detox Massage</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant truncate">Eleanor Vance</div>
+<div class="font-label-md text-label-md text-on-surface-variant/70 mt-1 flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+<span class="material-symbols-outlined text-[14px]">schedule</span> 8:30 - 10:00
+                                    </div>
+</div>
+<!-- Appointment: Swedish Massage (60 min) 10:30 - 11:30 -->
+<div class="absolute w-[calc(100%-8px)] left-[4px] h-[60px] top-[150px] bg-primary/10 border-l-4 border-primary rounded-r-md p-2 shadow-sm hover:shadow-md transition-shadow cursor-pointer group">
+<div class="font-label-bold text-label-bold text-on-primary-fixed mb-0.5 truncate">Swedish Massage</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant truncate">John Sterling</div>
+</div>
+</div>
+<!-- Col 2: Michael Torres (Showing Conflict) -->
+<div class="relative h-full">
+<!-- Appointment A: Acupuncture (60 min) 9:00 - 10:00 -->
+<div class="absolute w-[calc(50%-6px)] left-[4px] h-[60px] top-[60px] bg-error-container border-l-4 border-error rounded-r-md p-2 shadow-sm z-10 cursor-pointer">
+<div class="font-label-bold text-label-bold text-on-error-container truncate">Acupuncture</div>
+<div class="font-body-sm text-body-sm text-on-error-container/80 truncate">M. Rutherford</div>
+</div>
+<!-- Appointment B: Consult (45 min) 9:30 - 10:15 (CONFLICT) -->
+<div class="absolute w-[calc(50%-6px)] right-[4px] h-[45px] top-[90px] bg-error-container border-l-4 border-error rounded-r-md p-2 shadow-lg z-20 cursor-pointer outline outline-2 outline-error ring-4 ring-error/10">
+<div class="absolute -top-3 -right-2 bg-error text-on-error rounded-full p-0.5 shadow-md">
+<span class="material-symbols-outlined text-[14px]">warning</span>
+</div>
+<div class="font-label-bold text-label-bold text-on-error-container truncate">Initial Consult</div>
+<div class="font-body-sm text-body-sm text-on-error-container/80 truncate">T. Nguyen</div>
+</div>
+<!-- Conflict Banner Indicator below -->
+<div class="absolute w-[calc(100%-8px)] left-[4px] top-[140px] flex items-center gap-1 text-error font-label-md text-label-md bg-error/5 p-1 rounded">
+<span class="material-symbols-outlined text-[14px]">error</span>
+                                    Double-booking detected
+                                </div>
+<!-- Normal Appt: 1:00 - 2:00 -->
+<div class="absolute w-[calc(100%-8px)] left-[4px] h-[60px] top-[300px] bg-primary/10 border-l-4 border-primary rounded-r-md p-2 shadow-sm cursor-pointer">
+<div class="font-label-bold text-label-bold text-on-primary-fixed mb-0.5 truncate">Cupping Therapy</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant truncate">S. Malik</div>
+</div>
+</div>
+<!-- Col 3: Elena Rostova -->
+<div class="relative h-full">
+<!-- Appointment: Facial (90 min) 10:00 - 11:30 -->
+<div class="absolute w-[calc(100%-8px)] left-[4px] h-[90px] top-[120px] bg-secondary-container/50 border-l-4 border-secondary rounded-r-md p-2 shadow-sm cursor-pointer">
+<div class="font-label-bold text-label-bold text-on-secondary-container truncate">Anti-Aging Facial</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant truncate">L. Kensington</div>
+</div>
+</div>
+<!-- Col 4: David Chen -->
+<div class="relative h-full bg-surface-variant/20"> <!-- Entire column lightly shaded to indicate half-day or limited availability maybe -->
+<div class="absolute inset-0 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity bg-surface/50 backdrop-blur-sm pointer-events-none">
+<span class="font-label-bold text-label-bold text-on-surface-variant px-3 py-1 bg-surface rounded-full shadow-sm">Click to add slot</span>
+</div>
+<!-- Appointment: 2:00 - 3:00 -->
+<div class="absolute w-[calc(100%-8px)] left-[4px] h-[60px] top-[360px] bg-primary/10 border-l-4 border-primary rounded-r-md p-2 shadow-sm cursor-pointer relative z-10 pointer-events-auto">
+<div class="font-label-bold text-label-bold text-on-primary-fixed mb-0.5 truncate">Mineral Bath</div>
+<div class="font-body-sm text-body-sm text-on-surface-variant truncate">R. Patel</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

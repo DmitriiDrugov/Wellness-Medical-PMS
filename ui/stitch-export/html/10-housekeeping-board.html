@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sanctuary PMS - Housekeeping Board</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-background": "#1b1c1a",
+                        "on-surface": "#1b1c1a",
+                        "primary": "#05685f",
+                        "on-tertiary": "#ffffff",
+                        "surface-dim": "#dcdad7",
+                        "on-tertiary-container": "#f4fffc",
+                        "on-primary-fixed-variant": "#005049",
+                        "on-surface-variant": "#3f4947",
+                        "inverse-primary": "#86d5c9",
+                        "primary-fixed": "#a2f1e5",
+                        "secondary-fixed": "#dce4df",
+                        "tertiary": "#545e5c",
+                        "inverse-surface": "#30302f",
+                        "on-secondary-fixed-variant": "#414845",
+                        "secondary-fixed-dim": "#c0c8c4",
+                        "surface": "#fbf9f6",
+                        "surface-container-high": "#eae8e5",
+                        "primary-container": "#2f8177",
+                        "on-primary-container": "#f4fffc",
+                        "on-error": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-fixed-variant": "#3f4947",
+                        "surface-bright": "#fbf9f6",
+                        "surface-container-low": "#f5f3f0",
+                        "on-secondary": "#ffffff",
+                        "outline": "#6f7977",
+                        "surface-variant": "#e4e2df",
+                        "background": "#fbf9f6",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-fixed": "#141d1c",
+                        "secondary": "#58605c",
+                        "surface-container-lowest": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "outline-variant": "#bec9c6",
+                        "primary-fixed-dim": "#86d5c9",
+                        "tertiary-fixed": "#dae5e2",
+                        "secondary-container": "#dce4df",
+                        "surface-container": "#f0edea",
+                        "error": "#ba1a1a",
+                        "on-secondary-container": "#5e6662",
+                        "surface-container-highest": "#e4e2df",
+                        "on-primary-fixed": "#00201d",
+                        "inverse-on-surface": "#f3f0ed",
+                        "on-secondary-fixed": "#161d1a",
+                        "tertiary-fixed-dim": "#bec9c6",
+                        "surface-tint": "#0b6a61",
+                        "tertiary-container": "#6c7774"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-sm": "8px",
+                        "stack-md": "16px",
+                        "unit": "4px",
+                        "grid-gutter": "20px",
+                        "sidebar-width": "260px",
+                        "container-padding": "24px",
+                        "stack-lg": "32px"
+                    },
+                    "fontFamily": {
+                        "headline-xl": ["Inter"],
+                        "label-bold": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "label-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "headline-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-xl": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600" }],
+                        "label-bold": ["12px", { "lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600" }],
+                        "body-sm": ["13px", { "lineHeight": "18px", "fontWeight": "400" }],
+                        "headline-lg-mobile": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "label-md": ["12px", { "lineHeight": "16px", "fontWeight": "500" }],
+                        "body-lg": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "body-md": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "headline-lg": ["24px", { "lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600" }],
+                        "headline-md": ["20px", { "lineHeight": "28px", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .icon-fill {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background antialiased overflow-hidden">
+<!-- Shared Component: SideNavBar -->
+<nav class="w-sidebar-width h-screen fixed left-0 top-0 bg-surface shadow-[0px_4px_20px_rgba(62,142,132,0.05)] flex flex-col py-container-padding z-50">
+<!-- Brand / Header -->
+<div class="px-container-padding mb-stack-lg flex items-center gap-stack-sm">
+<div class="w-10 h-10 rounded-lg bg-primary-container flex items-center justify-center text-on-primary-container shrink-0">
+<span class="material-symbols-outlined icon-fill">spa</span>
+</div>
+<div>
+<h1 class="font-headline-md text-headline-md text-primary font-bold">Sanctuary PMS</h1>
+<p class="font-label-md text-label-md text-on-surface-variant">Medical Wellness Admin</p>
+</div>
+</div>
+<!-- CTA -->
+<div class="px-container-padding mb-stack-lg">
+<button class="w-full bg-primary text-on-primary font-label-bold text-label-bold py-3 rounded-lg shadow-sm hover:bg-primary/90 transition-colors active:scale-95 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined" style="font-size: 18px;">add</span>
+                Quick Booking
+            </button>
+</div>
+<!-- Navigation Links -->
+<ul class="flex-1 overflow-y-auto flex flex-col gap-unit px-unit">
+<li>
+<a class="flex items-center gap-stack-md px-4 py-3 rounded-r-full text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-bold text-label-bold">Dashboard</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-stack-md px-4 py-3 rounded-r-full text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">calendar_month</span>
+<span class="font-label-bold text-label-bold">Reservations</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-stack-md px-4 py-3 rounded-r-full text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-label-bold text-label-bold">Guests</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-stack-md px-4 py-3 rounded-r-full text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">spa</span>
+<span class="font-label-bold text-label-bold">Treatments</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-stack-md px-4 py-3 rounded-r-full text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="font-label-bold text-label-bold">Packages</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-stack-md px-4 py-3 rounded-r-full text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">receipt_long</span>
+<span class="font-label-bold text-label-bold">Billing</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-stack-md px-4 py-3 rounded-r-full text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">assessment</span>
+<span class="font-label-bold text-label-bold">Reports</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-stack-md px-4 py-3 rounded-r-full text-primary font-bold border-l-4 border-primary bg-surface-container-low transition-colors duration-200" href="#">
+<span class="material-symbols-outlined icon-fill">cleaning_services</span>
+<span class="font-label-bold text-label-bold">Housekeeping</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-stack-md px-4 py-3 rounded-r-full text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">history</span>
+<span class="font-label-bold text-label-bold">Audit Log</span>
+</a>
+</li>
+</ul>
+<!-- Footer Links -->
+<div class="mt-auto px-unit pt-stack-md border-t border-surface-container-highest">
+<ul class="flex flex-col gap-unit">
+<li>
+<a class="flex items-center gap-stack-md px-4 py-3 rounded-r-full text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-bold text-label-bold">Settings</span>
+</a>
+</li>
+<li>
+<a class="flex items-center gap-stack-md px-4 py-3 rounded-r-full text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">help_outline</span>
+<span class="font-label-bold text-label-bold">Support</span>
+</a>
+</li>
+</ul>
+</div>
+</nav>
+<!-- Shared Component: TopNavBar -->
+<header class="h-16 fixed top-0 right-0 left-sidebar-width z-40 bg-surface border-b border-surface-container-highest flex justify-between items-center px-container-padding w-[calc(100%-260px)]">
+<!-- Search -->
+<div class="flex-1 max-w-md relative group">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant">search</span>
+<input class="w-full h-10 pl-10 pr-4 rounded-full bg-surface-container-low border border-transparent focus:bg-surface-container-lowest focus:border-primary/30 focus:ring-2 focus:ring-primary/10 transition-all font-body-sm text-body-sm text-on-surface outline-none placeholder-on-surface-variant" placeholder="Search rooms, guests..." type="text"/>
+</div>
+<!-- Trailing Actions -->
+<div class="flex items-center gap-stack-md">
+<span class="font-label-md text-label-md text-on-surface-variant hidden md:block">Admin Role</span>
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 rounded-full bg-error border-2 border-surface"></span>
+</button>
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:bg-surface-container hover:text-primary transition-colors">
+<span class="material-symbols-outlined">help</span>
+</button>
+<button class="w-8 h-8 rounded-full overflow-hidden border-2 border-surface-container-highest hover:border-primary transition-colors ml-2">
+<img alt="User Profile Avatar" class="w-full h-full object-cover" data-alt="A small circular user avatar photo showing a professional woman with dark hair tied back, wearing minimal makeup, set against a warm beige background, evoking a spa-clinic aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCR8wQ4TJ5ml4xYzB41XPmG1lZD50sB_pOijXBcM0Miceu8qiFJsIHA_8rJn45Mq0WcXTBIWK6aFF79YYwiJKnZT6H9RsUasSck2H-5KAu1zH9cvaBVwXs9emk1Z66dPegtbXJO_XpaRd-5gg2Hlz4GPxMw7T8Fs7yYhCX0_fjZ4RMOsF7Tc97GoOGvtArh-P-YNKJGtXRUfLko7j_Y55NtPGWVqceWJHGD2YOZEq3CQAfsBL-x9SGk-hw8u3cc1-SGIiCOj6N6SYg"/>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-sidebar-width mt-16 p-container-padding h-[calc(100vh-64px)] overflow-hidden flex flex-col">
+<!-- Page Header -->
+<div class="flex justify-between items-end mb-stack-lg shrink-0">
+<div>
+<h2 class="font-headline-xl text-headline-xl text-on-background">Housekeeping Board</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Today's room turnover schedule</p>
+</div>
+<!-- Filters / Controls -->
+<div class="flex items-center gap-stack-sm">
+<div class="flex items-center bg-surface-container-low rounded-lg p-1 border border-surface-container-highest">
+<button class="px-3 py-1.5 rounded-md bg-surface shadow-sm font-label-md text-label-md text-primary">All Zones</button>
+<button class="px-3 py-1.5 rounded-md font-label-md text-label-md text-on-surface-variant hover:text-on-surface">East Wing</button>
+<button class="px-3 py-1.5 rounded-md font-label-md text-label-md text-on-surface-variant hover:text-on-surface">West Wing</button>
+</div>
+<button class="h-9 px-4 rounded-lg border border-surface-container-highest flex items-center gap-2 text-on-surface-variant hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined" style="font-size: 18px;">filter_list</span>
+<span class="font-label-md text-label-md">Filter</span>
+</button>
+</div>
+</div>
+<!-- Kanban Board Area -->
+<div class="flex gap-grid-gutter overflow-x-auto pb-4 flex-1 items-start">
+<!-- Column: Dirty -->
+<div class="flex-1 min-w-[320px] max-w-[400px] bg-surface-container-low rounded-xl p-stack-sm flex flex-col h-full border border-surface-container-highest">
+<div class="flex justify-between items-center px-2 py-3 mb-2 shrink-0 border-b border-surface-container-highest">
+<h3 class="font-label-bold text-label-bold text-on-surface flex items-center gap-2 uppercase tracking-wider">
+<span class="w-2 h-2 rounded-full bg-error"></span>
+                        Dirty
+                    </h3>
+<span class="font-body-sm text-body-sm text-on-surface-variant bg-surface-container px-2 py-0.5 rounded-full">3</span>
+</div>
+<div class="flex flex-col gap-stack-sm overflow-y-auto pr-1 pb-2">
+<!-- Card 1 -->
+<div class="bg-surface-container-lowest rounded-lg p-stack-md shadow-sm border border-surface-container-highest hover:border-outline-variant transition-colors group">
+<div class="flex justify-between items-start mb-3">
+<div>
+<span class="font-headline-md text-headline-md text-on-background block">Rm 204</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Check-out • Deep Clean</span>
+</div>
+<span class="material-symbols-outlined text-error">warning</span>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant mb-4">
+<span class="material-symbols-outlined" style="font-size: 16px;">bed</span>
+<span class="font-body-sm text-body-sm">King Suite</span>
+</div>
+<div class="bg-error-container/30 text-error rounded p-2 mb-4 flex items-start gap-2">
+<span class="material-symbols-outlined" style="font-size: 16px;">info</span>
+<span class="font-label-md text-label-md">VIP Guest arriving at 2:00 PM. Needs hypoallergenic pillows.</span>
+</div>
+<button class="w-full py-2.5 rounded-md bg-surface-container-highest text-on-surface hover:bg-surface-variant font-label-bold text-label-bold transition-colors border border-outline-variant/30 flex justify-center items-center gap-2">
+<span class="material-symbols-outlined" style="font-size: 18px;">play_arrow</span>
+                            Start Cleaning
+                        </button>
+</div>
+<!-- Card 2 -->
+<div class="bg-surface-container-lowest rounded-lg p-stack-md shadow-sm border border-surface-container-highest hover:border-outline-variant transition-colors group">
+<div class="flex justify-between items-start mb-3">
+<div>
+<span class="font-headline-md text-headline-md text-on-background block">Rm 112</span>
+<span class="font-body-sm text-body-sm text-on-surface-variant">Stay-over • Standard</span>
+</div>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant mb-4">
+<span class="material-symbols-outlined" style="font-size: 16px;">bed</span>
+<span class="font-body-sm text-body-sm">Double Queen</span>
+</div>
+<button class="w-full py-2.5 rounded-md bg-surface-container-highest text-on-surface hover:bg-surface-variant font-label-bold text-label-bold transition-colors border border-outline-variant/30 flex justify-center items-center gap-2">
+<span class="material-symbols-outlined" style="font-size: 18px;">play_arrow</span>
+                            Start Cleaning
+                        </button>
+</div>
+</div>
+</div>
+<!-- Column: In-Progress -->
+<div class="flex-1 min-w-[320px] max-w-[400px] bg-surface-container-low rounded-xl p-stack-sm flex flex-col h-full border border-surface-container-highest">
+<div class="flex justify-between items-center px-2 py-3 mb-2 shrink-0 border-b border-surface-container-highest">
+<h3 class="font-label-bold text-label-bold text-on-surface flex items-center gap-2 uppercase tracking-wider">
+<span class="w-2 h-2 rounded-full bg-[#1b64f2]"></span> <!-- Custom distinct blue for in-progress to fit clinic aesthetic safely without breaking token rules heavily, actually sticking to secondary/tertiary is safer. -->
+<span class="w-2 h-2 rounded-full bg-secondary"></span>
+                        In-Progress
+                    </h3>
+<span class="font-body-sm text-body-sm text-on-surface-variant bg-surface-container px-2 py-0.5 rounded-full">2</span>
+</div>
+<div class="flex flex-col gap-stack-sm overflow-y-auto pr-1 pb-2">
+<!-- Card 3 -->
+<div class="bg-surface-container-lowest rounded-lg p-stack-md shadow-sm border-l-4 border-l-secondary border-y border-r border-surface-container-highest hover:shadow-md transition-shadow group">
+<div class="flex justify-between items-start mb-3">
+<div>
+<span class="font-headline-md text-headline-md text-on-background block">Rm 305</span>
+<span class="font-body-sm text-body-sm text-secondary font-medium">Cleaning by Maria C.</span>
+</div>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant mb-4">
+<span class="material-symbols-outlined" style="font-size: 16px;">bed</span>
+<span class="font-body-sm text-body-sm">King Standard</span>
+</div>
+<div class="w-full bg-surface-container-highest rounded-full h-1.5 mb-4 overflow-hidden">
+<div class="bg-secondary h-1.5 rounded-full w-2/3"></div>
+</div>
+<button class="w-full py-2.5 rounded-md bg-secondary text-on-secondary hover:bg-secondary/90 font-label-bold text-label-bold transition-colors flex justify-center items-center gap-2 shadow-[inset_0_-2px_4px_rgba(0,0,0,0.1)] active:shadow-none">
+<span class="material-symbols-outlined" style="font-size: 18px;">check_circle</span>
+                            Mark Ready for Inspection
+                        </button>
+</div>
+</div>
+</div>
+<!-- Column: Inspected / Clean -->
+<div class="flex-1 min-w-[320px] max-w-[400px] bg-surface-container-low rounded-xl p-stack-sm flex flex-col h-full border border-surface-container-highest">
+<div class="flex justify-between items-center px-2 py-3 mb-2 shrink-0 border-b border-surface-container-highest">
+<h3 class="font-label-bold text-label-bold text-on-surface flex items-center gap-2 uppercase tracking-wider">
+<span class="w-2 h-2 rounded-full bg-primary"></span>
+                        Inspected
+                    </h3>
+<span class="font-body-sm text-body-sm text-on-surface-variant bg-surface-container px-2 py-0.5 rounded-full">1</span>
+</div>
+<div class="flex flex-col gap-stack-sm overflow-y-auto pr-1 pb-2">
+<!-- Card 4 -->
+<div class="bg-surface-container-lowest rounded-lg p-stack-md shadow-sm border border-surface-container-highest opacity-75 hover:opacity-100 transition-opacity">
+<div class="flex justify-between items-start mb-3">
+<div>
+<span class="font-headline-md text-headline-md text-on-background block line-through decoration-on-surface-variant/30">Rm 101</span>
+<span class="font-body-sm text-body-sm text-primary flex items-center gap-1">
+<span class="material-symbols-outlined icon-fill" style="font-size: 14px;">verified</span>
+                                    Ready for Guest
+                                </span>
+</div>
+</div>
+<div class="flex items-center gap-2 text-on-surface-variant mb-4">
+<span class="material-symbols-outlined" style="font-size: 16px;">bed</span>
+<span class="font-body-sm text-body-sm">King Suite</span>
+</div>
+<div class="flex gap-2">
+<button class="flex-1 py-2 rounded-md bg-transparent border border-outline-variant text-on-surface-variant hover:bg-surface-container font-label-bold text-label-bold transition-colors">
+                                View Log
+                            </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>

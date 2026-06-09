@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Guest Profiles - Sanctuary PMS</title>
+<!-- Fonts & Icons -->
+<link href="https://fonts.googleapis.com" rel="preconnect"/>
+<link crossorigin="" href="https://fonts.gstatic.com" rel="preconnect"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "on-background": "#1b1c1a",
+                        "on-surface": "#1b1c1a",
+                        "primary": "#05685f",
+                        "on-tertiary": "#ffffff",
+                        "surface-dim": "#dcdad7",
+                        "on-tertiary-container": "#f4fffc",
+                        "on-primary-fixed-variant": "#005049",
+                        "on-surface-variant": "#3f4947",
+                        "inverse-primary": "#86d5c9",
+                        "primary-fixed": "#a2f1e5",
+                        "secondary-fixed": "#dce4df",
+                        "tertiary": "#545e5c",
+                        "inverse-surface": "#30302f",
+                        "on-secondary-fixed-variant": "#414845",
+                        "secondary-fixed-dim": "#c0c8c4",
+                        "surface": "#fbf9f6",
+                        "surface-container-high": "#eae8e5",
+                        "primary-container": "#2f8177",
+                        "on-primary-container": "#f4fffc",
+                        "on-error": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-fixed-variant": "#3f4947",
+                        "surface-bright": "#fbf9f6",
+                        "surface-container-low": "#f5f3f0",
+                        "on-secondary": "#ffffff",
+                        "outline": "#6f7977",
+                        "surface-variant": "#e4e2df",
+                        "background": "#fbf9f6",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-fixed": "#141d1c",
+                        "secondary": "#58605c",
+                        "surface-container-lowest": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "outline-variant": "#bec9c6",
+                        "primary-fixed-dim": "#86d5c9",
+                        "tertiary-fixed": "#dae5e2",
+                        "secondary-container": "#dce4df",
+                        "surface-container": "#f0edea",
+                        "error": "#ba1a1a",
+                        "on-secondary-container": "#5e6662",
+                        "surface-container-highest": "#e4e2df",
+                        "on-primary-fixed": "#00201d",
+                        "inverse-on-surface": "#f3f0ed",
+                        "on-secondary-fixed": "#161d1a",
+                        "tertiary-fixed-dim": "#bec9c6",
+                        "surface-tint": "#0b6a61",
+                        "tertiary-container": "#6c7774"
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    spacing: {
+                        "stack-sm": "8px",
+                        "stack-md": "16px",
+                        "unit": "4px",
+                        "grid-gutter": "20px",
+                        "sidebar-width": "260px",
+                        "container-padding": "24px",
+                        "stack-lg": "32px"
+                    },
+                    fontFamily: {
+                        "headline-xl": ["Inter"],
+                        "label-bold": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "label-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "headline-md": ["Inter"]
+                    },
+                    fontSize: {
+                        "headline-xl": ["32px", { lineHeight: "40px", letterSpacing: "-0.02em", fontWeight: "600" }],
+                        "label-bold": ["12px", { lineHeight: "16px", letterSpacing: "0.05em", fontWeight: "600" }],
+                        "body-sm": ["13px", { lineHeight: "18px", fontWeight: "400" }],
+                        "headline-lg-mobile": ["20px", { lineHeight: "28px", fontWeight: "600" }],
+                        "label-md": ["12px", { lineHeight: "16px", fontWeight: "500" }],
+                        "body-lg": ["16px", { lineHeight: "24px", fontWeight: "400" }],
+                        "body-md": ["14px", { lineHeight: "20px", fontWeight: "400" }],
+                        "headline-lg": ["24px", { lineHeight: "32px", letterSpacing: "-0.01em", fontWeight: "600" }],
+                        "headline-md": ["20px", { lineHeight: "28px", fontWeight: "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .icon-fill { font-variation-settings: 'FILL' 1; }
+        
+        /* Level 1 Elevation Custom Shadow */
+        .elevation-1 {
+            box-shadow: 0px 4px 20px rgba(62, 142, 132, 0.05);
+        }
+        
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #dce4df; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #bec9c6; }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md antialiased overflow-hidden flex h-screen">
+<!-- SideNavBar -->
+<nav class="w-sidebar-width h-screen fixed left-0 top-0 bg-surface shadow-sm flex flex-col h-full py-container-padding z-50 border-r border-surface-container-highest">
+<!-- Header -->
+<div class="px-container-padding mb-stack-lg flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center text-on-primary">
+<span class="material-symbols-outlined icon-fill text-headline-lg font-headline-lg">spa</span>
+</div>
+<div>
+<h1 class="text-headline-md font-headline-md font-bold text-primary tracking-tight">Sanctuary PMS</h1>
+<p class="text-label-bold font-label-bold text-on-surface-variant uppercase tracking-widest mt-1">Medical Wellness Admin</p>
+</div>
+</div>
+<!-- CTA -->
+<div class="px-container-padding mb-stack-lg">
+<button class="w-full bg-primary text-on-primary rounded-lg py-3 px-4 flex items-center justify-center gap-2 hover:bg-primary-container transition-colors duration-200 active:scale-95 text-label-bold font-label-bold shadow-sm">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                Quick Booking
+            </button>
+</div>
+<!-- Main Nav Tabs -->
+<div class="flex-1 overflow-y-auto px-container-padding space-y-1">
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-200 active:scale-95 group" href="#">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+<span class="text-body-md font-body-md font-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-200 active:scale-95 group" href="#">
+<span class="material-symbols-outlined text-[20px]">calendar_month</span>
+<span class="text-body-md font-body-md font-medium">Reservations</span>
+</a>
+<!-- ACTIVE TAB: Guests -->
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-primary font-bold border-l-4 border-primary bg-surface-container-low active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined icon-fill text-[20px]">group</span>
+<span class="text-body-md font-body-md font-semibold">Guests</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-200 active:scale-95 group" href="#">
+<span class="material-symbols-outlined text-[20px]">spa</span>
+<span class="text-body-md font-body-md font-medium">Treatments</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-200 active:scale-95 group" href="#">
+<span class="material-symbols-outlined text-[20px]">inventory_2</span>
+<span class="text-body-md font-body-md font-medium">Packages</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-200 active:scale-95 group" href="#">
+<span class="material-symbols-outlined text-[20px]">receipt_long</span>
+<span class="text-body-md font-body-md font-medium">Billing</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-200 active:scale-95 group" href="#">
+<span class="material-symbols-outlined text-[20px]">assessment</span>
+<span class="text-body-md font-body-md font-medium">Reports</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-200 active:scale-95 group" href="#">
+<span class="material-symbols-outlined text-[20px]">cleaning_services</span>
+<span class="text-body-md font-body-md font-medium">Housekeeping</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-200 active:scale-95 group" href="#">
+<span class="material-symbols-outlined text-[20px]">history</span>
+<span class="text-body-md font-body-md font-medium">Audit Log</span>
+</a>
+</div>
+<!-- Footer Nav -->
+<div class="px-container-padding pt-stack-md mt-auto border-t border-surface-container-highest space-y-1">
+<a class="flex items-center gap-3 px-4 py-2 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+<span class="text-body-md font-body-md">Settings</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined text-[20px]">help_outline</span>
+<span class="text-body-md font-body-md">Support</span>
+</a>
+</div>
+</nav>
+<!-- Main Content Wrapper -->
+<div class="flex-1 ml-sidebar-width flex flex-col h-screen overflow-hidden bg-background relative">
+<!-- TopNavBar -->
+<header class="h-16 flex-shrink-0 bg-surface border-b border-surface-container-highest flex justify-between items-center px-container-padding w-full z-40">
+<!-- Left: Search -->
+<div class="flex-1 max-w-md">
+<div class="relative focus-within:ring-2 focus-within:ring-primary/10 rounded-lg transition-shadow">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-surface-container-low border border-surface-variant rounded-lg text-body-md font-body-md text-on-surface placeholder:text-outline focus:outline-none focus:border-primary transition-colors" placeholder="Search guests, IDs, or folios..." type="text"/>
+</div>
+</div>
+<!-- Right: Actions & Profile -->
+<div class="flex items-center gap-4">
+<div class="hidden md:flex items-center gap-2 mr-4 text-on-surface-variant border-r border-surface-variant pr-4">
+<span class="text-label-md font-label-md">Sanctuary Staff</span>
+<span class="text-label-md font-label-md bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded text-[10px] uppercase font-semibold">Reception Role</span>
+</div>
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-2 right-2 w-2 h-2 bg-error rounded-full border border-surface"></span>
+</button>
+<button class="w-10 h-10 rounded-full flex items-center justify-center text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined">help</span>
+</button>
+<div class="w-9 h-9 rounded-full bg-surface-variant overflow-hidden cursor-pointer border border-surface-container-highest ml-2">
+<img alt="User Profile Avatar" class="w-full h-full object-cover" data-alt="A professional headshot of a female clinic administrator with a warm, welcoming smile. She has dark hair tied back neatly and is wearing a soft beige blazer. The background is a gently blurred, bright clinical spa environment with soft natural lighting and subtle sage green accents, matching a modern light-mode wellness aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA22kaedP8elXiggSqcNZYcgLr54m2sRDLB6uVmfD0swvJeOd5rUPkxnBOiWqRZxZsXLVNxcEL2Xbyb6xW2UO0jauixwE4KHPYUsSBAHK2NhrIgr84_ZQ5ohLhNBK5gsuhO46ofWSGooOmd44KtfV5tWsSou9SSontG64YGCchxgHIhAg47LgAOTNFilY4uOvR9egHWUSmLDDSqSnvvrhlzIz7MtqL3c2VI73PW0s7YGrz0Nmg4Hx4XIMnUZZGZQ9ZGNFdYlHXxm-U"/>
+</div>
+</div>
+</header>
+<!-- Main Scrollable Canvas -->
+<main class="flex-1 overflow-y-auto p-container-padding">
+<!-- Page Header -->
+<div class="flex justify-between items-end mb-stack-lg">
+<div>
+<h2 class="text-headline-xl font-headline-xl text-on-background">Guest Directory</h2>
+<p class="text-body-md font-body-md text-on-surface-variant mt-1">Manage profiles, preferences, and clinical histories.</p>
+</div>
+<div class="flex gap-3">
+<button class="flex items-center gap-2 px-4 py-2 bg-surface border border-surface-variant rounded-lg text-body-md font-body-md text-on-surface hover:bg-surface-container-low transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[18px]">filter_list</span>
+                        Filters
+                    </button>
+<button class="flex items-center gap-2 px-4 py-2 bg-primary text-on-primary rounded-lg text-body-md font-body-md hover:bg-primary-container transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[18px]">person_add</span>
+                        New Guest
+                    </button>
+</div>
+</div>
+<!-- Asymmetric Grid Layout (Bento-style Master/Detail) -->
+<div class="grid grid-cols-1 xl:grid-cols-3 gap-grid-gutter items-start">
+<!-- Left: Master Table Container (col-span-2) -->
+<div class="xl:col-span-2 bg-surface-container-lowest rounded-xl border border-surface-variant elevation-1 overflow-hidden flex flex-col">
+<!-- Table Actions Bar -->
+<div class="p-4 border-b border-surface-container-highest flex justify-between items-center bg-surface-bright">
+<div class="text-label-bold font-label-bold text-on-surface-variant uppercase tracking-wider">
+                            1,204 Total Guests
+                        </div>
+<div class="flex gap-2">
+<button class="p-1.5 text-on-surface-variant hover:text-primary rounded-md hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-[20px]">download</span>
+</button>
+<button class="p-1.5 text-on-surface-variant hover:text-primary rounded-md hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-[20px]">view_column</span>
+</button>
+</div>
+</div>
+<!-- Data Table -->
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="border-b border-surface-container-highest bg-surface-container-low text-label-md font-label-md text-on-surface-variant uppercase">
+<th class="px-4 py-3 font-medium">Guest</th>
+<th class="px-4 py-3 font-medium">Contact</th>
+<th class="px-4 py-3 font-medium">Status</th>
+<th class="px-4 py-3 font-medium">Last Stay</th>
+<th class="px-4 py-3 font-medium text-right">Total Spend</th>
+</tr>
+</thead>
+<tbody class="text-body-md font-body-md divide-y divide-surface-container-highest">
+<!-- Row 1 (Active/Selected State) -->
+<tr class="hover:bg-surface-container-low transition-colors cursor-pointer bg-primary/5">
+<td class="px-4 py-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-surface-variant overflow-hidden border border-surface flex-shrink-0">
+<img alt="Eleanor Vance" class="w-full h-full object-cover" data-alt="A portrait of a distinguished older gentleman with silver hair, looking directly at the camera with a calm expression. He is wearing a crisp white linen shirt. The lighting is soft and natural, typical of a high-end wellness retreat environment, with a muted, warm gray background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuClXvC8iFGl1oetdQ3Sjvv6nofj81Fg0LsbYWy7f_UNtK7_GDdSL_TFgo1AMaUg-iIobeQuDh_ij3M8H5EbY8Omxr9i2EicjLeET2xSMieRnvxcCQu8rM1r7xLnfz8RtZ_qS5PvqIZ_Uux--f7MgCVhOlCXrI9ZrMLjhOOup5wC3Q_k9ooqiUqUXPg8IEpgkvyg5Lv5YpT3N9EmoZGl_kSZDzIOfrg5Zi6TN4nGy-Kut8b7au2zdHig8ewWkWt85dXrU-OVEUKHJHA"/>
+</div>
+<div>
+<div class="font-medium text-on-surface">Alexander Vance</div>
+<div class="text-label-md font-label-md text-on-surface-variant mt-0.5">ID: G-88241</div>
+</div>
+</div>
+</td>
+<td class="px-4 py-4">
+<div class="text-on-surface">a.vance@example.com</div>
+<div class="text-label-md font-label-md text-on-surface-variant mt-0.5">+44 7700 900077</div>
+</td>
+<td class="px-4 py-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-primary-container/20 text-primary-container">
+                                            In-House
+                                        </span>
+</td>
+<td class="px-4 py-4">
+<div class="text-on-surface">Currently</div>
+<div class="text-label-md font-label-md text-on-surface-variant mt-0.5">Room 402</div>
+</td>
+<td class="px-4 py-4 text-right font-medium text-on-surface">
+                                        $12,450
+                                    </td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container-low transition-colors cursor-pointer bg-surface-bright">
+<td class="px-4 py-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-tertiary-fixed text-on-tertiary-fixed flex items-center justify-center font-bold text-body-lg flex-shrink-0 border border-surface">
+                                                SJ
+                                            </div>
+<div>
+<div class="font-medium text-on-surface">Sarah Jenkins</div>
+<div class="text-label-md font-label-md text-on-surface-variant mt-0.5">ID: G-73920</div>
+</div>
+</div>
+</td>
+<td class="px-4 py-4">
+<div class="text-on-surface">s.jenkins@studio.io</div>
+<div class="text-label-md font-label-md text-on-surface-variant mt-0.5">+1 (555) 293-1029</div>
+</td>
+<td class="px-4 py-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-surface-variant text-on-surface-variant">
+                                            Departed
+                                        </span>
+</td>
+<td class="px-4 py-4">
+<div class="text-on-surface">Oct 12, 2023</div>
+<div class="text-label-md font-label-md text-on-surface-variant mt-0.5">7 Nights</div>
+</td>
+<td class="px-4 py-4 text-right font-medium text-on-surface">
+                                        $8,900
+                                    </td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-container-low transition-colors cursor-pointer bg-surface-bright">
+<td class="px-4 py-4">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full bg-surface-variant overflow-hidden border border-surface flex-shrink-0">
+<img alt="Marcus Chen" class="w-full h-full object-cover" data-alt="A portrait of a professional Asian woman in her 30s, looking relaxed yet focused. She wears a minimalist beige silk top. The lighting is bright, soft, and modern, reflecting a premium medical spa aesthetic with a pale, neutral background that perfectly matches a light-mode UI color palette." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDLIciaiEnCiObptVAPfEelZ7SgLUVYGO1TtibzDDGvp2vp6Zx_YIWPRtEizV0C6_UomswmtQLdOmmuv4iudTiatnV2umdpcSPbOwN4J-_IBDWIkw8vk2M8urdM-pzNt9mDN3CMp8M97b8S8snckwXzBkNf2cwhTJPGoGeZAAQ5Y2GoKYSlpXSnzIMayxKalEzcU5p3AHHGk0U7Lv6pudK4eTJ4ZuSblTeri6R2wVRAVw5A-dGPMPvKAUgA1lXESV4NRMygYLFCk4g"/>
+</div>
+<div>
+<div class="font-medium text-on-surface">Elena Rodriguez</div>
+<div class="text-label-md font-label-md text-on-surface-variant mt-0.5">ID: G-91023</div>
+</div>
+</div>
+</td>
+<td class="px-4 py-4">
+<div class="text-on-surface">elena.r@corporate.es</div>
+<div class="text-label-md font-label-md text-on-surface-variant mt-0.5">+34 600 123 456</div>
+</td>
+<td class="px-4 py-4">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-tertiary/10 text-tertiary">
+                                            Upcoming
+                                        </span>
+</td>
+<td class="px-4 py-4">
+<div class="text-on-surface">Nov 05, 2023</div>
+<div class="text-label-md font-label-md text-on-surface-variant mt-0.5">Booking #R-442</div>
+</td>
+<td class="px-4 py-4 text-right font-medium text-on-surface">
+                                        $3,200
+                                    </td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination -->
+<div class="p-4 border-t border-surface-container-highest flex justify-between items-center bg-surface-bright mt-auto">
+<span class="text-body-sm font-body-sm text-on-surface-variant">Showing 1 to 3 of 1,204</span>
+<div class="flex gap-1">
+<button class="px-3 py-1 rounded border border-surface-variant text-on-surface-variant disabled:opacity-50"><span class="material-symbols-outlined text-[18px] align-middle">chevron_left</span></button>
+<button class="px-3 py-1 rounded bg-primary text-on-primary font-medium text-body-sm">1</button>
+<button class="px-3 py-1 rounded border border-surface-variant text-on-surface hover:bg-surface-container-low font-medium text-body-sm">2</button>
+<button class="px-3 py-1 rounded border border-surface-variant text-on-surface hover:bg-surface-container-low font-medium text-body-sm">3</button>
+<button class="px-3 py-1 rounded border border-surface-variant text-on-surface hover:bg-surface-container-low"><span class="material-symbols-outlined text-[18px] align-middle">chevron_right</span></button>
+</div>
+</div>
+</div>
+<!-- Right: Guest Detail Panel (col-span-1) -->
+<div class="xl:col-span-1 bg-surface-container-lowest rounded-xl border border-surface-variant elevation-1 flex flex-col overflow-hidden h-full">
+<!-- Detail Header -->
+<div class="p-stack-md border-b border-surface-container-highest bg-surface-bright relative">
+<div class="absolute top-4 right-4 flex gap-2">
+<button class="p-1.5 text-on-surface-variant hover:text-primary rounded-md hover:bg-surface-container-high transition-colors"><span class="material-symbols-outlined text-[20px]">edit</span></button>
+<button class="p-1.5 text-on-surface-variant hover:text-primary rounded-md hover:bg-surface-container-high transition-colors"><span class="material-symbols-outlined text-[20px]">more_vert</span></button>
+</div>
+<div class="flex flex-col items-center text-center mt-4">
+<div class="w-20 h-20 rounded-full bg-surface-variant overflow-hidden border-4 border-surface shadow-sm mb-3 relative">
+<img alt="Eleanor Vance Large" class="w-full h-full object-cover" data-alt="A close-up portrait of a distinguished older gentleman with silver hair, looking directly at the camera with a calm expression. He is wearing a crisp white linen shirt. The lighting is soft and natural, typical of a high-end wellness retreat environment, with a muted, warm gray background." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCZ-8-jsqjFK65ApY4WXfjSZ5Nf0dw3NU8W4feAbUvP2XuXh2k4gKCshQ8K4mxWDvo4qmxIdZchXSxB6LN_WGb7bsN9mA0Dx_Ji53qkS9HGWFT9nhE0n3Yb0IRs5gYjw-nR77wiZtsIhx57tLKsCdUL78FBLLkiYudohm048Dm2hLUaU_YUFOyode1LNFKOSyWSE2WKOpUW0oFiF20FLWUF0i9X4Sn1bVQs-gSGI1PSkegp2bgdYv-SIVo1CpEvUUC2QMRQ5LU5ZJE"/>
+<div class="absolute bottom-0 right-0 w-4 h-4 bg-primary rounded-full border-2 border-surface"></div>
+</div>
+<h3 class="text-headline-md font-headline-md text-on-surface font-semibold">Alexander Vance</h3>
+<p class="text-body-sm font-body-sm text-on-surface-variant mt-1">ID: G-88241 • VIP Member</p>
+</div>
+<div class="grid grid-cols-2 gap-2 mt-6">
+<div class="bg-surface p-3 rounded-lg border border-surface-variant text-center">
+<div class="text-label-md font-label-md text-on-surface-variant uppercase mb-1">Lifetime Value</div>
+<div class="text-headline-md font-headline-md text-primary font-medium">$12,450</div>
+</div>
+<div class="bg-surface p-3 rounded-lg border border-surface-variant text-center">
+<div class="text-label-md font-label-md text-on-surface-variant uppercase mb-1">Total Stays</div>
+<div class="text-headline-md font-headline-md text-on-surface font-medium">4</div>
+</div>
+</div>
+</div>
+<!-- Scrollable Details Body -->
+<div class="p-stack-md flex-1 overflow-y-auto bg-surface-container-lowest space-y-6">
+<!-- Membership Section -->
+<section>
+<h4 class="text-label-bold font-label-bold text-on-surface-variant uppercase tracking-wider mb-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">card_membership</span> Membership
+                            </h4>
+<div class="bg-surface-container-low p-3 rounded-lg border border-surface-variant flex justify-between items-center">
+<div>
+<div class="text-body-sm font-body-sm font-medium text-on-surface">Diamond Wellness Plan</div>
+<div class="text-label-md font-label-md text-on-surface-variant mt-0.5">Active until Dec 2024</div>
+</div>
+<div class="text-right">
+<div class="text-headline-md font-headline-md text-primary font-semibold">12</div>
+<div class="text-[11px] text-on-surface-variant uppercase font-medium">Credits</div>
+</div>
+</div>
+</section>
+<hr class="border-surface-container-highest"/>
+<!-- Contact Info Section -->
+<section>
+<h4 class="text-label-bold font-label-bold text-on-surface-variant uppercase tracking-wider mb-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">contact_mail</span> Contact Information
+                            </h4>
+<div class="space-y-3 text-body-sm font-body-sm">
+<div class="flex gap-3 items-start">
+<span class="material-symbols-outlined text-outline text-[18px] mt-0.5">mail</span>
+<div>
+<div class="text-on-surface">a.vance@example.com</div>
+<div class="text-outline-variant text-[11px] uppercase">Primary Email</div>
+</div>
+</div>
+<div class="flex gap-3 items-start">
+<span class="material-symbols-outlined text-outline text-[18px] mt-0.5">call</span>
+<div>
+<div class="text-on-surface">+44 7700 900077</div>
+<div class="text-outline-variant text-[11px] uppercase">Mobile Phone</div>
+</div>
+</div>
+<div class="flex gap-3 items-start">
+<span class="material-symbols-outlined text-outline text-[18px] mt-0.5">location_on</span>
+<div>
+<div class="text-on-surface">14 Kensington Palace Gardens<br/>London, W8 4QQ, UK</div>
+</div>
+</div>
+</div>
+</section>
+<hr class="border-surface-container-highest"/>
+<!-- Clinical & GDPR Section -->
+<section>
+<div class="flex justify-between items-center mb-3">
+<h4 class="text-label-bold font-label-bold text-on-surface-variant uppercase tracking-wider flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">verified_user</span> Consents &amp; Agreements
+                                </h4>
+<a class="text-label-md font-label-md text-primary hover:underline" href="#">History</a>
+</div>
+<div class="bg-surface-container p-3 rounded-lg border border-surface-variant space-y-3">
+<div class="flex justify-between items-center">
+<span class="text-body-sm font-body-sm text-on-surface">General Liability Waiver</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-primary-container/20 text-primary-container">Signed</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-body-sm font-body-sm text-on-surface">Medical Data Processing</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-primary-container/20 text-primary-container">Signed</span>
+</div>
+<div class="flex justify-between items-center">
+<span class="text-body-sm font-body-sm text-on-surface">Marketing Communications</span>
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-surface-variant text-on-surface-variant">Declined</span>
+</div>
+<div class="text-[11px] text-on-surface-variant pt-2 border-t border-surface-container-highest mt-2">
+                                    Last updated: Oct 12, 2023 by Guest Portal
+                                </div>
+</div>
+</section>
+<hr class="border-surface-container-highest"/>
+<!-- Intake Forms Section -->
+<section>
+<h4 class="text-label-bold font-label-bold text-on-surface-variant uppercase tracking-wider mb-3 flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">assignment</span> Intake Forms
+                            </h4>
+<div class="space-y-2">
+<div class="flex items-center justify-between p-2 rounded-lg hover:bg-surface-container-low border border-transparent hover:border-surface-variant transition-colors">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-error text-[20px]">pending_actions</span>
+<div>
+<div class="text-body-sm font-body-sm font-medium text-on-surface">Pre-Arrival Health Questionnaire</div>
+<div class="text-label-md font-label-md text-error mt-0.5">Pending • Due Oct 24</div>
+</div>
+</div>
+<button class="text-primary hover:bg-primary/10 p-1.5 rounded-md transition-colors"><span class="material-symbols-outlined text-[18px]">send</span></button>
+</div>
+<div class="flex items-center justify-between p-2 rounded-lg hover:bg-surface-container-low border border-transparent hover:border-surface-variant transition-colors">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary text-[20px] icon-fill">task_alt</span>
+<div>
+<div class="text-body-sm font-body-sm font-medium text-on-surface">Dietary Preferences</div>
+<div class="text-label-md font-label-md text-on-surface-variant mt-0.5">Completed Oct 15</div>
+</div>
+</div>
+<button class="text-on-surface-variant hover:text-primary p-1.5 rounded-md transition-colors"><span class="material-symbols-outlined text-[18px]">visibility</span></button>
+</div>
+</div>
+</section>
+<hr class="border-surface-container-highest"/>
+<!-- Clinical Notes Section (RBAC) -->
+<section>
+<div class="flex justify-between items-center mb-3">
+<h4 class="text-label-bold font-label-bold text-on-surface-variant uppercase tracking-wider flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">medical_information</span> Clinical Notes
+                                </h4>
+</div>
+<div class="bg-surface-container-low p-4 rounded-lg border border-surface-variant flex flex-col items-center justify-center text-center py-6">
+<span class="material-symbols-outlined text-outline text-[32px] mb-2">lock</span>
+<div class="text-body-sm font-body-sm font-medium text-on-surface mb-1">Access Restricted</div>
+<div class="text-label-md font-label-md text-on-surface-variant">Your current role (Reception) does not have permission to view clinical records.</div>
+</div>
+</section>
+<hr class="border-surface-container-highest"/>
+<!-- Recent History/Folio Section -->
+<section>
+<div class="flex justify-between items-center mb-3">
+<h4 class="text-label-bold font-label-bold text-on-surface-variant uppercase tracking-wider flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">history</span> Current &amp; Past Stays
+                                </h4>
+<a class="text-label-md font-label-md text-primary hover:underline" href="#">View All</a>
+</div>
+<!-- Timeline/Cards -->
+<div class="space-y-3">
+<!-- Current Stay -->
+<div class="p-3 border border-primary/20 bg-primary/5 rounded-lg border-l-4 border-l-primary">
+<div class="flex justify-between items-start mb-1">
+<div class="text-body-sm font-body-sm font-medium text-on-surface">Wellness Retreat 7-Day</div>
+<span class="text-label-bold font-label-bold text-primary">Active</span>
+</div>
+<div class="text-body-sm font-body-sm text-on-surface-variant mb-2">Oct 24 - Oct 31, 2023 • Room 402</div>
+<div class="flex gap-2">
+<button class="text-label-md font-label-md bg-surface px-2 py-1 rounded border border-surface-variant text-on-surface hover:bg-surface-container-low flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">receipt</span> Folio F-1029
+                                        </button>
+<button class="text-label-md font-label-md bg-surface px-2 py-1 rounded border border-surface-variant text-on-surface hover:bg-surface-container-low flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">spa</span> Schedule
+                                        </button>
+</div>
+</div>
+<!-- Past Stay -->
+<div class="p-3 border border-surface-variant bg-surface rounded-lg">
+<div class="flex justify-between items-start mb-1">
+<div class="text-body-sm font-body-sm font-medium text-on-surface">Detox Weekend</div>
+<span class="text-label-bold font-label-bold text-outline">Completed</span>
+</div>
+<div class="text-body-sm font-body-sm text-on-surface-variant">May 12 - May 15, 2023</div>
+</div>
+</div>
+</section>
+</div>
+<!-- Detail Footer Actions -->
+<div class="p-4 border-t border-surface-container-highest bg-surface-bright flex gap-3 mt-auto">
+<button class="flex-1 py-2 px-4 bg-surface border border-surface-variant rounded-lg text-body-md font-body-md text-on-surface hover:bg-surface-container-low transition-colors shadow-sm text-center">
+                            Message
+                        </button>
+<button class="flex-1 py-2 px-4 bg-primary text-on-primary rounded-lg text-body-md font-body-md hover:bg-primary-container transition-colors shadow-sm text-center">
+                            Open Profile
+                        </button>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

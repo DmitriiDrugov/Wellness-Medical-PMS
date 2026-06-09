@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Packages &amp; Treatments - Sanctuary Admin</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-background": "#1b1c1a",
+                      "on-surface": "#1b1c1a",
+                      "primary": "#05685f",
+                      "on-tertiary": "#ffffff",
+                      "surface-dim": "#dcdad7",
+                      "on-tertiary-container": "#f4fffc",
+                      "on-primary-fixed-variant": "#005049",
+                      "on-surface-variant": "#3f4947",
+                      "inverse-primary": "#86d5c9",
+                      "primary-fixed": "#a2f1e5",
+                      "secondary-fixed": "#dce4df",
+                      "tertiary": "#545e5c",
+                      "inverse-surface": "#30302f",
+                      "on-secondary-fixed-variant": "#414845",
+                      "secondary-fixed-dim": "#c0c8c4",
+                      "surface": "#fbf9f6",
+                      "surface-container-high": "#eae8e5",
+                      "primary-container": "#2f8177",
+                      "on-primary-container": "#f4fffc",
+                      "on-error": "#ffffff",
+                      "on-primary": "#ffffff",
+                      "on-tertiary-fixed-variant": "#3f4947",
+                      "surface-bright": "#fbf9f6",
+                      "surface-container-low": "#f5f3f0",
+                      "on-secondary": "#ffffff",
+                      "outline": "#6f7977",
+                      "surface-variant": "#e4e2df",
+                      "background": "#fbf9f6",
+                      "error-container": "#ffdad6",
+                      "on-tertiary-fixed": "#141d1c",
+                      "secondary": "#58605c",
+                      "surface-container-lowest": "#ffffff",
+                      "on-error-container": "#93000a",
+                      "outline-variant": "#bec9c6",
+                      "primary-fixed-dim": "#86d5c9",
+                      "tertiary-fixed": "#dae5e2",
+                      "secondary-container": "#dce4df",
+                      "surface-container": "#f0edea",
+                      "error": "#ba1a1a",
+                      "on-secondary-container": "#5e6662",
+                      "surface-container-highest": "#e4e2df",
+                      "on-primary-fixed": "#00201d",
+                      "inverse-on-surface": "#f3f0ed",
+                      "on-secondary-fixed": "#161d1a",
+                      "tertiary-fixed-dim": "#bec9c6",
+                      "surface-tint": "#0b6a61",
+                      "tertiary-container": "#6c7774"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "stack-sm": "8px",
+                      "stack-md": "16px",
+                      "unit": "4px",
+                      "grid-gutter": "20px",
+                      "sidebar-width": "260px",
+                      "container-padding": "24px",
+                      "stack-lg": "32px"
+              },
+              "fontFamily": {
+                      "headline-xl": ["Inter"],
+                      "label-bold": ["Inter"],
+                      "body-sm": ["Inter"],
+                      "headline-lg-mobile": ["Inter"],
+                      "label-md": ["Inter"],
+                      "body-lg": ["Inter"],
+                      "body-md": ["Inter"],
+                      "headline-lg": ["Inter"],
+                      "headline-md": ["Inter"]
+              },
+              "fontSize": {
+                      "headline-xl": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                      "label-bold": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                      "body-sm": ["13px", {"lineHeight": "18px", "fontWeight": "400"}],
+                      "headline-lg-mobile": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                      "label-md": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                      "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                      "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                      "headline-lg": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                      "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "500"}]
+              }
+            }
+          }
+        }
+    </script>
+<style>
+        body {
+            background-color: #fbf9f6; /* bg-background */
+            color: #1b1c1a; /* text-on-background */
+        }
+        /* Hide scrollbar for clean look */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #dcdad7;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #bec9c6;
+        }
+    </style>
+</head>
+<body class="font-body-md text-body-md antialiased overflow-x-hidden min-h-screen">
+<!-- SideNavBar -->
+<nav class="hidden md:flex w-sidebar-width h-screen fixed left-0 top-0 bg-surface shadow-sm shadow-[0px_4px_20px_rgba(62,142,132,0.05)] z-50 flex-col py-container-padding border-r border-surface-container-highest">
+<!-- Brand -->
+<div class="px-container-padding mb-stack-lg flex items-center gap-3">
+<div class="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">spa</span>
+</div>
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-primary">Sanctuary PMS</h1>
+<p class="font-label-bold text-label-bold text-on-surface-variant">Medical Wellness Admin</p>
+</div>
+</div>
+<!-- CTA -->
+<div class="px-container-padding mb-stack-lg">
+<button class="w-full bg-primary text-on-primary py-2.5 rounded-lg font-label-bold text-label-bold hover:bg-primary-container transition-colors shadow-sm active:scale-95 flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                Quick Booking
+            </button>
+</div>
+<!-- Navigation Links -->
+<div class="flex-1 overflow-y-auto px-4 space-y-1">
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-bold text-label-bold">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">calendar_month</span>
+<span class="font-label-bold text-label-bold">Reservations</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-label-bold text-label-bold">Guests</span>
+</a>
+<!-- Active State Context: Packages & Treatments -->
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-primary font-bold border-l-4 border-primary bg-surface-container-low transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">spa</span>
+<span class="font-label-bold text-label-bold">Treatments</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-primary font-bold border-l-4 border-primary bg-surface-container-low transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">inventory_2</span>
+<span class="font-label-bold text-label-bold">Packages</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">receipt_long</span>
+<span class="font-label-bold text-label-bold">Billing</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">assessment</span>
+<span class="font-label-bold text-label-bold">Reports</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">cleaning_services</span>
+<span class="font-label-bold text-label-bold">Housekeeping</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">history</span>
+<span class="font-label-bold text-label-bold">Audit Log</span>
+</a>
+</div>
+<!-- Footer Links -->
+<div class="px-4 mt-auto pt-4 border-t border-surface-container-highest space-y-1">
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-label-bold text-label-bold">Settings</span>
+</a>
+<a class="flex items-center gap-3 px-4 py-2.5 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">help_outline</span>
+<span class="font-label-bold text-label-bold">Support</span>
+</a>
+</div>
+</nav>
+<!-- TopNavBar -->
+<header class="h-16 fixed top-0 right-0 left-0 md:left-sidebar-width z-40 bg-surface flex justify-between items-center px-container-padding w-full border-b border-surface-container-highest">
+<!-- Left: Search & Mobile Menu -->
+<div class="flex items-center gap-4">
+<button class="md:hidden text-on-surface-variant p-1 rounded-md hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined">menu</span>
+</button>
+<div class="relative hidden sm:block focus-within:ring-2 focus-within:ring-primary/10 rounded-lg">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[20px]">search</span>
+<input class="w-64 pl-10 pr-4 py-2 bg-surface-container-low border border-surface-container-highest rounded-lg text-body-sm font-body-sm focus:outline-none focus:border-primary transition-colors" placeholder="Search treatments, guests..." type="text"/>
+</div>
+<h2 class="md:hidden font-headline-md text-headline-md font-bold text-primary">Sanctuary Admin</h2>
+</div>
+<!-- Right: Actions & Profile -->
+<div class="flex items-center gap-4">
+<div class="hidden sm:flex items-center gap-2">
+<button class="p-2 text-on-surface-variant hover:text-primary transition-colors rounded-full hover:bg-surface-container-high relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full"></span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-primary transition-colors rounded-full hover:bg-surface-container-high">
+<span class="material-symbols-outlined">help</span>
+</button>
+</div>
+<div class="h-6 w-px bg-surface-container-highest hidden sm:block mx-2"></div>
+<div class="flex items-center gap-3 cursor-pointer p-1.5 rounded-lg hover:bg-surface-container-high transition-colors">
+<div class="text-right hidden md:block">
+<p class="font-label-md text-label-md text-on-surface">Eleanor Vane</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant text-[11px]">Admin Role</p>
+</div>
+<img alt="User Profile Avatar" class="w-9 h-9 rounded-full object-cover border border-surface-container-highest" data-alt="A professional headshot of a female clinic administrator with a warm smile, wearing a subtle sage green top, lit by soft, natural, diffused lighting in a modern, pristine wellness center setting, evoking an aesthetic of calm, corporate modernism." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB0usZTr4QusfmmFxJt-AnkMUU_b8jUIW4NI1jR8kwgb1HFkUlkKPWOjl5CkzcUKOgF5WtmcvKhX-5P4Ep7YicR_2Ftq4Cfjxs7pxjQGurd5Fq1kzFklvv1K9bdD_L-nmNacoWm2fpZ-CeAM6mTUurXbULVkJi9UTJTi8nEJSq6fSvFSAQrrdReduPYeWBzVcRnuNPML6Rrdr5yrp52EKlFA0PZwut-GYyUdvBkfihEWqeBDDE_ivaJgvOMRcbLDP1RwU0mt3IQRfw"/>
+</div>
+</div>
+</header>
+<!-- Main Canvas -->
+<main class="pt-20 md:pl-[284px] pr-4 md:pr-container-padding pb-container-padding min-h-screen">
+<!-- Page Header -->
+<div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
+<div>
+<h1 class="font-headline-xl text-headline-xl text-on-background mb-1">Service Catalog</h1>
+<p class="font-body-lg text-body-lg text-on-surface-variant">Manage integrated wellness packages and a la carte treatments.</p>
+</div>
+<div class="flex gap-3">
+<button class="px-4 py-2 rounded-lg border border-primary text-primary font-label-bold text-label-bold hover:bg-primary/5 transition-colors flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                    New Treatment
+                </button>
+<button class="px-4 py-2 rounded-lg bg-primary text-on-primary font-label-bold text-label-bold hover:bg-primary-container transition-colors shadow-sm active:scale-95 flex items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">library_add</span>
+                    Create Package
+                </button>
+</div>
+</div>
+<!-- Bento Grid Layout for Packages -->
+<section class="mb-12">
+<div class="flex items-center justify-between mb-6">
+<h2 class="font-headline-lg text-headline-lg text-on-background">Featured Wellness Packages</h2>
+<a class="text-primary font-label-bold text-label-bold hover:underline" href="#">View All</a>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6">
+<!-- Package Card 1 -->
+<div class="bg-white rounded-xl shadow-[0px_4px_20px_rgba(62,142,132,0.05)] border border-surface-container-highest overflow-hidden flex flex-col group relative">
+<div class="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="w-8 h-8 rounded-full bg-white/90 shadow-sm flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors backdrop-blur-sm">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+</div>
+<div class="h-40 bg-surface-container-low relative overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-br from-primary/10 to-surface-container-low mix-blend-multiply"></div>
+<img alt="Detox Week" class="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700" data-alt="A tranquil, minimalist spa therapy room featuring a pristine massage table draped in soft white linens, bathed in natural light filtering through sheer curtains. Subtle sage green accents and organic textures like pale wood and smooth stones create a serene, tactile, and high-end clinic atmosphere." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAItr_f4u9P7M1yeHpgu_mUVOJw5bKe7IlydCUlPI0Jpu3gUKr2ZslcrD_XsMRvEncD-EMage1krEQ0Xfiv68BxSCLGXYi_aDYNhKFWUbyRTx15FmQutddhYa61GFffHeIoeeUaY-7ggX9qKDrrRzzeINV-3UPACQQPcf5LsP8t5GkhZGOAuy7h2eZZCNqnkuMxgBBfDZXUzrjX7pJ5DKFH9du13iD7NUaTe71QEG967sGW-D1ActdpUkxFcS0BCZC1hC8IVssdnPg"/>
+<div class="absolute bottom-3 left-4 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-md shadow-sm">
+<span class="font-label-bold text-label-bold text-primary">7 Days</span>
+</div>
+</div>
+<div class="p-5 flex-1 flex flex-col">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-headline-md text-headline-md text-on-background">Wellness Detox Week</h3>
+<span class="font-headline-md text-headline-md text-on-background font-semibold">$3,200</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-4 line-clamp-2">A comprehensive physiological reset focusing on lymphatic drainage, hydrotherapy, and metabolic restoration.</p>
+<div class="mt-auto pt-4 border-t border-surface-container-highest">
+<p class="font-label-bold text-label-bold text-on-surface mb-2 uppercase tracking-wider text-[10px]">Includes</p>
+<div class="flex flex-wrap gap-2">
+<span class="px-2 py-1 bg-surface-container-low text-on-surface-variant rounded text-[11px] font-label-md">3x Lymphatic Massage</span>
+<span class="px-2 py-1 bg-surface-container-low text-on-surface-variant rounded text-[11px] font-label-md">Daily Cryotherapy</span>
+<span class="px-2 py-1 bg-surface-container-low text-on-surface-variant rounded text-[11px] font-label-md">Nutritional Consult</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Package Card 2 -->
+<div class="bg-white rounded-xl shadow-[0px_4px_20px_rgba(62,142,132,0.05)] border border-surface-container-highest overflow-hidden flex flex-col group relative">
+<div class="absolute top-4 right-4 z-10 opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="w-8 h-8 rounded-full bg-white/90 shadow-sm flex items-center justify-center text-on-surface-variant hover:text-primary transition-colors backdrop-blur-sm">
+<span class="material-symbols-outlined text-[18px]">edit</span>
+</button>
+</div>
+<div class="h-40 bg-surface-container-low relative overflow-hidden">
+<div class="absolute inset-0 bg-gradient-to-br from-secondary/10 to-surface-container-low mix-blend-multiply"></div>
+<img alt="Recovery Weekend" class="w-full h-full object-cover opacity-80 group-hover:scale-105 transition-transform duration-700" data-alt="Close up of smooth, heated basalt stones placed delicately on a soft, white towel, alongside small sprigs of fresh eucalyptus and a sleek white ceramic bowl. The lighting is soft and diffused, highlighting the tactile textures and promoting a sense of organized calm inherent in a modern medical-wellness setting." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBHGz2KvxsheLHY2dldPr-vGurhFcRf-Sbsk1yEXqPRotRldBe5oH0gtg57PyfFjb8TbaSeYK_WjJY81sZI07RfoOo1xO9jSZDWnLGd6u0lzYfdO-fQs9Tt2_PD5Bme73aV_QVgPRvo0hiUDAB43tX9duyAYxbI8n5hW-hj51jmfZLj35ueo5GwaD7Pw4dcvpIoRVvQTnd-rjfJKr3jma6a21dws1DdSwDYtXogZ4wNqhb62X9-JYuDb20CP0BkYwT6uE__1qlbPiw"/>
+<div class="absolute bottom-3 left-4 bg-white/90 backdrop-blur-sm px-2.5 py-1 rounded-md shadow-sm">
+<span class="font-label-bold text-label-bold text-secondary">3 Days</span>
+</div>
+</div>
+<div class="p-5 flex-1 flex flex-col">
+<div class="flex justify-between items-start mb-2">
+<h3 class="font-headline-md text-headline-md text-on-background">Post-Op Recovery</h3>
+<span class="font-headline-md text-headline-md text-on-background font-semibold">$1,850</span>
+</div>
+<p class="font-body-sm text-body-sm text-on-surface-variant mb-4 line-clamp-2">Gentle, restorative treatments designed to accelerate tissue healing and manage inflammation safely.</p>
+<div class="mt-auto pt-4 border-t border-surface-container-highest">
+<p class="font-label-bold text-label-bold text-on-surface mb-2 uppercase tracking-wider text-[10px]">Includes</p>
+<div class="flex flex-wrap gap-2">
+<span class="px-2 py-1 bg-surface-container-low text-on-surface-variant rounded text-[11px] font-label-md">2x Hyperbaric O2</span>
+<span class="px-2 py-1 bg-surface-container-low text-on-surface-variant rounded text-[11px] font-label-md">Red Light Therapy</span>
+<span class="px-2 py-1 bg-surface-container-low text-on-surface-variant rounded text-[11px] font-label-md">Physiotherapy Eval</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Package Card 3 -->
+<div class="bg-white rounded-xl shadow-[0px_4px_20px_rgba(62,142,132,0.05)] border border-surface-container-highest overflow-hidden flex flex-col group relative border-dashed hover:border-solid hover:border-primary/50 transition-all cursor-pointer">
+<div class="p-5 flex-1 flex flex-col items-center justify-center text-center h-full min-h-[340px]">
+<div class="w-16 h-16 rounded-full bg-primary/5 flex items-center justify-center text-primary mb-4 group-hover:bg-primary group-hover:text-white transition-colors duration-300">
+<span class="material-symbols-outlined text-[32px]">add_circle</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-background mb-1">Custom Bundle</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Design a new package based on patient demographics or seasonal offerings.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- Treatments Table Section -->
+<section>
+<div class="flex items-center justify-between mb-4">
+<h2 class="font-headline-lg text-headline-lg text-on-background">A La Carte Treatments</h2>
+<div class="flex gap-2">
+<div class="relative">
+<span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant text-[18px]">filter_list</span>
+<select class="pl-9 pr-8 py-1.5 bg-white border border-surface-container-highest rounded-lg text-body-sm font-label-md text-on-surface focus:outline-none focus:border-primary appearance-none shadow-[0px_4px_20px_rgba(62,142,132,0.02)]">
+<option>All Categories</option>
+<option>Massage</option>
+<option>Hydrotherapy</option>
+<option>Medical</option>
+</select>
+</div>
+</div>
+</div>
+<div class="bg-white rounded-xl shadow-[0px_4px_20px_rgba(62,142,132,0.05)] border border-surface-container-highest overflow-hidden">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low border-b border-surface-container-highest">
+<th class="py-3 px-6 font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider">Treatment Name</th>
+<th class="py-3 px-6 font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider">Duration</th>
+<th class="py-3 px-6 font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider">Price</th>
+<th class="py-3 px-6 font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider">Requirements</th>
+<th class="py-3 px-6 font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider">Status</th>
+<th class="py-3 px-6 font-label-bold text-label-bold text-on-surface-variant uppercase tracking-wider text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="font-body-md text-on-surface">
+<!-- Row 1 -->
+<tr class="border-b border-surface-container-highest hover:bg-[#F4F8F7] transition-colors group">
+<td class="py-4 px-6">
+<div class="font-medium text-on-background">Deep Tissue Massage</div>
+<div class="text-[12px] text-on-surface-variant mt-0.5">Musculoskeletal therapy</div>
+</td>
+<td class="py-4 px-6 text-on-surface-variant">60 / 90 min</td>
+<td class="py-4 px-6">$150</td>
+<td class="py-4 px-6">
+<div class="flex items-center gap-1.5 text-body-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px]">person</span> RMT required
+                                    </div>
+</td>
+<td class="py-4 px-6">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-label-bold bg-primary/10 text-primary">Active</span>
+</td>
+<td class="py-4 px-6 text-right">
+<button class="p-1.5 text-on-surface-variant hover:text-primary rounded-md opacity-0 group-hover:opacity-100 transition-all">
+<span class="material-symbols-outlined text-[20px]">edit</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="border-b border-surface-container-highest hover:bg-[#F4F8F7] transition-colors group">
+<td class="py-4 px-6">
+<div class="font-medium text-on-background">Cryotherapy Session</div>
+<div class="text-[12px] text-on-surface-variant mt-0.5">Recovery &amp; Inflammation</div>
+</td>
+<td class="py-4 px-6 text-on-surface-variant">15 min</td>
+<td class="py-4 px-6">$85</td>
+<td class="py-4 px-6">
+<div class="flex items-center gap-1.5 text-body-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px]">ac_unit</span> Cryo Chamber
+                                    </div>
+</td>
+<td class="py-4 px-6">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-label-bold bg-primary/10 text-primary">Active</span>
+</td>
+<td class="py-4 px-6 text-right">
+<button class="p-1.5 text-on-surface-variant hover:text-primary rounded-md opacity-0 group-hover:opacity-100 transition-all">
+<span class="material-symbols-outlined text-[20px]">edit</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="border-b border-surface-container-highest hover:bg-[#F4F8F7] transition-colors group">
+<td class="py-4 px-6">
+<div class="font-medium text-on-background">Hyperbaric Oxygen Therapy</div>
+<div class="text-[12px] text-on-surface-variant mt-0.5">Cellular repair</div>
+</td>
+<td class="py-4 px-6 text-on-surface-variant">60 min</td>
+<td class="py-4 px-6">$220</td>
+<td class="py-4 px-6">
+<div class="flex flex-col gap-1">
+<div class="flex items-center gap-1.5 text-body-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px]">medical_services</span> RN required
+                                        </div>
+<div class="flex items-center gap-1.5 text-body-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px]">airline_seat_flat</span> HBOT Pod
+                                        </div>
+</div>
+</td>
+<td class="py-4 px-6">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-label-bold bg-[#F0EEEB] text-tertiary">Maint.</span>
+</td>
+<td class="py-4 px-6 text-right">
+<button class="p-1.5 text-on-surface-variant hover:text-primary rounded-md opacity-0 group-hover:opacity-100 transition-all">
+<span class="material-symbols-outlined text-[20px]">edit</span>
+</button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-[#F4F8F7] transition-colors group">
+<td class="py-4 px-6">
+<div class="font-medium text-on-background">Vichy Shower Scrub</div>
+<div class="text-[12px] text-on-surface-variant mt-0.5">Exfoliation &amp; Hydrotherapy</div>
+</td>
+<td class="py-4 px-6 text-on-surface-variant">45 min</td>
+<td class="py-4 px-6">$130</td>
+<td class="py-4 px-6">
+<div class="flex items-center gap-1.5 text-body-sm text-on-surface-variant">
+<span class="material-symbols-outlined text-[16px]">water_drop</span> Wet Room A
+                                    </div>
+</td>
+<td class="py-4 px-6">
+<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-label-bold bg-primary/10 text-primary">Active</span>
+</td>
+<td class="py-4 px-6 text-right">
+<button class="p-1.5 text-on-surface-variant hover:text-primary rounded-md opacity-0 group-hover:opacity-100 transition-all">
+<span class="material-symbols-outlined text-[20px]">edit</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="mt-4 flex justify-between items-center text-body-sm text-on-surface-variant px-2">
+<span>Showing 4 of 24 treatments</span>
+<div class="flex gap-1">
+<button class="w-8 h-8 flex items-center justify-center rounded border border-surface-container-highest hover:bg-surface-container-low disabled:opacity-50" disabled="">
+<span class="material-symbols-outlined text-[18px]">chevron_left</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded bg-primary text-white font-label-md">1</button>
+<button class="w-8 h-8 flex items-center justify-center rounded border border-surface-container-highest hover:bg-surface-container-low font-label-md">2</button>
+<button class="w-8 h-8 flex items-center justify-center rounded border border-surface-container-highest hover:bg-surface-container-low font-label-md">3</button>
+<button class="w-8 h-8 flex items-center justify-center rounded border border-surface-container-highest hover:bg-surface-container-low">
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</div>
+</div>
+</section>
+</main>
+</body></html>

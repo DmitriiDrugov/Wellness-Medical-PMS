@@ -1,0 +1,390 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Wellness PMS - Membership Plans</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-background": "#0b1c30",
+                    "surface-container-high": "#dce9ff",
+                    "on-primary-container": "#f4fffc",
+                    "tertiary-fixed": "#e1e0ff",
+                    "on-secondary-fixed-variant": "#434847",
+                    "on-primary-fixed": "#00201d",
+                    "error-container": "#ffdad6",
+                    "primary-container": "#2f8177",
+                    "surface-bright": "#f8f9ff",
+                    "on-primary": "#ffffff",
+                    "secondary-fixed": "#e0e3e2",
+                    "secondary-fixed-dim": "#c4c7c6",
+                    "surface-container-highest": "#d3e4fe",
+                    "inverse-primary": "#86d5c9",
+                    "on-tertiary-fixed": "#07006c",
+                    "secondary-container": "#dde0df",
+                    "primary-fixed": "#a2f1e5",
+                    "inverse-surface": "#213145",
+                    "background": "#f8f9ff",
+                    "on-error": "#ffffff",
+                    "on-tertiary": "#ffffff",
+                    "surface-container-lowest": "#ffffff",
+                    "tertiary-container": "#6063ee",
+                    "surface-container-low": "#eff4ff",
+                    "tertiary": "#4648d4",
+                    "surface-variant": "#d3e4fe",
+                    "on-secondary-container": "#5f6363",
+                    "tertiary-fixed-dim": "#c0c1ff",
+                    "primary": "#05685f",
+                    "on-secondary": "#ffffff",
+                    "on-primary-fixed-variant": "#005049",
+                    "surface": "#f8f9ff",
+                    "on-error-container": "#93000a",
+                    "secondary": "#5b5f5f",
+                    "error": "#ba1a1a",
+                    "on-tertiary-container": "#fffbff",
+                    "surface-container": "#e5eeff",
+                    "surface-dim": "#cbdbf5",
+                    "on-surface": "#0b1c30",
+                    "primary-fixed-dim": "#86d5c9",
+                    "outline": "#6f7977",
+                    "on-surface-variant": "#3f4947",
+                    "inverse-on-surface": "#eaf1ff",
+                    "on-secondary-fixed": "#181c1c",
+                    "surface-tint": "#0b6a61",
+                    "outline-variant": "#bec9c6",
+                    "on-tertiary-fixed-variant": "#2f2ebe"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "unit": "4px",
+                    "gutter": "20px",
+                    "stack-md": "16px",
+                    "margin-desktop": "32px",
+                    "stack-lg": "32px",
+                    "stack-sm": "8px",
+                    "margin-mobile": "16px"
+            },
+            "fontFamily": {
+                    "headline-lg": ["Inter"],
+                    "body-md": ["Inter"],
+                    "label-sm": ["Inter"],
+                    "headline-md": ["Inter"],
+                    "headline-lg-mobile": ["Inter"],
+                    "body-lg": ["Inter"]
+            },
+            "fontSize": {
+                    "headline-lg": ["32px", {"lineHeight": "1.2", "fontWeight": "600"}],
+                    "body-md": ["14px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                    "label-sm": ["12px", {"lineHeight": "1", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                    "headline-md": ["20px", {"lineHeight": "1.4", "fontWeight": "500"}],
+                    "headline-lg-mobile": ["24px", {"lineHeight": "1.3", "fontWeight": "600"}],
+                    "body-lg": ["16px", {"lineHeight": "1.6", "fontWeight": "400"}]
+            }
+          }
+        }
+      }
+    </script>
+</head>
+<body class="bg-background text-on-background min-h-screen font-body-md selection:bg-primary-container selection:text-on-primary-container">
+<!-- App Shell -->
+<div class="flex h-screen overflow-hidden">
+<!-- SideNavBar (Desktop/Tablet) -->
+<aside class="hidden md:flex bg-surface dark:bg-on-background w-64 flex-col h-screen py-stack-md px-unit bg-surface-container-low dark:bg-on-background flex-shrink-0 z-10 transition-colors duration-200">
+<!-- Header -->
+<div class="flex items-center gap-3 px-3 mb-stack-lg">
+<div class="w-10 h-10 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-headline-md">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">spa</span>
+</div>
+<div>
+<h1 class="font-headline-md text-headline-md text-primary dark:text-primary-fixed-dim font-extrabold tracking-tight">Wellness PMS</h1>
+<p class="font-label-sm text-label-sm text-on-surface-variant">Staff Admin</p>
+</div>
+</div>
+<!-- Navigation Links -->
+<nav class="flex-1 overflow-y-auto space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant dark:text-outline-variant hover:bg-surface-container-high dark:hover:bg-inverse-surface transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-body-md text-body-md">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant dark:text-outline-variant hover:bg-surface-container-high dark:hover:bg-inverse-surface transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">calendar_today</span>
+<span class="font-body-md text-body-md">Reservations</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant dark:text-outline-variant hover:bg-surface-container-high dark:hover:bg-inverse-surface transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-body-md text-body-md">Guests</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant dark:text-outline-variant hover:bg-surface-container-high dark:hover:bg-inverse-surface transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">spa</span>
+<span class="font-body-md text-body-md">Treatments</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant dark:text-outline-variant hover:bg-surface-container-high dark:hover:bg-inverse-surface transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">inventory_2</span>
+<span class="font-body-md text-body-md">Packages</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant dark:text-outline-variant hover:bg-surface-container-high dark:hover:bg-inverse-surface transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">receipt_long</span>
+<span class="font-body-md text-body-md">Billing</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant dark:text-outline-variant hover:bg-surface-container-high dark:hover:bg-inverse-surface transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">assessment</span>
+<span class="font-body-md text-body-md">Reports</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant dark:text-outline-variant hover:bg-surface-container-high dark:hover:bg-inverse-surface transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">cleaning_services</span>
+<span class="font-body-md text-body-md">Housekeeping</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant dark:text-outline-variant hover:bg-surface-container-high dark:hover:bg-inverse-surface transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">history</span>
+<span class="font-body-md text-body-md">Audit Log</span>
+</a>
+<!-- Active State -->
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-primary dark:text-primary-fixed-dim font-bold border-r-4 border-primary bg-surface-container-high dark:bg-inverse-surface transition-colors duration-200" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">card_membership</span>
+<span class="font-body-md text-body-md">Membership</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant dark:text-outline-variant hover:bg-surface-container-high dark:hover:bg-inverse-surface transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">chat</span>
+<span class="font-body-md text-body-md">WhatsApp Console</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant dark:text-outline-variant hover:bg-surface-container-high dark:hover:bg-inverse-surface transition-colors duration-200" href="#">
+<span class="material-symbols-outlined">description</span>
+<span class="font-body-md text-body-md">Form Templates</span>
+</a>
+</nav>
+<!-- User Profile Area -->
+<div class="mt-auto pt-stack-md border-t border-surface-container-highest">
+<button class="flex items-center gap-3 px-3 py-2 w-full rounded-lg text-left text-on-surface-variant hover:bg-surface-container-high transition-colors duration-200">
+<div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center overflow-hidden">
+<span class="material-symbols-outlined text-on-secondary-container">person</span>
+</div>
+<div class="flex-1 min-w-0">
+<p class="font-body-md text-body-md font-medium truncate">Admin User</p>
+<p class="font-label-sm text-label-sm text-outline truncate">Settings</p>
+</div>
+</button>
+</div>
+</aside>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col min-w-0 bg-background overflow-hidden">
+<!-- TopAppBar (Mobile Only for Navigation, acts as context header on Desktop) -->
+<header class="md:hidden flex justify-between items-center w-full px-margin-mobile h-16 bg-surface/80 dark:bg-on-background/80 backdrop-blur-xl bg-surface-container-low shadow-sm z-20">
+<div class="flex items-center gap-2">
+<span class="material-symbols-outlined text-primary text-2xl" style="font-variation-settings: 'FILL' 1;">card_membership</span>
+<h2 class="font-headline-md text-headline-md text-primary dark:text-primary-fixed-dim font-bold">Membership Plans</h2>
+</div>
+<div class="flex items-center gap-4 text-on-surface-variant">
+<button class="hover:text-primary transition-all duration-300">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="hover:text-primary transition-all duration-300">
+<span class="material-symbols-outlined">account_circle</span>
+</button>
+</div>
+</header>
+<!-- Page Canvas -->
+<div class="flex-1 overflow-y-auto p-margin-mobile md:p-margin-desktop">
+<!-- Page Header (Desktop) -->
+<div class="hidden md:flex justify-between items-end mb-stack-lg">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-on-background mb-2">Membership Plans</h2>
+<p class="font-body-md text-body-md text-on-surface-variant max-w-2xl">Manage subscription tiers, pricing, and guest benefits. Changes to active plans will apply to new subscribers immediately.</p>
+</div>
+<div class="flex gap-3">
+<button class="flex items-center gap-2 px-4 py-2 rounded-full border border-outline text-on-surface font-body-md font-medium hover:bg-surface-container-high transition-colors">
+<span class="material-symbols-outlined text-[20px]">download</span>
+                            Export Data
+                        </button>
+<button class="flex items-center gap-2 px-4 py-2 rounded-full bg-primary text-on-primary font-body-md font-medium hover:bg-primary-fixed-variant transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[20px]">add</span>
+                            Create Plan
+                        </button>
+</div>
+</div>
+<!-- Action Bar (Mobile) -->
+<div class="md:hidden flex flex-col gap-3 mb-stack-md">
+<p class="font-body-md text-body-md text-on-surface-variant">Manage subscription tiers, pricing, and guest benefits.</p>
+<button class="flex items-center justify-center gap-2 w-full px-4 py-3 rounded-full bg-primary text-on-primary font-body-md font-medium hover:bg-primary-fixed-variant transition-colors shadow-sm min-h-[48px]">
+<span class="material-symbols-outlined">add</span>
+                        Create Plan
+                    </button>
+</div>
+<!-- Metrics Overview -->
+<div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-stack-lg">
+<div class="bg-surface p-4 rounded-xl shadow-[0_4px_20px_-4px_rgba(5,104,95,0.05)] border border-surface-container-low">
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Total Members</p>
+<p class="font-headline-lg text-headline-lg text-primary">1,248</p>
+<p class="font-body-md text-body-md text-on-surface-variant mt-2 flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-primary">trending_up</span>
+<span class="text-primary font-medium">+12%</span> vs last month
+                        </p>
+</div>
+<div class="bg-surface p-4 rounded-xl shadow-[0_4px_20px_-4px_rgba(5,104,95,0.05)] border border-surface-container-low">
+<p class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-1">Active MRR</p>
+<p class="font-headline-lg text-headline-lg text-primary">$184k</p>
+<p class="font-body-md text-body-md text-on-surface-variant mt-2 flex items-center gap-1">
+<span class="material-symbols-outlined text-[16px] text-primary">trending_up</span>
+<span class="text-primary font-medium">+5%</span> vs last month
+                        </p>
+</div>
+</div>
+<!-- Plans Grid -->
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+<!-- Plan Card: Essential -->
+<div class="bg-surface rounded-xl p-6 shadow-[0_8px_30px_-4px_rgba(5,104,95,0.08)] border border-surface-container-low flex flex-col relative overflow-hidden group hover:shadow-[0_12px_40px_-4px_rgba(5,104,95,0.12)] transition-shadow duration-300">
+<!-- Status Badge -->
+<div class="absolute top-6 right-6">
+<span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-green-100 text-green-800 border border-green-200">
+                                Active
+                            </span>
+</div>
+<div class="mb-6">
+<div class="w-12 h-12 rounded-full bg-surface-container-highest flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-primary">self_care</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-background mb-1">Essential Tier</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Entry-level monthly access</p>
+</div>
+<div class="mb-6 pb-6 border-b border-surface-container-highest">
+<div class="flex items-baseline gap-1">
+<span class="font-headline-lg text-headline-lg text-on-background">$99</span>
+<span class="font-body-md text-body-md text-on-surface-variant">/ mo</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">450 Active Subscribers</p>
+</div>
+<div class="flex-1 mb-6">
+<h4 class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-3">Included Benefits</h4>
+<ul class="space-y-3">
+<li class="flex items-start gap-2 font-body-md text-body-md text-on-surface">
+<span class="material-symbols-outlined text-[20px] text-primary shrink-0">check_circle</span>
+                                    1 Core Treatment per month
+                                </li>
+<li class="flex items-start gap-2 font-body-md text-body-md text-on-surface">
+<span class="material-symbols-outlined text-[20px] text-primary shrink-0">check_circle</span>
+                                    10% off retail products
+                                </li>
+<li class="flex items-start gap-2 font-body-md text-body-md text-on-surface">
+<span class="material-symbols-outlined text-[20px] text-primary shrink-0">check_circle</span>
+                                    Access to relaxation lounge
+                                </li>
+</ul>
+</div>
+<div class="flex gap-2 mt-auto">
+<button class="flex-1 py-2 px-4 rounded-lg border border-outline text-on-surface font-body-md font-medium hover:bg-surface-container-low transition-colors min-h-[48px]">Edit</button>
+<button aria-label="More options" class="py-2 px-4 rounded-lg border border-outline text-on-surface hover:bg-surface-container-low transition-colors min-h-[48px]">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</div>
+</div>
+<!-- Plan Card: Signature (Popular) -->
+<div class="bg-surface rounded-xl p-6 shadow-[0_8px_30px_-4px_rgba(5,104,95,0.08)] border-2 border-primary flex flex-col relative overflow-hidden group hover:shadow-[0_12px_40px_-4px_rgba(5,104,95,0.12)] transition-shadow duration-300">
+<!-- Popular Banner -->
+<div class="absolute top-0 right-0 bg-primary text-on-primary px-3 py-1 rounded-bl-lg font-label-sm text-label-sm">
+                            Most Popular
+                        </div>
+<div class="mb-6 mt-2">
+<div class="w-12 h-12 rounded-full bg-primary-container flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-on-primary-container" style="font-variation-settings: 'FILL' 1;">hotel_class</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-background mb-1">Signature Tier</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Comprehensive wellness routine</p>
+</div>
+<div class="mb-6 pb-6 border-b border-surface-container-highest">
+<div class="flex items-baseline gap-1">
+<span class="font-headline-lg text-headline-lg text-on-background">$199</span>
+<span class="font-body-md text-body-md text-on-surface-variant">/ mo</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">620 Active Subscribers</p>
+</div>
+<div class="flex-1 mb-6">
+<h4 class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-3">Included Benefits</h4>
+<ul class="space-y-3">
+<li class="flex items-start gap-2 font-body-md text-body-md text-on-surface">
+<span class="material-symbols-outlined text-[20px] text-primary shrink-0">check_circle</span>
+                                    2 Premium Treatments per month
+                                </li>
+<li class="flex items-start gap-2 font-body-md text-body-md text-on-surface">
+<span class="material-symbols-outlined text-[20px] text-primary shrink-0">check_circle</span>
+                                    20% off retail products
+                                </li>
+<li class="flex items-start gap-2 font-body-md text-body-md text-on-surface">
+<span class="material-symbols-outlined text-[20px] text-primary shrink-0">check_circle</span>
+                                    Priority booking access
+                                </li>
+<li class="flex items-start gap-2 font-body-md text-body-md text-on-surface">
+<span class="material-symbols-outlined text-[20px] text-primary shrink-0">check_circle</span>
+                                    1 Guest pass per month
+                                </li>
+</ul>
+</div>
+<div class="flex gap-2 mt-auto">
+<button class="flex-1 py-2 px-4 rounded-lg bg-primary text-on-primary font-body-md font-medium hover:bg-primary-fixed-variant transition-colors min-h-[48px]">Edit</button>
+<button aria-label="More options" class="py-2 px-4 rounded-lg border border-outline text-on-surface hover:bg-surface-container-low transition-colors min-h-[48px]">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</div>
+</div>
+<!-- Plan Card: Annual -->
+<div class="bg-surface rounded-xl p-6 shadow-[0_8px_30px_-4px_rgba(5,104,95,0.08)] border border-surface-container-low flex flex-col relative overflow-hidden group hover:shadow-[0_12px_40px_-4px_rgba(5,104,95,0.12)] transition-shadow duration-300">
+<!-- Status Badge -->
+<div class="absolute top-6 right-6">
+<span class="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-green-100 text-green-800 border border-green-200">
+                                Active
+                            </span>
+</div>
+<div class="mb-6">
+<div class="w-12 h-12 rounded-full bg-surface-container-highest flex items-center justify-center mb-4">
+<span class="material-symbols-outlined text-primary">diamond</span>
+</div>
+<h3 class="font-headline-md text-headline-md text-on-background mb-1">Annual Prestige</h3>
+<p class="font-body-md text-body-md text-on-surface-variant">Ultimate yearly commitment</p>
+</div>
+<div class="mb-6 pb-6 border-b border-surface-container-highest">
+<div class="flex items-baseline gap-1">
+<span class="font-headline-lg text-headline-lg text-on-background">$2,100</span>
+<span class="font-body-md text-body-md text-on-surface-variant">/ yr</span>
+</div>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1 text-primary">Save $288 annually</p>
+</div>
+<div class="flex-1 mb-6">
+<h4 class="font-label-sm text-label-sm text-on-surface-variant uppercase tracking-wider mb-3">Included Benefits</h4>
+<ul class="space-y-3">
+<li class="flex items-start gap-2 font-body-md text-body-md text-on-surface">
+<span class="material-symbols-outlined text-[20px] text-primary shrink-0">check_circle</span>
+                                    All Signature benefits
+                                </li>
+<li class="flex items-start gap-2 font-body-md text-body-md text-on-surface">
+<span class="material-symbols-outlined text-[20px] text-primary shrink-0">check_circle</span>
+                                    Unlimited salt cave access
+                                </li>
+<li class="flex items-start gap-2 font-body-md text-body-md text-on-surface">
+<span class="material-symbols-outlined text-[20px] text-primary shrink-0">check_circle</span>
+                                    Quarterly consultation
+                                </li>
+</ul>
+</div>
+<div class="flex gap-2 mt-auto">
+<button class="flex-1 py-2 px-4 rounded-lg border border-outline text-on-surface font-body-md font-medium hover:bg-surface-container-low transition-colors min-h-[48px]">Edit</button>
+<button aria-label="More options" class="py-2 px-4 rounded-lg border border-outline text-on-surface hover:bg-surface-container-low transition-colors min-h-[48px]">
+<span class="material-symbols-outlined">more_horiz</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</body></html>

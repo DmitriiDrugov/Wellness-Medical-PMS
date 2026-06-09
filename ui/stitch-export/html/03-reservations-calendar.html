@@ -1,0 +1,446 @@
+<!DOCTYPE html>
+
+<html class="light" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Sanctuary PMS - Reservations Calendar</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        /* Hide scrollbar for Gantt chart but keep functionality */
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
+        }
+    </style>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-background": "#1b1c1a",
+                        "on-surface": "#1b1c1a",
+                        "primary": "#05685f",
+                        "on-tertiary": "#ffffff",
+                        "surface-dim": "#dcdad7",
+                        "on-tertiary-container": "#f4fffc",
+                        "on-primary-fixed-variant": "#005049",
+                        "on-surface-variant": "#3f4947",
+                        "inverse-primary": "#86d5c9",
+                        "primary-fixed": "#a2f1e5",
+                        "secondary-fixed": "#dce4df",
+                        "tertiary": "#545e5c",
+                        "inverse-surface": "#30302f",
+                        "on-secondary-fixed-variant": "#414845",
+                        "secondary-fixed-dim": "#c0c8c4",
+                        "surface": "#fbf9f6",
+                        "surface-container-high": "#eae8e5",
+                        "primary-container": "#2f8177",
+                        "on-primary-container": "#f4fffc",
+                        "on-error": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "on-tertiary-fixed-variant": "#3f4947",
+                        "surface-bright": "#fbf9f6",
+                        "surface-container-low": "#f5f3f0",
+                        "on-secondary": "#ffffff",
+                        "outline": "#6f7977",
+                        "surface-variant": "#e4e2df",
+                        "background": "#fbf9f6",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-fixed": "#141d1c",
+                        "secondary": "#58605c",
+                        "surface-container-lowest": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "outline-variant": "#bec9c6",
+                        "primary-fixed-dim": "#86d5c9",
+                        "tertiary-fixed": "#dae5e2",
+                        "secondary-container": "#dce4df",
+                        "surface-container": "#f0edea",
+                        "error": "#ba1a1a",
+                        "on-secondary-container": "#5e6662",
+                        "surface-container-highest": "#e4e2df",
+                        "on-primary-fixed": "#00201d",
+                        "inverse-on-surface": "#f3f0ed",
+                        "on-secondary-fixed": "#161d1a",
+                        "tertiary-fixed-dim": "#bec9c6",
+                        "surface-tint": "#0b6a61",
+                        "tertiary-container": "#6c7774"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "stack-sm": "8px",
+                        "stack-md": "16px",
+                        "unit": "4px",
+                        "grid-gutter": "20px",
+                        "sidebar-width": "260px",
+                        "container-padding": "24px",
+                        "stack-lg": "32px"
+                    },
+                    "fontFamily": {
+                        "headline-xl": ["Inter"],
+                        "label-bold": ["Inter"],
+                        "body-sm": ["Inter"],
+                        "headline-lg-mobile": ["Inter"],
+                        "label-md": ["Inter"],
+                        "body-lg": ["Inter"],
+                        "body-md": ["Inter"],
+                        "headline-lg": ["Inter"],
+                        "headline-md": ["Inter"]
+                    },
+                    "fontSize": {
+                        "headline-xl": ["32px", {"lineHeight": "40px", "letterSpacing": "-0.02em", "fontWeight": "600"}],
+                        "label-bold": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "600"}],
+                        "body-sm": ["13px", {"lineHeight": "18px", "fontWeight": "400"}],
+                        "headline-lg-mobile": ["20px", {"lineHeight": "28px", "fontWeight": "600"}],
+                        "label-md": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                        "body-lg": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                        "body-md": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                        "headline-lg": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                        "headline-md": ["20px", {"lineHeight": "28px", "fontWeight": "500"}]
+                    }
+                }
+            }
+        }
+    </script>
+</head>
+<body class="bg-background text-on-background font-body-md text-body-md antialiased overflow-hidden">
+<!-- SideNavBar (Shared Component) -->
+<nav class="w-sidebar-width h-screen fixed left-0 top-0 bg-surface dark:bg-on-background shadow-[0px_4px_20px_rgba(62,142,132,0.05)] z-50 flex flex-col h-full py-container-padding">
+<!-- Brand Header -->
+<div class="px-container-padding mb-stack-lg flex items-center gap-stack-sm">
+<div class="w-10 h-10 rounded-lg bg-primary-container flex items-center justify-center text-on-primary-container">
+<span class="material-symbols-outlined">spa</span>
+</div>
+<div>
+<h1 class="font-headline-md text-headline-md font-bold text-primary dark:text-primary-fixed">Sanctuary PMS</h1>
+<p class="font-label-md text-label-md text-on-surface-variant">Medical Wellness Admin</p>
+</div>
+</div>
+<!-- CTA -->
+<div class="px-container-padding mb-stack-md">
+<button class="w-full bg-primary text-on-primary rounded-lg py-3 px-4 font-label-bold text-label-bold hover:bg-surface-tint active:scale-95 transition-transform shadow-sm flex justify-center items-center gap-2">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                Quick Booking
+            </button>
+</div>
+<!-- Navigation Links -->
+<div class="flex-1 overflow-y-auto px-container-padding no-scrollbar">
+<ul class="space-y-unit">
+<li>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-200 font-label-bold text-label-bold" href="#">
+<span class="material-symbols-outlined text-[20px]">dashboard</span>
+                        Dashboard
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-primary font-bold border-l-4 border-primary bg-surface-container-low font-label-bold text-label-bold active:scale-95 transition-transform" href="#">
+<span class="material-symbols-outlined text-[20px]" style="font-variation-settings: 'FILL' 1;">calendar_month</span>
+                        Reservations
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-200 font-label-bold text-label-bold" href="#">
+<span class="material-symbols-outlined text-[20px]">group</span>
+                        Guests
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-200 font-label-bold text-label-bold" href="#">
+<span class="material-symbols-outlined text-[20px]">spa</span>
+                        Treatments
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-200 font-label-bold text-label-bold" href="#">
+<span class="material-symbols-outlined text-[20px]">inventory_2</span>
+                        Packages
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-200 font-label-bold text-label-bold" href="#">
+<span class="material-symbols-outlined text-[20px]">receipt_long</span>
+                        Billing
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-200 font-label-bold text-label-bold" href="#">
+<span class="material-symbols-outlined text-[20px]">assessment</span>
+                        Reports
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-200 font-label-bold text-label-bold" href="#">
+<span class="material-symbols-outlined text-[20px]">cleaning_services</span>
+                        Housekeeping
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-200 font-label-bold text-label-bold" href="#">
+<span class="material-symbols-outlined text-[20px]">history</span>
+                        Audit Log
+                    </a>
+</li>
+</ul>
+</div>
+<!-- Footer Links -->
+<div class="px-container-padding mt-stack-md pt-stack-md border-t border-surface-container-high">
+<ul class="space-y-unit">
+<li>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-200 font-label-bold text-label-bold" href="#">
+<span class="material-symbols-outlined text-[20px]">settings</span>
+                        Settings
+                    </a>
+</li>
+<li>
+<a class="flex items-center gap-3 px-4 py-3 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-high transition-colors duration-200 font-label-bold text-label-bold" href="#">
+<span class="material-symbols-outlined text-[20px]">help_outline</span>
+                        Support
+                    </a>
+</li>
+</ul>
+</div>
+</nav>
+<!-- TopNavBar (Shared Component) -->
+<header class="h-16 fixed top-0 right-0 left-sidebar-width z-40 bg-surface border-b border-surface-container-highest flex justify-between items-center px-container-padding w-[calc(100%-260px)]">
+<!-- Search -->
+<div class="flex-1 max-w-md focus-within:ring-2 focus-within:ring-primary/10 rounded-lg transition-shadow">
+<div class="relative flex items-center w-full h-10 rounded-lg focus-within:shadow-lg bg-surface-container-low overflow-hidden">
+<div class="grid place-items-center h-full w-12 text-on-surface-variant">
+<span class="material-symbols-outlined text-[20px]">search</span>
+</div>
+<input class="peer h-full w-full outline-none text-body-sm font-body-sm text-on-surface bg-transparent pr-2" id="search" placeholder="Search reservations, guests..." type="text"/>
+</div>
+</div>
+<!-- Actions -->
+<div class="flex items-center gap-stack-md">
+<div class="flex items-center gap-2">
+<button class="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container-high rounded-full transition-colors relative">
+<span class="material-symbols-outlined">notifications</span>
+<span class="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full"></span>
+</button>
+<button class="p-2 text-on-surface-variant hover:text-primary hover:bg-surface-container-high rounded-full transition-colors">
+<span class="material-symbols-outlined">help</span>
+</button>
+</div>
+<div class="h-6 w-px bg-surface-container-highest"></div>
+<div class="flex items-center gap-3 cursor-pointer hover:bg-surface-container-low p-1.5 rounded-lg transition-colors">
+<div class="text-right hidden md:block">
+<div class="font-label-bold text-label-bold text-on-surface">Admin Role</div>
+<div class="font-label-md text-label-md text-on-surface-variant">Front Desk</div>
+</div>
+<div class="w-8 h-8 rounded-full bg-primary text-on-primary flex items-center justify-center font-label-bold text-label-bold overflow-hidden border border-surface-variant">
+<img alt="User Profile Avatar" class="w-full h-full object-cover" data-alt="A close-up, professional headshot of a female clinic administrator with a warm, welcoming smile. She has neatly styled dark hair and is wearing a subtle, light-colored blouse. The lighting is bright, soft, and natural, fitting a high-end medical spa aesthetic. The background is slightly blurred and features warm, light neutral tones, perfectly matching a clean, pristine, light-mode corporate environment." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA0Jyzkc5MFixFOSLOpE9tv4rg3XuUNt8rwj9b120QzF2blLL-IQ2xrifc7H4mWTevxbUWI3GLE_lkNeJwtgODh89Eolmlzr_hc3ZFmxsK6KGcFRhWtkNyHGi3ifZVMmwFwrQEJ2ag7Ywt56TN8x2VsOSlVYgcekVpyVdiSQoaipEvIf8ZCW_-rhwjejqnj2cKbYWbBxizLJE5KwyO_1JPjXeIUdDWZePorY3jNaBRPeXdC73ueBn2jLFmx-ZFXzRhi8w9BJ3EHBb0"/>
+</div>
+</div>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="ml-sidebar-width mt-16 p-container-padding h-[calc(100vh-64px)] flex flex-col gap-container-padding bg-background">
+<!-- Page Header -->
+<div class="flex justify-between items-center shrink-0">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface">Reservations Calendar</h2>
+<p class="font-body-md text-body-md text-on-surface-variant mt-1">Manage room allocations and guest stays.</p>
+</div>
+<div class="flex gap-3">
+<button class="flex items-center gap-2 px-4 py-2 rounded-lg border border-outline-variant text-secondary font-label-bold text-label-bold hover:bg-surface-container-low transition-colors bg-surface">
+<span class="material-symbols-outlined text-[18px]">filter_list</span>
+                    Filters
+                </button>
+<button class="flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-on-primary font-label-bold text-label-bold hover:bg-surface-tint shadow-sm transition-colors active:scale-95">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                    New Reservation
+                </button>
+</div>
+</div>
+<!-- Main Workspace (Calendar + Side Panel) -->
+<div class="flex flex-1 gap-grid-gutter overflow-hidden">
+<!-- Gantt Calendar Container -->
+<div class="flex-1 bg-surface rounded-xl border border-surface-container-highest shadow-sm overflow-hidden flex flex-col">
+<!-- Toolbar/Date Selector -->
+<div class="h-14 border-b border-surface-container-highest flex items-center justify-between px-4 bg-surface-container-lowest shrink-0">
+<div class="flex items-center gap-4">
+<button class="p-1 rounded hover:bg-surface-container-low text-on-surface-variant"><span class="material-symbols-outlined">chevron_left</span></button>
+<h3 class="font-label-bold text-label-bold text-on-surface">October 2023</h3>
+<button class="p-1 rounded hover:bg-surface-container-low text-on-surface-variant"><span class="material-symbols-outlined">chevron_right</span></button>
+</div>
+<div class="flex gap-2">
+<span class="px-2 py-1 rounded bg-surface-container-low text-on-surface-variant font-label-md text-label-md">Today</span>
+</div>
+</div>
+<!-- Scrollable Grid Area -->
+<div class="flex-1 overflow-auto no-scrollbar relative">
+<!-- Grid Definition: 1 col for rooms, 7 cols for days -->
+<div class="min-w-[800px] grid grid-cols-[120px_repeat(7,minmax(120px,1fr))] relative border-t border-surface-container-highest">
+<!-- Header Row (Dates) - Sticky Top -->
+<div class="col-span-full grid grid-cols-subgrid sticky top-0 z-20 bg-surface border-b border-surface-container-highest shadow-sm">
+<div class="p-3 font-label-bold text-label-bold text-on-surface-variant border-r border-surface-container-highest bg-surface-container-lowest flex items-center">Room</div>
+<div class="p-3 text-center border-r border-surface-container-highest bg-surface-container-lowest">
+<div class="font-label-md text-label-md text-on-surface-variant">Mon</div>
+<div class="font-label-bold text-label-bold text-on-surface">10</div>
+</div>
+<div class="p-3 text-center border-r border-surface-container-highest bg-surface-container-lowest">
+<div class="font-label-md text-label-md text-on-surface-variant">Tue</div>
+<div class="font-label-bold text-label-bold text-on-surface">11</div>
+</div>
+<div class="p-3 text-center border-r border-surface-container-highest bg-surface-container-lowest bg-surface-container-low/50"> <!-- Today -->
+<div class="font-label-md text-label-md text-primary">Wed</div>
+<div class="font-label-bold text-label-bold text-primary">12</div>
+</div>
+<div class="p-3 text-center border-r border-surface-container-highest bg-surface-container-lowest">
+<div class="font-label-md text-label-md text-on-surface-variant">Thu</div>
+<div class="font-label-bold text-label-bold text-on-surface">13</div>
+</div>
+<div class="p-3 text-center border-r border-surface-container-highest bg-surface-container-lowest">
+<div class="font-label-md text-label-md text-on-surface-variant">Fri</div>
+<div class="font-label-bold text-label-bold text-on-surface">14</div>
+</div>
+<div class="p-3 text-center border-r border-surface-container-highest bg-surface-container-lowest">
+<div class="font-label-md text-label-md text-on-surface-variant">Sat</div>
+<div class="font-label-bold text-label-bold text-on-surface">15</div>
+</div>
+<div class="p-3 text-center bg-surface-container-lowest">
+<div class="font-label-md text-label-md text-on-surface-variant">Sun</div>
+<div class="font-label-bold text-label-bold text-on-surface">16</div>
+</div>
+</div>
+<!-- Rows Wrapper -->
+<div class="col-span-full grid grid-cols-subgrid relative">
+<!-- Background Grid Lines -->
+<div class="absolute inset-0 grid grid-cols-subgrid pointer-events-none z-0">
+<div class="border-r border-surface-container-highest h-full"></div>
+<div class="border-r border-surface-container-highest h-full"></div>
+<div class="border-r border-surface-container-highest h-full"></div>
+<div class="border-r border-surface-container-highest h-full bg-surface-container-low/20"></div> <!-- Today highlight -->
+<div class="border-r border-surface-container-highest h-full"></div>
+<div class="border-r border-surface-container-highest h-full"></div>
+<div class="border-r border-surface-container-highest h-full"></div>
+<div class="h-full"></div>
+</div>
+<!-- Room Row 101 -->
+<div class="col-span-full grid grid-cols-subgrid group border-b border-surface-container-highest hover:bg-surface-container-low/30 transition-colors h-16 items-center relative z-10">
+<div class="pl-4 font-label-bold text-label-bold text-on-surface sticky left-0 bg-surface group-hover:bg-surface-container-low/30 transition-colors z-20 flex items-center h-full border-r border-surface-container-highest">
+                                    101 <span class="ml-2 w-2 h-2 rounded-full bg-primary-fixed block"></span>
+</div>
+<!-- Reservation Bar (In-house) -->
+<div class="col-start-2 col-end-5 mx-2 my-2 h-10 bg-primary rounded-lg shadow-sm flex items-center px-3 cursor-pointer hover:brightness-110 transition-all border border-primary-container z-30">
+<span class="font-label-bold text-label-bold text-on-primary truncate">Eleanor Vance (Wellness Pkg)</span>
+</div>
+</div>
+<!-- Room Row 102 -->
+<div class="col-span-full grid grid-cols-subgrid group border-b border-surface-container-highest hover:bg-surface-container-low/30 transition-colors h-16 items-center relative z-10">
+<div class="pl-4 font-label-bold text-label-bold text-on-surface sticky left-0 bg-surface group-hover:bg-surface-container-low/30 transition-colors z-20 flex items-center h-full border-r border-surface-container-highest">
+                                    102 <span class="ml-2 w-2 h-2 rounded-full bg-surface-variant block"></span>
+</div>
+<!-- Reservation Bar (Confirmed future) -->
+<div class="col-start-4 col-end-7 mx-2 my-2 h-10 bg-secondary-container rounded-lg shadow-sm flex items-center px-3 cursor-pointer hover:brightness-95 transition-all border border-outline-variant/30 z-30 ring-2 ring-primary/20">
+<span class="font-label-bold text-label-bold text-on-secondary-container truncate">Dr. Montague</span>
+</div>
+</div>
+<!-- Room Row 201 -->
+<div class="col-span-full grid grid-cols-subgrid group border-b border-surface-container-highest hover:bg-surface-container-low/30 transition-colors h-16 items-center relative z-10">
+<div class="pl-4 font-label-bold text-label-bold text-on-surface sticky left-0 bg-surface group-hover:bg-surface-container-low/30 transition-colors z-20 flex items-center h-full border-r border-surface-container-highest">
+                                    201 <span class="ml-2 w-2 h-2 rounded-full bg-primary-fixed block"></span>
+</div>
+<!-- Reservation Bar spanning weeks -->
+<div class="col-start-2 col-end-8 mx-2 my-2 h-10 bg-primary rounded-lg shadow-sm flex items-center px-3 cursor-pointer hover:brightness-110 transition-all border border-primary-container z-30">
+<span class="font-label-bold text-label-bold text-on-primary truncate">Theodora (Detox Retreat)</span>
+</div>
+</div>
+<!-- Room Row 202 (Empty) -->
+<div class="col-span-full grid grid-cols-subgrid group border-b border-surface-container-highest hover:bg-surface-container-low/30 transition-colors h-16 items-center relative z-10">
+<div class="pl-4 font-label-bold text-label-bold text-on-surface sticky left-0 bg-surface group-hover:bg-surface-container-low/30 transition-colors z-20 flex items-center h-full border-r border-surface-container-highest">
+                                    202 <span class="ml-2 w-2 h-2 rounded-full bg-surface-variant block"></span>
+</div>
+<!-- Empty row area -->
+<div class="col-start-5 col-end-8 mx-2 my-2 h-10 bg-transparent border-2 border-dashed border-[#D97706] rounded-lg shadow-sm flex items-center px-3 cursor-pointer hover:bg-[#D97706]/10 transition-all z-30">
+<span class="font-label-bold text-label-bold text-[#D97706] truncate">Arthur Pringle (Pending)</span>
+</div></div>
+</div>
+</div>
+</div>
+</div>
+<!-- Detail Panel (Side Panel) -->
+<aside class="w-80 bg-surface rounded-xl border border-surface-container-highest shadow-[0px_4px_20px_rgba(62,142,132,0.05)] flex flex-col shrink-0 overflow-hidden">
+<div class="p-5 border-b border-surface-container-highest flex justify-between items-start bg-surface-container-lowest">
+<div>
+<div class="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-secondary-container text-on-secondary-container font-label-md text-[10px] uppercase tracking-wider mb-2">
+<span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+                            Confirmed
+                        </div>
+<h3 class="font-headline-md text-headline-md text-on-surface font-bold">Dr. Montague</h3>
+<p class="font-body-sm text-body-sm text-on-surface-variant">Res #84729</p>
+</div>
+<button class="text-on-surface-variant hover:text-primary transition-colors p-1 rounded-md hover:bg-surface-container-low"><span class="material-symbols-outlined">close</span></button>
+</div>
+<div class="p-5 flex-1 overflow-y-auto space-y-6">
+<!-- Date Block -->
+<div class="flex gap-4 items-center bg-surface-container-low p-3 rounded-lg border border-surface-variant">
+<div class="flex-1">
+<p class="font-label-md text-label-md text-on-surface-variant mb-1">Check-in</p>
+<p class="font-label-bold text-label-bold text-on-surface">Wed, Oct 12</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">14:00</p>
+</div>
+<div class="w-px h-10 bg-surface-container-highest"></div>
+<div class="flex-1">
+<p class="font-label-md text-label-md text-on-surface-variant mb-1">Check-out</p>
+<p class="font-label-bold text-label-bold text-on-surface">Fri, Oct 14</p>
+<p class="font-body-sm text-body-sm text-on-surface-variant">11:00</p>
+</div>
+</div>
+<!-- Details List -->
+<div class="space-y-4">
+<div>
+<p class="font-label-md text-label-md text-on-surface-variant mb-1 flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">bed</span> Room Assignment
+                            </p>
+<p class="font-body-md text-body-md text-on-surface">Room 102 (Garden Suite)</p>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface-variant mb-1 flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">spa</span> Package
+                            </p>
+<p class="font-body-md text-body-md text-on-surface">Executive Stress Recovery</p>
+</div>
+<div>
+<p class="font-label-md text-label-md text-on-surface-variant mb-1 flex items-center gap-2">
+<span class="material-symbols-outlined text-[16px]">receipt_long</span> Linked Folio
+                            </p>
+<a class="font-body-md text-body-md text-primary hover:underline flex items-center gap-1" href="#">
+                                FOL-2023-10-84729 <span class="material-symbols-outlined text-[14px]">open_in_new</span>
+</a>
+</div>
+</div>
+<!-- Notes -->
+<div class="pt-4 border-t border-surface-container-highest">
+<p class="font-label-md text-label-md text-on-surface-variant mb-2">Guest Notes</p>
+<p class="font-body-sm text-body-sm text-on-surface bg-surface-container-low p-3 rounded-lg border border-surface-variant italic">
+                            "Guest requested firm pillows and a late afternoon massage slot on the first day if possible."
+                        </p>
+</div>
+</div>
+<div class="p-5 border-t border-surface-container-highest bg-surface-container-lowest gap-3 flex flex-col"><button class="w-full py-2.5 rounded-lg bg-[#D97706] text-white font-label-bold text-label-bold hover:brightness-110 shadow-sm transition-colors flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]">check_circle</span>
+Confirm Reservation
+</button>
+<button class="w-full py-2.5 rounded-lg border border-primary text-primary font-label-bold text-label-bold hover:bg-primary/5 transition-colors">Edit Reservation</button>
+<button class="w-full py-2.5 rounded-lg bg-primary text-on-primary font-label-bold text-label-bold hover:bg-surface-tint shadow-sm transition-colors">Go to Folio</button>
+</div>
+</aside>
+</div>
+</main>
+</body></html>

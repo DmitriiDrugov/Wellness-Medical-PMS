@@ -1,0 +1,72 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  @apply bg-background text-on-surface font-sans antialiased;
+}
+
+/* Material Symbols (icon font used by the Stitch mockups). */
+.material-symbols-outlined {
+  font-family: "Material Symbols Outlined";
+  font-weight: normal;
+  font-style: normal;
+  font-size: 1.25rem;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  font-feature-settings: "liga";
+  -webkit-font-feature-settings: "liga";
+  -webkit-font-smoothing: antialiased;
+}
+
+@layer components {
+  /* Status pills (DESIGN.md): tinted text on tinted background. */
+  .pill {
+    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold;
+  }
+  .pill-success {
+    @apply bg-success/15 text-success;
+  }
+  .pill-warning {
+    @apply bg-warning/20 text-[#7a4f17];
+  }
+  .pill-info {
+    @apply bg-info/20 text-[#4a5878];
+  }
+  .pill-neutral {
+    @apply bg-surface-container-high text-on-surface-variant;
+  }
+  .pill-primary {
+    @apply bg-primary/10 text-primary;
+  }
+
+  .card {
+    @apply rounded-lg bg-surface-container-lowest shadow-card;
+  }
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2 rounded bg-primary px-4 py-2 text-sm font-semibold text-on-primary transition hover:bg-primary-container disabled:opacity-50;
+  }
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2 rounded border border-primary px-4 py-2 text-sm font-semibold text-primary transition hover:bg-primary/5 disabled:opacity-50;
+  }
+  .btn-ghost {
+    @apply inline-flex items-center justify-center gap-2 rounded px-3 py-2 text-sm font-medium text-on-surface-variant transition hover:bg-surface-container disabled:opacity-50;
+  }
+  .input {
+    @apply w-full rounded border border-outline-variant bg-surface-container-lowest px-3 py-2 text-sm text-on-surface placeholder:text-outline focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15;
+  }
+}

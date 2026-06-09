@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Wellness PMS - Form Templates</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-background": "#0b1c30",
+                      "surface-container-high": "#dce9ff",
+                      "on-primary-container": "#f4fffc",
+                      "tertiary-fixed": "#e1e0ff",
+                      "on-secondary-fixed-variant": "#434847",
+                      "on-primary-fixed": "#00201d",
+                      "error-container": "#ffdad6",
+                      "primary-container": "#2f8177",
+                      "surface-bright": "#f8f9ff",
+                      "on-primary": "#ffffff",
+                      "secondary-fixed": "#e0e3e2",
+                      "secondary-fixed-dim": "#c4c7c6",
+                      "surface-container-highest": "#d3e4fe",
+                      "inverse-primary": "#86d5c9",
+                      "on-tertiary-fixed": "#07006c",
+                      "secondary-container": "#dde0df",
+                      "primary-fixed": "#a2f1e5",
+                      "inverse-surface": "#213145",
+                      "background": "#f8f9ff",
+                      "on-error": "#ffffff",
+                      "on-tertiary": "#ffffff",
+                      "surface-container-lowest": "#ffffff",
+                      "tertiary-container": "#6063ee",
+                      "surface-container-low": "#eff4ff",
+                      "tertiary": "#4648d4",
+                      "surface-variant": "#d3e4fe",
+                      "on-secondary-container": "#5f6363",
+                      "tertiary-fixed-dim": "#c0c1ff",
+                      "primary": "#05685f",
+                      "on-secondary": "#ffffff",
+                      "on-primary-fixed-variant": "#005049",
+                      "surface": "#f8f9ff",
+                      "on-error-container": "#93000a",
+                      "secondary": "#5b5f5f",
+                      "error": "#ba1a1a",
+                      "on-tertiary-container": "#fffbff",
+                      "surface-container": "#e5eeff",
+                      "surface-dim": "#cbdbf5",
+                      "on-surface": "#0b1c30",
+                      "primary-fixed-dim": "#86d5c9",
+                      "outline": "#6f7977",
+                      "on-surface-variant": "#3f4947",
+                      "inverse-on-surface": "#eaf1ff",
+                      "on-secondary-fixed": "#181c1c",
+                      "surface-tint": "#0b6a61",
+                      "outline-variant": "#bec9c6",
+                      "on-tertiary-fixed-variant": "#2f2ebe"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "unit": "4px",
+                      "gutter": "20px",
+                      "stack-md": "16px",
+                      "margin-desktop": "32px",
+                      "stack-lg": "32px",
+                      "stack-sm": "8px",
+                      "margin-mobile": "16px"
+              },
+              "fontFamily": {
+                      "headline-lg": [
+                              "Inter"
+                      ],
+                      "body-md": [
+                              "Inter"
+                      ],
+                      "label-sm": [
+                              "Inter"
+                      ],
+                      "headline-md": [
+                              "Inter"
+                      ],
+                      "headline-lg-mobile": [
+                              "Inter"
+                      ],
+                      "body-lg": [
+                              "Inter"
+                      ]
+              },
+              "fontSize": {
+                      "headline-lg": [
+                              "32px",
+                              {
+                                      "lineHeight": "1.2",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-md": [
+                              "14px",
+                              {
+                                      "lineHeight": "1.5",
+                                      "fontWeight": "400"
+                              }
+                      ],
+                      "label-sm": [
+                              "12px",
+                              {
+                                      "lineHeight": "1",
+                                      "letterSpacing": "0.05em",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "headline-md": [
+                              "20px",
+                              {
+                                      "lineHeight": "1.4",
+                                      "fontWeight": "500"
+                              }
+                      ],
+                      "headline-lg-mobile": [
+                              "24px",
+                              {
+                                      "lineHeight": "1.3",
+                                      "fontWeight": "600"
+                              }
+                      ],
+                      "body-lg": [
+                              "16px",
+                              {
+                                      "lineHeight": "1.6",
+                                      "fontWeight": "400"
+                              }
+                      ]
+              }
+      },
+          },
+        }
+    </script>
+<style>
+        .glass-panel {
+            background: rgba(255, 255, 255, 0.7);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(111, 121, 119, 0.1);
+        }
+        .status-draft {
+            background-color: rgba(255, 193, 7, 0.1);
+            color: #FFC107;
+        }
+        .status-published {
+            background-color: rgba(76, 175, 80, 0.1);
+            color: #4CAF50;
+        }
+        .status-archived {
+            color: #FFC107;
+            border: 1px dashed #FFC107;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-background font-body-md min-h-screen flex">
+<!-- SideNavBar (Desktop) -->
+<nav class="hidden md:flex flex-col h-screen py-spacing-stack-md px-spacing-unit bg-surface dark:bg-on-background left-0 top-0 w-64 border-r border-surface-container-low">
+<div class="px-4 mb-8">
+<h1 class="font-headline-md text-headline-md text-primary dark:text-primary-fixed-dim font-bold tracking-tight">Wellness PMS</h1>
+<p class="font-label-sm text-label-sm text-on-surface-variant mt-1">Staff Admin</p>
+</div>
+<div class="flex-1 overflow-y-auto space-y-1 px-2">
+<a class="flex items-center px-3 py-2 rounded-lg text-on-surface-variant dark:text-outline-variant hover:bg-surface-container-high dark:hover:bg-inverse-surface transition-colors duration-200" href="#">
+<span class="material-symbols-outlined mr-3">dashboard</span>
+<span>Dashboard</span>
+</a>
+<a class="flex items-center px-3 py-2 rounded-lg text-on-surface-variant dark:text-outline-variant hover:bg-surface-container-high dark:hover:bg-inverse-surface transition-colors duration-200" href="#">
+<span class="material-symbols-outlined mr-3">calendar_today</span>
+<span>Reservations</span>
+</a>
+<a class="flex items-center px-3 py-2 rounded-lg text-on-surface-variant dark:text-outline-variant hover:bg-surface-container-high dark:hover:bg-inverse-surface transition-colors duration-200" href="#">
+<span class="material-symbols-outlined mr-3">group</span>
+<span>Guests</span>
+</a>
+<a class="flex items-center px-3 py-2 rounded-lg text-on-surface-variant dark:text-outline-variant hover:bg-surface-container-high dark:hover:bg-inverse-surface transition-colors duration-200" href="#">
+<span class="material-symbols-outlined mr-3">spa</span>
+<span>Treatments</span>
+</a>
+<a class="flex items-center px-3 py-2 rounded-lg text-on-surface-variant dark:text-outline-variant hover:bg-surface-container-high dark:hover:bg-inverse-surface transition-colors duration-200" href="#">
+<span class="material-symbols-outlined mr-3">inventory_2</span>
+<span>Packages</span>
+</a>
+<a class="flex items-center px-3 py-2 rounded-lg text-on-surface-variant dark:text-outline-variant hover:bg-surface-container-high dark:hover:bg-inverse-surface transition-colors duration-200" href="#">
+<span class="material-symbols-outlined mr-3">receipt_long</span>
+<span>Billing</span>
+</a>
+<a class="flex items-center px-3 py-2 rounded-lg text-on-surface-variant dark:text-outline-variant hover:bg-surface-container-high dark:hover:bg-inverse-surface transition-colors duration-200" href="#">
+<span class="material-symbols-outlined mr-3">assessment</span>
+<span>Reports</span>
+</a>
+<a class="flex items-center px-3 py-2 rounded-lg text-on-surface-variant dark:text-outline-variant hover:bg-surface-container-high dark:hover:bg-inverse-surface transition-colors duration-200" href="#">
+<span class="material-symbols-outlined mr-3">cleaning_services</span>
+<span>Housekeeping</span>
+</a>
+<a class="flex items-center px-3 py-2 rounded-lg text-on-surface-variant dark:text-outline-variant hover:bg-surface-container-high dark:hover:bg-inverse-surface transition-colors duration-200" href="#">
+<span class="material-symbols-outlined mr-3">history</span>
+<span>Audit Log</span>
+</a>
+<a class="flex items-center px-3 py-2 rounded-lg text-on-surface-variant dark:text-outline-variant hover:bg-surface-container-high dark:hover:bg-inverse-surface transition-colors duration-200" href="#">
+<span class="material-symbols-outlined mr-3">card_membership</span>
+<span>Membership</span>
+</a>
+<a class="flex items-center px-3 py-2 rounded-lg text-on-surface-variant dark:text-outline-variant hover:bg-surface-container-high dark:hover:bg-inverse-surface transition-colors duration-200" href="#">
+<span class="material-symbols-outlined mr-3">chat</span>
+<span>WhatsApp Console</span>
+</a>
+<a class="flex items-center px-3 py-2 rounded-lg text-primary dark:text-primary-fixed-dim font-bold border-r-4 border-primary hover:bg-surface-container-high dark:hover:bg-inverse-surface transition-colors duration-200 bg-surface-container-low" href="#">
+<span class="material-symbols-outlined mr-3">description</span>
+<span>Form Templates</span>
+</a>
+</div>
+<div class="mt-auto px-4 pt-4 border-t border-surface-container-low">
+<div class="flex items-center">
+<div class="w-8 h-8 rounded-full bg-primary-container text-on-primary-container flex items-center justify-center font-bold text-sm">
+                    SP
+                </div>
+<div class="ml-3">
+<p class="font-label-sm text-label-sm text-on-surface">Staff Profile</p>
+</div>
+</div>
+</div>
+</nav>
+<!-- Main Content Area -->
+<main class="flex-1 flex flex-col h-screen overflow-hidden">
+<!-- TopAppBar (Mobile & Desktop Header) -->
+<header class="flex justify-between items-center w-full px-spacing-margin-desktop h-16 bg-surface/80 dark:bg-on-background/80 backdrop-blur-xl shadow-sm md:hidden z-10">
+<div class="flex items-center">
+<h1 class="font-headline-md-mobile text-headline-md-mobile text-primary dark:text-primary-fixed-dim font-bold tracking-tight">Lumina Wellness</h1>
+</div>
+<div class="flex items-center space-x-4 text-primary dark:text-primary-fixed-dim">
+<button class="hover:text-primary dark:hover:text-primary-fixed-dim transition-all duration-300">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="hover:text-primary dark:hover:text-primary-fixed-dim transition-all duration-300">
+<span class="material-symbols-outlined">account_circle</span>
+</button>
+</div>
+</header>
+<!-- Canvas -->
+<div class="flex-1 overflow-y-auto p-spacing-margin-mobile md:p-spacing-margin-desktop bg-background pb-24 md:pb-8">
+<!-- Page Header -->
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-spacing-stack-lg gap-4">
+<div>
+<h2 class="font-headline-lg text-headline-lg text-on-surface mb-1">Form Templates</h2>
+<p class="font-body-md text-body-md text-on-surface-variant">Manage intake, medical history, and custom forms.</p>
+</div>
+<button class="bg-primary text-on-primary hover:bg-on-primary-fixed-variant transition-colors px-6 py-3 rounded-lg font-label-sm text-label-sm flex items-center shadow-sm">
+<span class="material-symbols-outlined mr-2 text-sm">add</span>
+                    New Template
+                </button>
+</div>
+<!-- Stats/Filters Bento -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-4 mb-spacing-stack-lg">
+<div class="glass-panel rounded-xl p-4 shadow-[0_4px_20px_rgba(5,104,95,0.05)]">
+<p class="text-on-surface-variant font-label-sm text-label-sm mb-1 uppercase tracking-wider">Total Templates</p>
+<p class="font-headline-lg text-headline-lg text-primary">24</p>
+</div>
+<div class="glass-panel rounded-xl p-4 shadow-[0_4px_20px_rgba(5,104,95,0.05)]">
+<p class="text-on-surface-variant font-label-sm text-label-sm mb-1 uppercase tracking-wider">Published</p>
+<p class="font-headline-lg text-headline-lg text-on-surface">18</p>
+</div>
+<div class="glass-panel rounded-xl p-4 shadow-[0_4px_20px_rgba(5,104,95,0.05)]">
+<p class="text-on-surface-variant font-label-sm text-label-sm mb-1 uppercase tracking-wider">Drafts</p>
+<p class="font-headline-lg text-headline-lg text-on-surface">6</p>
+</div>
+<div class="glass-panel rounded-xl p-4 flex items-center shadow-[0_4px_20px_rgba(5,104,95,0.05)]">
+<div class="relative w-full">
+<span class="material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-outline">search</span>
+<input class="w-full bg-surface-bright border border-outline-variant rounded-lg pl-10 pr-4 py-2 text-sm focus:ring-1 focus:ring-primary focus:border-primary outline-none transition-shadow text-on-surface" placeholder="Search templates..." type="text"/>
+</div>
+</div>
+</div>
+<!-- Data Table Card -->
+<div class="bg-surface-container-lowest rounded-xl shadow-[0_8px_30px_rgba(5,104,95,0.05)] overflow-hidden border border-surface-container-low">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low border-b border-surface-container-high">
+<th class="p-4 font-label-sm text-label-sm text-on-surface-variant uppercase">Template Name</th>
+<th class="p-4 font-label-sm text-label-sm text-on-surface-variant uppercase">Category</th>
+<th class="p-4 font-label-sm text-label-sm text-on-surface-variant uppercase">Version</th>
+<th class="p-4 font-label-sm text-label-sm text-on-surface-variant uppercase">Status</th>
+<th class="p-4 font-label-sm text-label-sm text-on-surface-variant uppercase">Last Modified</th>
+<th class="p-4 font-label-sm text-label-sm text-on-surface-variant uppercase text-right">Actions</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-surface-container-high">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-bright transition-colors group">
+<td class="p-4">
+<div class="flex items-center">
+<span class="material-symbols-outlined text-outline mr-3">description</span>
+<div>
+<p class="font-body-md text-on-surface font-medium">Standard Medical History</p>
+<p class="font-label-sm text-on-surface-variant text-[11px] mt-0.5">Required for all new guests</p>
+</div>
+</div>
+</td>
+<td class="p-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary-container text-on-secondary-container">Medical</span>
+</td>
+<td class="p-4 text-on-surface-variant text-sm">v2.4</td>
+<td class="p-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium status-published">
+<span class="w-1.5 h-1.5 rounded-full bg-current mr-1.5"></span>
+                                        Published
+                                    </span>
+</td>
+<td class="p-4 text-on-surface-variant text-sm">Oct 12, 2023</td>
+<td class="p-4 text-right">
+<button class="text-outline hover:text-primary transition-colors p-1 opacity-0 group-hover:opacity-100 focus:opacity-100">
+<span class="material-symbols-outlined text-xl">edit</span>
+</button>
+<button class="text-outline hover:text-primary transition-colors p-1 opacity-0 group-hover:opacity-100 focus:opacity-100 ml-2">
+<span class="material-symbols-outlined text-xl">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-bright transition-colors group">
+<td class="p-4">
+<div class="flex items-center">
+<span class="material-symbols-outlined text-outline mr-3">description</span>
+<div>
+<p class="font-body-md text-on-surface font-medium">Deep Tissue Consent</p>
+<p class="font-label-sm text-on-surface-variant text-[11px] mt-0.5">Specific to massage therapies</p>
+</div>
+</div>
+</td>
+<td class="p-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary-container text-on-secondary-container">Consent</span>
+</td>
+<td class="p-4 text-on-surface-variant text-sm">v1.1</td>
+<td class="p-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium status-published">
+<span class="w-1.5 h-1.5 rounded-full bg-current mr-1.5"></span>
+                                        Published
+                                    </span>
+</td>
+<td class="p-4 text-on-surface-variant text-sm">Sep 05, 2023</td>
+<td class="p-4 text-right">
+<button class="text-outline hover:text-primary transition-colors p-1 opacity-0 group-hover:opacity-100 focus:opacity-100">
+<span class="material-symbols-outlined text-xl">edit</span>
+</button>
+<button class="text-outline hover:text-primary transition-colors p-1 opacity-0 group-hover:opacity-100 focus:opacity-100 ml-2">
+<span class="material-symbols-outlined text-xl">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-bright transition-colors group bg-surface/50">
+<td class="p-4">
+<div class="flex items-center">
+<span class="material-symbols-outlined text-outline mr-3">description</span>
+<div>
+<p class="font-body-md text-on-surface font-medium">Post-Treatment Feedback</p>
+<p class="font-label-sm text-on-surface-variant text-[11px] mt-0.5">Automated survey</p>
+</div>
+</div>
+</td>
+<td class="p-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary-container text-on-secondary-container">Intake</span>
+</td>
+<td class="p-4 text-on-surface-variant text-sm">v3.0-draft</td>
+<td class="p-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium status-draft">
+<span class="w-1.5 h-1.5 rounded-full bg-current mr-1.5"></span>
+                                        Draft
+                                    </span>
+</td>
+<td class="p-4 text-on-surface-variant text-sm">Today, 10:42 AM</td>
+<td class="p-4 text-right">
+<button class="text-outline hover:text-primary transition-colors p-1 opacity-0 group-hover:opacity-100 focus:opacity-100">
+<span class="material-symbols-outlined text-xl">edit</span>
+</button>
+<button class="text-outline hover:text-primary transition-colors p-1 opacity-0 group-hover:opacity-100 focus:opacity-100 ml-2">
+<span class="material-symbols-outlined text-xl">more_vert</span>
+</button>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-surface-bright transition-colors group">
+<td class="p-4">
+<div class="flex items-center">
+<span class="material-symbols-outlined text-outline mr-3">description</span>
+<div>
+<p class="font-body-md text-on-surface font-medium text-on-surface-variant line-through opacity-70">COVID-19 Screening</p>
+<p class="font-label-sm text-on-surface-variant text-[11px] mt-0.5 opacity-70">Deprecated</p>
+</div>
+</div>
+</td>
+<td class="p-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary-container text-on-secondary-container opacity-70">Medical</span>
+</td>
+<td class="p-4 text-on-surface-variant text-sm opacity-70">v1.0</td>
+<td class="p-4">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium status-archived">
+                                        Archived
+                                    </span>
+</td>
+<td class="p-4 text-on-surface-variant text-sm opacity-70">Jan 15, 2022</td>
+<td class="p-4 text-right">
+<button class="text-outline hover:text-primary transition-colors p-1 opacity-0 group-hover:opacity-100 focus:opacity-100">
+<span class="material-symbols-outlined text-xl">restore</span>
+</button>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination -->
+<div class="border-t border-surface-container-high px-4 py-3 flex items-center justify-between sm:px-6">
+<div class="hidden sm:flex-1 sm:flex sm:items-center sm:justify-between">
+<div>
+<p class="text-sm text-on-surface-variant">
+                                Showing <span class="font-medium text-on-surface">1</span> to <span class="font-medium text-on-surface">4</span> of <span class="font-medium text-on-surface">24</span> results
+                            </p>
+</div>
+<div>
+<nav aria-label="Pagination" class="relative z-0 inline-flex rounded-md shadow-sm -space-x-px">
+<a class="relative inline-flex items-center px-2 py-2 rounded-l-md border border-outline-variant bg-surface-container-lowest text-sm font-medium text-on-surface-variant hover:bg-surface-bright" href="#">
+<span class="sr-only">Previous</span>
+<span class="material-symbols-outlined text-sm">chevron_left</span>
+</a>
+<a aria-current="page" class="z-10 bg-primary-container border-primary text-on-primary-container relative inline-flex items-center px-4 py-2 border text-sm font-medium" href="#">
+                                    1
+                                </a>
+<a class="bg-surface-container-lowest border-outline-variant text-on-surface-variant hover:bg-surface-bright relative inline-flex items-center px-4 py-2 border text-sm font-medium" href="#">
+                                    2
+                                </a>
+<a class="bg-surface-container-lowest border-outline-variant text-on-surface-variant hover:bg-surface-bright relative inline-flex items-center px-4 py-2 border text-sm font-medium" href="#">
+                                    3
+                                </a>
+<span class="relative inline-flex items-center px-4 py-2 border border-outline-variant bg-surface-container-lowest text-sm font-medium text-on-surface-variant">
+                                    ...
+                                </span>
+<a class="relative inline-flex items-center px-2 py-2 rounded-r-md border border-outline-variant bg-surface-container-lowest text-sm font-medium text-on-surface-variant hover:bg-surface-bright" href="#">
+<span class="sr-only">Next</span>
+<span class="material-symbols-outlined text-sm">chevron_right</span>
+</a>
+</nav>
+</div>
+</div>
+</div>
+</div>
+</div>
+</main>
+</body></html>
