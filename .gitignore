@@ -6,3 +6,6 @@ dist/
 *.log
 *.tsbuildinfo
 next-env.d.ts
+
+# Claude Code worktrees (isolated workspaces)
+.claude/worktrees/
