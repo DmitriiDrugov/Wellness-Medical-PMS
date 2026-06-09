@@ -97,7 +97,9 @@ export const appointmentsService = {
       throw new ValidationError(`Treatment requires a ${treatment.requiredResourceType} resource`);
     }
     await assertValidTherapist(ctx.propertyId, input.therapistId);
-    await guestsService.get(ctx, input.guestId); // validates the guest exists/visible
+    // Existence check only (no guest:read): keeps the booking path open to the
+    // least-privilege AI_AGENT principal, which may book but cannot read guests (ADR 0006).
+    await guestsService.requireExists(input.guestId);
 
     const start = input.startTime;
     const end = computeEndTime(start, treatment.durationMinutes);

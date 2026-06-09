@@ -28,6 +28,16 @@ export const guestsService = {
     return getOrThrow(id);
   },
 
+  /**
+   * Cross-module interface (no RBAC): assert a guest exists and is not soft-deleted.
+   * Used by booking flows (reservations/appointments) that need to validate the guest
+   * without granting the actor `guest:read` — notably the least-privilege AI_AGENT,
+   * which may book (ADR 0006) but must not be able to read the guest directory.
+   */
+  async requireExists(id: string): Promise<Guest> {
+    return getOrThrow(id);
+  },
+
   async create(ctx: AuthContext, input: CreateGuestInput): Promise<Guest> {
     requireCapability(ctx.role, "guest:write");
     const consentGiven = input.gdprConsentDataProcessing || input.gdprConsentMarketing;

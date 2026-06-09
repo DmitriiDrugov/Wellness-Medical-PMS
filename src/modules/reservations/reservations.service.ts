@@ -64,6 +64,11 @@ export const reservationsService = {
 
   async create(ctx: AuthContext, input: CreateReservationInput): Promise<Reservation> {
     requireCapability(ctx.role, "reservation:write");
+    // Defense in depth: the route schema enforces this, but direct callers (the AI
+    // receptionist invokes the service, not the route) must not bypass it.
+    if (input.checkOutDate <= input.checkInDate) {
+      throw new ValidationError("checkOutDate must be after checkInDate");
+    }
     const roomType = await reservationsRepository.roomTypeById(input.roomTypeId);
     if (!roomType || roomType.propertyId !== ctx.propertyId) {
       throw new NotFoundError("Room type not found");
