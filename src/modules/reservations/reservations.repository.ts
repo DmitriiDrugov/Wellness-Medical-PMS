@@ -76,6 +76,10 @@ export const reservationsRepository = {
     return prisma.roomType.findUnique({ where: { id } });
   },
 
+  listRoomTypes(propertyId: string): Promise<RoomType[]> {
+    return prisma.roomType.findMany({ where: { propertyId }, orderBy: { name: "asc" } });
+  },
+
   roomsByType(propertyId: string, roomTypeId?: string): Promise<Room[]> {
     return prisma.room.findMany({
       where: { propertyId, ...(roomTypeId ? { roomTypeId } : {}) },

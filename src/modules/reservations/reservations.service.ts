@@ -211,6 +211,16 @@ export const reservationsService = {
     return after;
   },
 
+  async listRoomTypes(ctx: AuthContext) {
+    requireCapability(ctx.role, "reservation:read");
+    return reservationsRepository.listRoomTypes(ctx.propertyId);
+  },
+
+  async listRooms(ctx: AuthContext) {
+    requireCapability(ctx.role, "reservation:read");
+    return reservationsRepository.roomsByType(ctx.propertyId);
+  },
+
   /** Rooms of the requested type with no blocking reservation overlapping [from, to). */
   async availability(ctx: AuthContext, query: AvailabilityQuery) {
     requireCapability(ctx.role, "reservation:read");
