@@ -23,6 +23,14 @@ describe("RBAC capability matrix", () => {
     expect(can("RECEPTION", "catalog:manage")).toBe(false);
   });
 
+  it("restricts audit:read (audit-log viewer) to MANAGER and ADMIN", () => {
+    expect(can("ADMIN", "audit:read")).toBe(true);
+    expect(can("MANAGER", "audit:read")).toBe(true);
+    expect(can("RECEPTION", "audit:read")).toBe(false);
+    expect(can("THERAPIST", "audit:read")).toBe(false);
+    expect(can("HOUSEKEEPING", "audit:read")).toBe(false);
+  });
+
   it("lets RESERVATION_ADMIN read reports but not close folios", () => {
     expect(can("RESERVATION_ADMIN", "report:read")).toBe(true);
     expect(can("RESERVATION_ADMIN", "folio:close")).toBe(false);
@@ -45,5 +53,23 @@ describe("RBAC capability matrix", () => {
   it("requireCapability throws ForbiddenError when denied", () => {
     expect(() => requireCapability("THERAPIST", "reservation:write")).toThrow(ForbiddenError);
     expect(() => requireCapability("ADMIN", "staff:manage")).not.toThrow();
+  });
+
+  it("grants messaging to front desk + management, scopes therapist, denies housekeeping", () => {
+    expect(can("RECEPTION", "messaging:write")).toBe(true);
+    expect(can("MANAGER", "messaging:read")).toBe(true);
+    expect(can("THERAPIST", "messaging:read")).toBe(true); // service adds own-guest scope
+    expect(can("HOUSEKEEPING", "messaging:read")).toBe(false);
+  });
+
+  it("gives AI_AGENT a least-privilege booking zone and nothing destructive/financial", () => {
+    expect(can("AI_AGENT", "messaging:write")).toBe(true);
+    expect(can("AI_AGENT", "reservation:write")).toBe(true);
+    expect(can("AI_AGENT", "appointment:write")).toBe(true);
+    expect(can("AI_AGENT", "catalog:read")).toBe(true);
+    expect(can("AI_AGENT", "folio:write")).toBe(false);
+    expect(can("AI_AGENT", "folio:close")).toBe(false);
+    expect(can("AI_AGENT", "clinical:read")).toBe(false);
+    expect(can("AI_AGENT", "staff:manage")).toBe(false);
   });
 });

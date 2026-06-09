@@ -35,7 +35,9 @@ export type Capability =
   | "clinical:write"
   | "consent:write"
   | "consent:read"
-  | "consent:status:read";
+  | "consent:status:read"
+  | "messaging:read"
+  | "messaging:write";
 
 const ALL: Capability[] = [
   "guest:read", "guest:write",
@@ -48,6 +50,7 @@ const ALL: Capability[] = [
   "forms:manage", "submission:write",
   "clinical:read", "clinical:write",
   "consent:write", "consent:read", "consent:status:read",
+  "messaging:read", "messaging:write",
 ];
 
 const MATRIX: Record<StaffRole, Capability[]> = {
@@ -58,6 +61,7 @@ const MATRIX: Record<StaffRole, Capability[]> = {
     "appointment:read", "appointment:write",
     "folio:read", "folio:write", "folio:close",
     "submission:write", "consent:write", "consent:status:read",
+    "messaging:read", "messaging:write",
   ],
   RESERVATION_ADMIN: [
     "guest:read", "guest:write",
@@ -67,6 +71,7 @@ const MATRIX: Record<StaffRole, Capability[]> = {
     "folio:read", "folio:write",
     "report:read",
     "submission:write", "consent:status:read",
+    "messaging:read", "messaging:write",
   ],
   THERAPIST: [
     "guest:read",
@@ -75,14 +80,19 @@ const MATRIX: Record<StaffRole, Capability[]> = {
     "submission:write",
     "clinical:read", "clinical:write",
     "consent:write", "consent:read", "consent:status:read",
+    "messaging:read",
   ],
   HOUSEKEEPING: [
     "housekeeping:read", "housekeeping:manage",
   ],
   MANAGER: ALL.filter((c) => c !== "staff:manage"),
   ADMIN: [...ALL],
-  // AI_AGENT capabilities are defined in the messaging module (Phase 7)
-  AI_AGENT: [],
+  AI_AGENT: [
+    "messaging:read", "messaging:write",
+    "reservation:read", "reservation:write",
+    "appointment:read", "appointment:write",
+    "catalog:read",
+  ],
 };
 
 export function can(role: StaffRole, capability: Capability): boolean {
