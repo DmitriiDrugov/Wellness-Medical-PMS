@@ -23,12 +23,16 @@ async function aiActorFor(propertyId: string) {
 
 async function runAiAction(
   propertyId: string,
+  guestId: string,
   action: AiAction,
 ): Promise<{ actionType: string; actionId: string }> {
   const ctx = await aiActorFor(propertyId);
+  // The AI may only act on behalf of THIS conversation's guest. We deliberately
+  // ignore any guestId the provider supplied — it is never authoritative — so a
+  // (future) real LLM cannot book for a different guest.
   if (action.type === "create_reservation") {
     const r = await reservationsService.create(ctx, {
-      guestId: action.guestId,
+      guestId,
       roomTypeId: action.roomTypeId,
       checkInDate: new Date(action.checkInDate),
       checkOutDate: new Date(action.checkOutDate),
@@ -38,7 +42,7 @@ async function runAiAction(
     return { actionType: "Reservation", actionId: r.id };
   }
   const a = await appointmentsService.create(ctx, {
-    guestId: action.guestId,
+    guestId,
     treatmentId: action.treatmentId,
     therapistId: action.therapistId,
     resourceId: action.resourceId,
@@ -135,7 +139,7 @@ export const messagingService = {
           }
           return msg;
         },
-        runAction: (action) => runAiAction(conv.propertyId, action),
+        runAction: (action) => runAiAction(conv.propertyId, conv.guestId, action),
       });
     }
     return messageRepository.listSince(conv.id, undefined, 100);
