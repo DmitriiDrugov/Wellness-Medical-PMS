@@ -121,7 +121,7 @@ export default function GuestsPage() {
           </DataState>
         </Card>
 
-        <GuestDetail guest={selected} onEdit={openEdit} onDelete={setDeleting} />
+        <GuestDetail guest={selected} onEdit={openEdit} onDelete={setDeleting} onReload={reload} />
       </div>
 
       <GuestFormModal
@@ -152,15 +152,30 @@ function GuestDetail({
   guest,
   onEdit,
   onDelete,
+  onReload,
 }: {
   guest: Guest | null;
   onEdit: (g: Guest) => void;
   onDelete: (g: Guest) => void;
+  onReload: () => void;
 }) {
   const { data: folios } = useApi<FolioSummary[]>(
     () => (guest ? api.get<FolioSummary[]>("/api/folios", { guestId: guest.id }) : Promise.resolve({ data: [] })),
     [guest?.id],
   );
+
+  const consentMutation = useMutation();
+
+  async function recordGdprConsent() {
+    if (!guest) return;
+    const result = await consentMutation.submit(() =>
+      api.post(`/api/guests/${guest.id}/consents`, {
+        type: "GDPR_DATA_PROCESSING",
+        version: "1.0",
+      }),
+    );
+    if (result !== undefined) onReload();
+  }
 
   if (!guest) {
     return (
@@ -220,7 +235,7 @@ function GuestDetail({
 
       <div className="mt-5">
         <p className="mb-2 text-xs font-semibold uppercase tracking-wide text-on-surface-variant">GDPR Consent</p>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <StatusPill tone={guest.gdprConsentDataProcessing ? "success" : "neutral"}>
             Data processing {guest.gdprConsentDataProcessing ? "✓" : "✗"}
           </StatusPill>
@@ -228,6 +243,21 @@ function GuestDetail({
             Marketing {guest.gdprConsentMarketing ? "✓" : "✗"}
           </StatusPill>
         </div>
+        {!guest.gdprConsentDataProcessing && (
+          <div className="mt-2">
+            <button
+              className="btn-secondary text-xs"
+              onClick={recordGdprConsent}
+              disabled={consentMutation.submitting}
+            >
+              <Icon name="check_circle" className="text-[16px]" />
+              {consentMutation.submitting ? "Recording…" : "Record GDPR consent"}
+            </button>
+            {consentMutation.error && (
+              <p className="mt-1 text-xs text-error">{consentMutation.error}</p>
+            )}
+          </div>
+        )}
       </div>
     </Card>
   );
