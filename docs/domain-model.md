@@ -49,6 +49,12 @@ erDiagram
     TreatmentAppointment ||--o{ TreatmentRecord : "documented by"
     Staff ||--o{ TreatmentRecord : "authors/signs"
     TreatmentRecord ||--o| TreatmentRecord : "addendum supersedes"
+
+    GuestAccount ||--|| Guest : "credentials for"
+    Conversation ||--|| Guest : "belongs to"
+    Conversation }o--|| Property : "within"
+    Conversation }o--o| Staff : "assigned to"
+    Conversation ||--o{ Message : contains
 ```
 
 ## Data planes
@@ -59,6 +65,7 @@ erDiagram
 | **Financial** | Folio, FolioLineItem, Payment |
 | **Compliance/Audit** | AuditLog (append-only), ComplianceEvent |
 | **Clinical** (Phase 6) | FormTemplate, IntakeFormSubmission, Consent, TreatmentRecord |
+| **Messaging** (Phase 10) | GuestAccount (`src/modules/guest-auth`), Conversation, Message (both `src/modules/messaging`) |
 
 ## Key invariants (enforced in the service layer)
 
@@ -74,3 +81,10 @@ erDiagram
 - **Clinical immutability:** a `TreatmentRecord` is immutable once `SIGNED`; corrections are new
   addendum records (`supersededById` → prior record); the original is never mutated. Every
   clinical read/write is audit-logged (`AuditAction.READ` for reads).
+- **One conversation per guest:** `Conversation.guestId` is `@unique`; created lazily on first guest
+  message or fetch. A guest message to a `CLOSED` conversation auto-reopens it; a staff message to a
+  closed conversation returns 409.
+- **AI authority:** the AI acts as a seeded `Staff` row with role `AI_AGENT`; it is subject to the
+  same RBAC, conflict-detection, and append-only audit as human staff. It is denied
+  `folio:*`, all `clinical:*`/`consent:*`, `*:delete`, `staff:manage`, `compliance:manage`,
+  `report:read`. Every AI message and AI booking is an `AuditLog` row with the `AI_AGENT` actor.

@@ -35,7 +35,7 @@ Required capability per endpoint is shown in brackets; see [RBAC matrix](superpo
 ## Reservations (Phase 2)
 | Method | Path | Capability | Body / Notes |
 |---|---|---|---|
-| GET | `/api/reservations` | reservation:read | query: `page, pageSize, status` |
+| GET | `/api/reservations` | reservation:read | query: `page, pageSize, status, roomId?, from?, to?` (`from`+`to` together → reservations overlapping `[from,to)`, for the calendar grid) |
 | POST | `/api/reservations` | reservation:write | `{ guestId, roomTypeId, roomId?, checkInDate, checkOutDate, adults?, children?, ratePerNightMinor?, notes? }` |
 | GET | `/api/reservations/:id` | reservation:read | |
 | PATCH | `/api/reservations/:id` | reservation:write | dates/occupancy/notes; re-checks room conflict |
@@ -58,7 +58,7 @@ Required capability per endpoint is shown in brackets; see [RBAC matrix](superpo
 ## Appointments (Phase 3)
 | Method | Path | Capability | Body / Notes |
 |---|---|---|---|
-| GET | `/api/appointments` | appointment:read | query: `page, pageSize, therapistId?, guestId?, status?` (therapists see only their own) |
+| GET | `/api/appointments` | appointment:read | query: `page, pageSize, therapistId?, guestId?, resourceId?, status?, from?, to?` (`from`+`to` together → appointments overlapping `[from,to)`, for the day grid; therapists see only their own) |
 | POST | `/api/appointments` | appointment:write | `{ guestId, treatmentId, therapistId, resourceId, startTime, reservationId?, notes? }` — 409 on therapist/resource double-booking |
 | GET | `/api/appointments/:id` | appointment:read | |
 | PATCH | `/api/appointments/:id` | appointment:write | reschedule/reassign (SCHEDULED only); re-checks conflicts |
@@ -69,6 +69,7 @@ Required capability per endpoint is shown in brackets; see [RBAC matrix](superpo
 ## Folio & Payments (Phase 4)
 | Method | Path | Capability | Body / Notes |
 |---|---|---|---|
+| GET | `/api/folios` | folio:read | query: `reservationId?` or `guestId?` (one required) → folio summaries with totals, for navigating to a folio |
 | GET | `/api/folios/:id` | folio:read | folio + line items + payments + `chargesMinor/paymentsMinor/balanceMinor` |
 | POST | `/api/folios/:id/charges` | folio:write | `{ description, quantity?, unitPriceMinor }` (ADJUSTMENT) |
 | POST | `/api/folios/:id/charge-package` | folio:write | `{ packageId }` → PACKAGE line |
@@ -81,6 +82,7 @@ Required capability per endpoint is shown in brackets; see [RBAC matrix](superpo
 | GET | `/api/reports/occupancy` | report:read | query: `from, to` → rooms, booked room-nights, occupancyRate |
 | GET | `/api/reports/revenue` | report:read | query: `from, to` → charges by type + payments (minor units) |
 | GET | `/api/reports/treatment-utilization` | report:read | query: `from, to` → per-treatment counts/minutes/revenue |
+| GET | `/api/audit-logs` | audit:read | query: `page, pageSize, actorStaffId?, action?, entityType?, from?, to?` → append-only audit trail (read-only; MANAGER/ADMIN) |
 | POST | `/api/compliance/ntak/daily-report` | compliance:manage | `{ date }` → builds + logs NTAK payload, persists ComplianceEvent |
 | POST | `/api/compliance/nav/invoice` | compliance:manage | `{ folioId }` → builds + logs NAV invoice payload, persists ComplianceEvent |
 | GET | `/api/compliance/events` | compliance:manage | logged compliance events |
@@ -107,3 +109,32 @@ housekeeping has no access. Every clinical read/write is audit-logged.
 | PATCH | `/api/treatment-records/:id` | clinical:write | DRAFT only; 409 once signed |
 | POST | `/api/treatment-records/:id/sign` | clinical:write | human signature locks the record |
 | POST | `/api/treatment-records/:id/addendum` | clinical:write | new DRAFT superseding a signed record |
+
+## Messaging & Guest Auth (Phase 10, revised)
+
+Guests are authorized by **ownership** (own conversation only), not the RBAC matrix; the guest access
+token carries `guestId` instead of a role. The AI receptionist books via the normal
+reservation/appointment endpoints as a least-privilege `AI_AGENT` principal; every AI action is
+append-only audit-logged with that actor.
+
+### Guest auth
+| Method | Path | Capability | Body / Notes |
+|---|---|---|---|
+| POST | `/api/guest-auth/login` | public | `{ email, password }` → `{ accessToken, refreshToken, tokenType, expiresIn }` |
+| POST | `/api/guest-auth/refresh` | public | `{ refreshToken }` → new token pair (rotates refresh token) |
+| POST | `/api/guest-auth/logout` | guest | `{ refreshToken }` → revokes it |
+| POST | `/api/guest-auth/set-password` | invite token | `{ inviteToken, password }` → activates GuestAccount |
+| GET | `/api/guest/me` | guest | own guest profile |
+
+### Conversations & messages
+| Method | Path | Capability | Body / Notes |
+|---|---|---|---|
+| GET | `/api/conversations/me` | guest | own conversation (created lazily on first fetch) |
+| GET | `/api/conversations/me/messages` | guest | own messages; query: `since=<ISO\|id>` (polling cursor) |
+| POST | `/api/conversations/me/messages` | guest | `{ body }` — appends a GUEST message; if the conversation is AI-handled, triggers an AI turn synchronously |
+| GET | `/api/conversations` | messaging:read | staff list; query: `handling?, status?, page, pageSize`; therapists see only conversations belonging to guests they have an appointment with |
+| GET | `/api/conversations/:id` | messaging:read | staff; therapist-scoped |
+| GET | `/api/conversations/:id/messages` | messaging:read | query: `since=<ISO\|id>` (polling cursor) |
+| POST | `/api/conversations/:id/messages` | messaging:write | staff reply: `{ body }` → STAFF message |
+| POST | `/api/conversations/:id/take-over` | messaging:write | switches handling to HUMAN, assigns requesting staff member; audited STATE_CHANGE |
+| POST | `/api/conversations/:id/release` | messaging:write | switches handling back to AI, clears assignment; audited STATE_CHANGE |
