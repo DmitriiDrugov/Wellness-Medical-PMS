@@ -46,3 +46,29 @@ export function hashRefreshToken(raw: string): string {
 export function refreshTokenExpiry(): Date {
   return new Date(Date.now() + config.jwt.refreshTtlSeconds * 1000);
 }
+
+/** Claims carried in a GUEST access token. */
+export interface GuestTokenClaims {
+  sub: string; // guestAccountId
+  guestId: string;
+  propertyId: string;
+  kind: "guest";
+}
+
+export function issueGuestAccessToken(claims: Omit<GuestTokenClaims, "kind">): string {
+  return jwt.sign({ ...claims, kind: "guest" }, config.jwt.accessSecret, {
+    expiresIn: config.jwt.accessTtlSeconds,
+  });
+}
+
+export function verifyGuestAccessToken(token: string): GuestTokenClaims {
+  try {
+    const decoded = jwt.verify(token, config.jwt.accessSecret);
+    if (typeof decoded === "string") throw new Error("Unexpected token payload");
+    const d = decoded as jwt.JwtPayload & Partial<GuestTokenClaims>;
+    if (!d.sub || !d.guestId || !d.propertyId || d.kind !== "guest") throw new Error("Missing claims");
+    return { sub: d.sub, guestId: d.guestId, propertyId: d.propertyId, kind: "guest" };
+  } catch {
+    throw new UnauthorizedError("Invalid or expired guest token");
+  }
+}

@@ -1,23 +1,44 @@
 import type { StaffRole } from "@prisma/client";
 import { UnauthorizedError } from "@/platform/errors";
-import { verifyAccessToken } from "@/platform/auth/jwt";
+import { verifyAccessToken, verifyGuestAccessToken } from "@/platform/auth/jwt";
 
-/** The authenticated caller, derived from the access token (stateless). */
-export interface AuthContext {
+export interface StaffAuthContext {
+  kind: "staff";
   staffId: string;
   role: StaffRole;
   propertyId: string;
 }
+export interface GuestAuthContext {
+  kind: "guest";
+  guestAccountId: string;
+  guestId: string;
+  propertyId: string;
+}
+export type AuthContext = StaffAuthContext;
 
-/**
- * Extract and verify the Bearer access token from a request. Throws
- * UnauthorizedError if the header is missing/malformed or the token is invalid.
- */
-export function requireAuth(req: Request): AuthContext {
+function bearer(req: Request): string {
   const header = req.headers.get("authorization") ?? req.headers.get("Authorization");
   if (!header || !header.startsWith("Bearer ")) {
     throw new UnauthorizedError("Missing or malformed Authorization header");
   }
-  const claims = verifyAccessToken(header.slice("Bearer ".length).trim());
-  return { staffId: claims.sub, role: claims.role, propertyId: claims.propertyId };
+  return header.slice("Bearer ".length).trim();
+}
+
+/** Staff principal (unchanged signature for existing callers). */
+export function requireAuth(req: Request): StaffAuthContext {
+  const claims = verifyAccessToken(bearer(req));
+  return { kind: "staff", staffId: claims.sub, role: claims.role, propertyId: claims.propertyId };
+}
+
+export const requireStaff = requireAuth;
+
+/** Guest principal — authorized by ownership, not the RBAC matrix. */
+export function requireGuest(req: Request): GuestAuthContext {
+  const claims = verifyGuestAccessToken(bearer(req));
+  return {
+    kind: "guest",
+    guestAccountId: claims.sub,
+    guestId: claims.guestId,
+    propertyId: claims.propertyId,
+  };
 }
