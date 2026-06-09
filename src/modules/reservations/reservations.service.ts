@@ -50,6 +50,9 @@ export const reservationsService = {
       skip: (query.page - 1) * query.pageSize,
       take: query.pageSize,
       status: query.status,
+      roomId: query.roomId,
+      from: query.from,
+      to: query.to,
     });
     return { items, total, page: query.page, pageSize: query.pageSize };
   },

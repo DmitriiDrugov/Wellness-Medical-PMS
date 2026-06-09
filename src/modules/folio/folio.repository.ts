@@ -24,6 +24,19 @@ export const folioRepository = {
     return prisma.folio.findUnique({ where: { reservationId } });
   },
 
+  /** Folio summaries (with line items + payments for totals) by reservation or guest. */
+  listSummaries(params: { propertyId: string; reservationId?: string; guestId?: string }) {
+    return prisma.folio.findMany({
+      where: {
+        propertyId: params.propertyId,
+        ...(params.reservationId ? { reservationId: params.reservationId } : {}),
+        ...(params.guestId ? { guestId: params.guestId } : {}),
+      },
+      orderBy: { openedAt: "desc" },
+      include: { lineItems: { select: { amountMinor: true } }, payments: { select: { amountMinor: true } } },
+    });
+  },
+
   addLineItem(data: Prisma.FolioLineItemUncheckedCreateInput): Promise<FolioLineItem> {
     return prisma.folioLineItem.create({ data });
   },

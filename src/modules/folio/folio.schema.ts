@@ -16,6 +16,17 @@ export const addPaymentSchema = z.object({
   reference: z.string().optional(),
 });
 
+export const listFoliosQuerySchema = z
+  .object({
+    reservationId: z.string().min(1).optional(),
+    guestId: z.string().min(1).optional(),
+  })
+  .refine((v) => v.reservationId || v.guestId, {
+    message: "Provide reservationId or guestId",
+    path: ["reservationId"],
+  });
+
 export type AddChargeInput = z.infer<typeof addChargeSchema>;
 export type ChargePackageInput = z.infer<typeof chargePackageSchema>;
 export type AddPaymentInput = z.infer<typeof addPaymentSchema>;
+export type ListFoliosQuery = z.infer<typeof listFoliosQuerySchema>;

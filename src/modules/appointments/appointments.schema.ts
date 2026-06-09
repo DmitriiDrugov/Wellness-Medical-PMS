@@ -18,13 +18,26 @@ export const updateAppointmentSchema = z.object({
   notes: z.string().optional(),
 });
 
-export const listAppointmentsQuerySchema = z.object({
-  page: z.coerce.number().int().min(1).default(1),
-  pageSize: z.coerce.number().int().min(1).max(100).default(20),
-  therapistId: z.string().optional(),
-  guestId: z.string().optional(),
-  status: z.enum(["SCHEDULED", "COMPLETED", "CANCELLED", "NO_SHOW"]).optional(),
-});
+export const listAppointmentsQuerySchema = z
+  .object({
+    page: z.coerce.number().int().min(1).default(1),
+    pageSize: z.coerce.number().int().min(1).max(100).default(20),
+    therapistId: z.string().optional(),
+    guestId: z.string().optional(),
+    resourceId: z.string().optional(),
+    status: z.enum(["SCHEDULED", "COMPLETED", "CANCELLED", "NO_SHOW"]).optional(),
+    // Day/range window: when both are given, return appointments overlapping [from, to).
+    from: z.coerce.date().optional(),
+    to: z.coerce.date().optional(),
+  })
+  .refine((v) => !(v.from && v.to) || v.to > v.from, {
+    message: "to must be after from",
+    path: ["to"],
+  })
+  .refine((v) => (v.from ? !!v.to : !v.to), {
+    message: "from and to must be provided together",
+    path: ["from"],
+  });
 
 export const appointmentAvailabilityQuerySchema = z
   .object({

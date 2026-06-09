@@ -42,13 +42,26 @@ export const availabilityQuerySchema = z
   })
   .refine((v) => v.to > v.from, { message: "to must be after from", path: ["to"] });
 
-export const listReservationsQuerySchema = z.object({
-  page: z.coerce.number().int().min(1).default(1),
-  pageSize: z.coerce.number().int().min(1).max(100).default(20),
-  status: z
-    .enum(["PENDING", "CONFIRMED", "CHECKED_IN", "CHECKED_OUT", "CANCELLED", "NO_SHOW"])
-    .optional(),
-});
+export const listReservationsQuerySchema = z
+  .object({
+    page: z.coerce.number().int().min(1).default(1),
+    pageSize: z.coerce.number().int().min(1).max(100).default(20),
+    status: z
+      .enum(["PENDING", "CONFIRMED", "CHECKED_IN", "CHECKED_OUT", "CANCELLED", "NO_SHOW"])
+      .optional(),
+    roomId: z.string().min(1).optional(),
+    // Calendar window: when both are given, return reservations overlapping [from, to).
+    from: z.coerce.date().optional(),
+    to: z.coerce.date().optional(),
+  })
+  .refine((v) => !(v.from && v.to) || v.to > v.from, {
+    message: "to must be after from",
+    path: ["to"],
+  })
+  .refine((v) => (v.from ? !!v.to : !v.to), {
+    message: "from and to must be provided together",
+    path: ["from"],
+  });
 
 export type CreateReservationInput = z.infer<typeof createReservationSchema>;
 export type UpdateReservationInput = z.infer<typeof updateReservationSchema>;

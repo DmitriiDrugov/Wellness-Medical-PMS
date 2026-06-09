@@ -72,7 +72,10 @@ export const appointmentsService = {
       take: query.pageSize,
       therapistId,
       guestId: query.guestId,
+      resourceId: query.resourceId,
       status: query.status,
+      from: query.from,
+      to: query.to,
     });
     return { items, total, page: query.page, pageSize: query.pageSize };
   },

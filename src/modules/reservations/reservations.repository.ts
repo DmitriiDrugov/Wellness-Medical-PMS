@@ -20,10 +20,23 @@ export const reservationsRepository = {
     });
   },
 
-  async list(params: { propertyId: string; skip: number; take: number; status?: ReservationStatus }) {
+  async list(params: {
+    propertyId: string;
+    skip: number;
+    take: number;
+    status?: ReservationStatus;
+    roomId?: string;
+    from?: Date;
+    to?: Date;
+  }) {
     const where: Prisma.ReservationWhereInput = {
       propertyId: params.propertyId,
       ...(params.status ? { status: params.status } : {}),
+      ...(params.roomId ? { roomId: params.roomId } : {}),
+      // Half-open overlap with the requested [from, to) window.
+      ...(params.from && params.to
+        ? { checkInDate: { lt: params.to }, checkOutDate: { gt: params.from } }
+        : {}),
     };
     const [items, total] = await Promise.all([
       prisma.reservation.findMany({

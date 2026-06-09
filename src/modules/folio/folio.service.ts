@@ -6,7 +6,7 @@ import { ConflictError, NotFoundError } from "@/platform/errors";
 import { packagesService } from "@/modules/packages/packages.service";
 import { folioRepository } from "@/modules/folio/folio.repository";
 import { sumAmounts } from "@/modules/folio/money";
-import type { AddChargeInput, ChargePackageInput, AddPaymentInput } from "@/modules/folio/folio.schema";
+import type { AddChargeInput, ChargePackageInput, AddPaymentInput, ListFoliosQuery } from "@/modules/folio/folio.schema";
 
 /** Actor identity passed to internal posting methods (no capability check there). */
 type Actor = Pick<AuthContext, "staffId" | "propertyId">;
@@ -27,6 +27,22 @@ export const folioService = {
   async get(ctx: AuthContext, id: string) {
     requireCapability(ctx.role, "folio:read");
     return withTotals(await loadFolioOrThrow(id, ctx.propertyId));
+  },
+
+  /** Resolve folio summaries (id + totals) by reservation or guest, so the UI can
+   *  navigate to a folio without already knowing its id. */
+  async list(ctx: AuthContext, query: ListFoliosQuery) {
+    requireCapability(ctx.role, "folio:read");
+    const folios = await folioRepository.listSummaries({
+      propertyId: ctx.propertyId,
+      reservationId: query.reservationId,
+      guestId: query.guestId,
+    });
+    return folios.map(({ lineItems, payments, ...rest }) => {
+      const chargesMinor = sumAmounts(lineItems);
+      const paymentsMinor = sumAmounts(payments);
+      return { ...rest, chargesMinor, paymentsMinor, balanceMinor: chargesMinor - paymentsMinor };
+    });
   },
 
   async addCharge(ctx: AuthContext, id: string, input: AddChargeInput) {
