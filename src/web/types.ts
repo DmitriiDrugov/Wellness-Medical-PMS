@@ -155,3 +155,16 @@ export interface MessageDto {
   actionId: string | null;
   createdAt: string;
 }
+
+export interface StaffRef {
+  id: string;
+  firstName: string;
+  lastName: string;
+  role: string;
+}
+export interface RoomListItem {
+  id: string;
+  number: string;
+  roomTypeId: string;
+  status: string;
+}
