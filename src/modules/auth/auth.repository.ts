@@ -1,4 +1,4 @@
-import type { Staff } from "@prisma/client";
+import type { Staff, StaffRole } from "@prisma/client";
 import { prisma } from "@/platform/db";
 
 /**
@@ -37,5 +37,16 @@ export const authRepository = {
 
   findAiAgent(propertyId: string) {
     return prisma.staff.findFirst({ where: { propertyId, role: "AI_AGENT", isActive: true } });
+  },
+
+  listStaff(params: { propertyId: string; role?: StaffRole }) {
+    return prisma.staff.findMany({
+      where: {
+        propertyId: params.propertyId,
+        isActive: true,
+        ...(params.role ? { role: params.role } : {}),
+      },
+      orderBy: { lastName: "asc" },
+    });
   },
 };

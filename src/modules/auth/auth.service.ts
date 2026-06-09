@@ -1,5 +1,6 @@
-import type { Staff } from "@prisma/client";
+import type { Staff, StaffRole } from "@prisma/client";
 import { config } from "@/platform/config";
+import { requireCapability } from "@/platform/rbac";
 import { UnauthorizedError, NotFoundError } from "@/platform/errors";
 import { recordAudit } from "@/platform/audit";
 import {
@@ -90,5 +91,11 @@ export const authService = {
     const staff = await authRepository.findStaffById(staffId);
     if (!staff) throw new NotFoundError("Staff not found");
     return toProfile(staff);
+  },
+
+  async listStaff(ctx: { role: StaffRole; propertyId: string }, role?: StaffRole): Promise<StaffProfile[]> {
+    requireCapability(ctx.role, "appointment:read");
+    const rows = await authRepository.listStaff({ propertyId: ctx.propertyId, role });
+    return rows.map(toProfile);
   },
 };
