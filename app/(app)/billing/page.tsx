@@ -6,6 +6,7 @@ import { useApi } from "@/web/use-api";
 import type { Reservation, Folio, FolioSummary } from "@/web/types";
 import { PageHeader, Card, StatusPill, Icon, DataState } from "@/web/components/ui";
 import { fullName, formatDate, formatMinor } from "@/web/format";
+import { FolioActions } from "./FolioActions";
 
 export default function BillingPage() {
   const { data: reservations, loading } = useApi<Reservation[]>(
@@ -75,6 +76,7 @@ function FolioPanel({ reservationId }: { reservationId: string }) {
     () => (folioId ? api.get<Folio>(`/api/folios/${folioId}`) : Promise.resolve({ data: null })),
     [folioId],
   );
+  const reloadFolio = folio.reload;
 
   if (summaries.loading) return <Card>Loading folio…</Card>;
   if (!folioId) {
@@ -99,6 +101,9 @@ function FolioPanel({ reservationId }: { reservationId: string }) {
       <DataState loading={folio.loading} error={folio.error}>
         {f && (
           <>
+            <div className="border-b border-outline-variant/50 px-5 py-3">
+              <FolioActions folio={f} onChanged={reloadFolio} />
+            </div>
             <table className="w-full text-left text-sm">
               <thead>
                 <tr className="border-b border-outline-variant/50 text-xs font-semibold uppercase tracking-wide text-on-surface-variant">
