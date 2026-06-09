@@ -80,7 +80,7 @@ const MATRIX: Record<StaffRole, Capability[]> = {
     "submission:write",
     "clinical:read", "clinical:write",
     "consent:write", "consent:read", "consent:status:read",
-    "messaging:read",
+    "messaging:read", "messaging:write",
   ],
   HOUSEKEEPING: [
     "housekeeping:read", "housekeeping:manage",

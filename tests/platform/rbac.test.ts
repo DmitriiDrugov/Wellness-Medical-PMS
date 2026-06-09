@@ -59,7 +59,9 @@ describe("RBAC capability matrix", () => {
     expect(can("RECEPTION", "messaging:write")).toBe(true);
     expect(can("MANAGER", "messaging:read")).toBe(true);
     expect(can("THERAPIST", "messaging:read")).toBe(true); // service adds own-guest scope
+    expect(can("THERAPIST", "messaging:write")).toBe(true); // reply to own guests
     expect(can("HOUSEKEEPING", "messaging:read")).toBe(false);
+    expect(can("HOUSEKEEPING", "messaging:write")).toBe(false);
   });
 
   it("gives AI_AGENT a least-privilege booking zone and nothing destructive/financial", () => {
