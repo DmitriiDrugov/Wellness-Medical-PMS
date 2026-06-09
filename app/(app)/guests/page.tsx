@@ -3,20 +3,45 @@
 import { useState } from "react";
 import { api } from "@/web/api-client";
 import { useApi } from "@/web/use-api";
+import { useMutation } from "@/web/use-mutation";
 import type { Guest, FolioSummary } from "@/web/types";
 import { PageHeader, Card, StatusPill, Icon, DataState } from "@/web/components/ui";
 import { fullName, initials, formatDate, formatMinor } from "@/web/format";
+import { GuestFormModal } from "./GuestFormModal";
+import { ConfirmDialog } from "@/web/components/ConfirmDialog";
 
 export default function GuestsPage() {
   const [search, setSearch] = useState("");
   const [selectedId, setSelectedId] = useState<string | null>(null);
 
-  const { data, meta, loading, error } = useApi<Guest[]>(
+  const { data, meta, loading, error, reload } = useApi<Guest[]>(
     () => api.get<Guest[]>("/api/guests", { pageSize: 50, search: search || undefined }),
     [search],
   );
   const guests = data ?? [];
   const selected = guests.find((g) => g.id === selectedId) ?? null;
+
+  const [formOpen, setFormOpen] = useState(false);
+  const [editing, setEditing] = useState<Guest | null>(null);
+  const [deleting, setDeleting] = useState<Guest | null>(null);
+  const del = useMutation();
+
+  function openCreate() {
+    setEditing(null);
+    setFormOpen(true);
+  }
+  function openEdit(g: Guest) {
+    setEditing(g);
+    setFormOpen(true);
+  }
+  async function confirmDelete() {
+    if (!deleting) return;
+    const ok = await del.submit(() => api.del(`/api/guests/${deleting.id}`));
+    if (ok !== undefined) {
+      setDeleting(null);
+      reload();
+    }
+  }
 
   return (
     <div>
@@ -24,7 +49,7 @@ export default function GuestsPage() {
         title="Guest Profiles"
         subtitle={meta ? `${meta.total} total guests` : "Guest directory"}
         actions={
-          <button className="btn-primary">
+          <button className="btn-primary" onClick={openCreate}>
             <Icon name="person_add" className="text-[20px]" /> New Guest
           </button>
         }
@@ -96,13 +121,42 @@ export default function GuestsPage() {
           </DataState>
         </Card>
 
-        <GuestDetail guest={selected} />
+        <GuestDetail guest={selected} onEdit={openEdit} onDelete={setDeleting} />
       </div>
+
+      <GuestFormModal
+        open={formOpen}
+        guest={editing}
+        onClose={() => setFormOpen(false)}
+        onSaved={() => {
+          setFormOpen(false);
+          reload();
+        }}
+      />
+      <ConfirmDialog
+        open={deleting !== null}
+        title="Delete guest"
+        message={`Soft-delete ${deleting?.firstName ?? ""} ${deleting?.lastName ?? ""}? They will be hidden from lists (GDPR erasure).`}
+        confirmLabel="Delete"
+        danger
+        busy={del.submitting}
+        error={del.error}
+        onConfirm={confirmDelete}
+        onClose={() => setDeleting(null)}
+      />
     </div>
   );
 }
 
-function GuestDetail({ guest }: { guest: Guest | null }) {
+function GuestDetail({
+  guest,
+  onEdit,
+  onDelete,
+}: {
+  guest: Guest | null;
+  onEdit: (g: Guest) => void;
+  onDelete: (g: Guest) => void;
+}) {
   const { data: folios } = useApi<FolioSummary[]>(
     () => (guest ? api.get<FolioSummary[]>("/api/folios", { guestId: guest.id }) : Promise.resolve({ data: [] })),
     [guest?.id],
@@ -131,6 +185,15 @@ function GuestDetail({ guest }: { guest: Guest | null }) {
           <h2 className="text-lg font-semibold text-on-surface">{fullName(guest.firstName, guest.lastName)}</h2>
           <p className="text-xs text-on-surface-variant">ID: {guest.id.slice(0, 8)}</p>
         </div>
+      </div>
+
+      <div className="mt-3 flex gap-2">
+        <button className="btn-secondary flex-1" onClick={() => onEdit(guest)}>
+          <Icon name="edit" className="text-[18px]" /> Edit
+        </button>
+        <button className="btn-ghost text-error" onClick={() => onDelete(guest)}>
+          <Icon name="delete" className="text-[18px]" /> Delete
+        </button>
       </div>
 
       <div className="mt-4 grid grid-cols-2 gap-3">
