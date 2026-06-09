@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { api } from "@/web/api-client";
 import { useMutation } from "@/web/use-mutation";
 import { Modal } from "@/web/components/Modal";
@@ -29,6 +29,14 @@ function initial(g: Guest | null) {
 export function GuestFormModal({ open, guest, onClose, onSaved }: Props) {
   const { submit, submitting, error, fieldErrors, reset } = useMutation();
   const [form, setForm] = useState(() => initial(guest));
+
+  useEffect(() => {
+    if (open) {
+      setForm(initial(guest));
+      reset();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, guest?.id]);
 
   function set<K extends keyof ReturnType<typeof initial>>(k: K, v: ReturnType<typeof initial>[K]) {
     setForm((f) => ({ ...f, [k]: v }));
