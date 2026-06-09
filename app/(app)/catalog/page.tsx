@@ -1,14 +1,21 @@
 "use client";
 
+import { useState } from "react";
 import { api } from "@/web/api-client";
 import { useApi } from "@/web/use-api";
 import type { Treatment, ServicePackage } from "@/web/types";
 import { PageHeader, Card, StatusPill, Icon, DataState } from "@/web/components/ui";
 import { formatMinor } from "@/web/format";
+import { TreatmentFormModal } from "./TreatmentFormModal";
+import { PackageFormModal } from "./PackageFormModal";
 
 export default function CatalogPage() {
   const treatments = useApi<Treatment[]>(() => api.get<Treatment[]>("/api/treatments", { pageSize: 100 }), []);
   const packages = useApi<ServicePackage[]>(() => api.get<ServicePackage[]>("/api/packages", { pageSize: 100 }), []);
+
+  const [treatmentOpen, setTreatmentOpen] = useState(false);
+  const [packageOpen, setPackageOpen] = useState(false);
+  const [editingTreatment, setEditingTreatment] = useState<Treatment | null>(null);
 
   return (
     <div>
@@ -17,10 +24,10 @@ export default function CatalogPage() {
         subtitle="Manage wellness packages and à-la-carte treatments."
         actions={
           <>
-            <button className="btn-secondary">
+            <button className="btn-secondary" onClick={() => setPackageOpen(true)}>
               <Icon name="library_add" className="text-[20px]" /> New Package
             </button>
-            <button className="btn-primary">
+            <button className="btn-primary" onClick={() => { setEditingTreatment(null); setTreatmentOpen(true); }}>
               <Icon name="add" className="text-[20px]" /> New Treatment
             </button>
           </>
@@ -76,6 +83,7 @@ export default function CatalogPage() {
                   <th className="px-4 py-3">Resource</th>
                   <th className="px-4 py-3">Price</th>
                   <th className="px-4 py-3">Status</th>
+                  <th className="px-4 py-3"></th>
                 </tr>
               </thead>
               <tbody>
@@ -91,6 +99,15 @@ export default function CatalogPage() {
                     <td className="px-4 py-3">
                       <StatusPill tone={t.active ? "success" : "neutral"}>{t.active ? "Active" : "Inactive"}</StatusPill>
                     </td>
+                    <td className="px-4 py-3">
+                      <button
+                        className="btn-ghost px-2"
+                        aria-label="Edit treatment"
+                        onClick={() => { setEditingTreatment(t); setTreatmentOpen(true); }}
+                      >
+                        <Icon name="edit" className="text-[18px]" />
+                      </button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -98,6 +115,22 @@ export default function CatalogPage() {
           </DataState>
         </Card>
       </section>
+
+      {treatmentOpen && (
+        <TreatmentFormModal
+          open={treatmentOpen}
+          treatment={editingTreatment}
+          onClose={() => setTreatmentOpen(false)}
+          onSaved={() => { setTreatmentOpen(false); treatments.reload(); }}
+        />
+      )}
+      {packageOpen && (
+        <PackageFormModal
+          open={packageOpen}
+          onClose={() => setPackageOpen(false)}
+          onSaved={() => { setPackageOpen(false); packages.reload(); }}
+        />
+      )}
     </div>
   );
 }
