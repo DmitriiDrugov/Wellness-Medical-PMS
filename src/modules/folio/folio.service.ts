@@ -70,6 +70,7 @@ export const folioService = {
       after: item,
       metadata: { folioId: id },
     });
+    eventBus.emit({ type: "folio.charged", entity: "folio", entityId: id, propertyId: ctx.propertyId });
     return this.get(ctx, id);
   },
 
@@ -98,6 +99,7 @@ export const folioService = {
       after: item,
       metadata: { folioId: id, packageId: pkg.id },
     });
+    eventBus.emit({ type: "folio.charged", entity: "folio", entityId: id, propertyId: ctx.propertyId });
     return this.get(ctx, id);
   },
 
@@ -121,6 +123,7 @@ export const folioService = {
       after: payment,
       metadata: { folioId: id },
     });
+    eventBus.emit({ type: "folio.payment", entity: "folio", entityId: id, propertyId: ctx.propertyId });
     return this.get(ctx, id);
   },
 
@@ -143,6 +146,7 @@ export const folioService = {
       before: { status: "OPEN" },
       after: { status: "CLOSED" },
     });
+    eventBus.emit({ type: "folio.closed", entity: "folio", entityId: id, propertyId: ctx.propertyId });
     return this.get(ctx, id);
   },
 

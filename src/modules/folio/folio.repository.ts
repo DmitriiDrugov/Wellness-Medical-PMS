@@ -46,6 +46,28 @@ export const folioRepository = {
     return prisma.folioLineItem.deleteMany({ where: { folioId, type, sourceType, sourceId } });
   },
 
+  /** Guest-portal view: the guest's own folios with whitelisted bill detail. */
+  listForGuestPortal(propertyId: string, guestId: string) {
+    return prisma.folio.findMany({
+      where: { propertyId, guestId },
+      orderBy: { openedAt: "desc" },
+      select: {
+        id: true,
+        status: true,
+        openedAt: true,
+        closedAt: true,
+        lineItems: {
+          orderBy: { createdAt: "asc" },
+          select: { id: true, type: true, description: true, quantity: true, amountMinor: true, createdAt: true },
+        },
+        payments: {
+          orderBy: { paidAt: "asc" },
+          select: { id: true, amountMinor: true, method: true, paidAt: true },
+        },
+      },
+    });
+  },
+
   /** Property tourist-tax configuration. */
   taxConfig(propertyId: string) {
     return prisma.property.findUnique({
