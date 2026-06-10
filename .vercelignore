@@ -1,0 +1,7 @@
+.env
+.env*.local
+.next
+node_modules
+tests
+ui/stitch-export/screenshots
+docs
