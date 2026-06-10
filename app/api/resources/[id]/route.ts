@@ -3,15 +3,15 @@ import { requireAuth } from "@/platform/auth/context";
 import { updateResourceSchema } from "@/modules/resources/resources.schema";
 import { resourcesService } from "@/modules/resources/resources.service";
 
-type Params = { params: { id: string } };
+type Params = { params: Promise<{ id: string }> };
 
 export const GET = handle(async (req, { params }: Params) => {
   const ctx = requireAuth(req);
-  return ok(await resourcesService.get(ctx, params.id));
+  return ok(await resourcesService.get(ctx, (await params).id));
 });
 
 export const PATCH = handle(async (req, { params }: Params) => {
   const ctx = requireAuth(req);
   const input = updateResourceSchema.parse(await parseJson(req));
-  return ok(await resourcesService.update(ctx, params.id, input));
+  return ok(await resourcesService.update(ctx, (await params).id, input));
 });

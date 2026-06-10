@@ -1,6 +1,145 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@plugin "tailwindcss-animate";
+@plugin "tailwindcss-react-aria-components";
+
+/*
+ * Untitled UI design system, themed with the app's teal wellness brand.
+ *
+ * Two layers live here:
+ *  1. Raw scales — Untitled UI's `gray` + status ramps, and a `brand` (teal) ramp.
+ *  2. A semantic "bridge": the app's existing token names (surface, on-surface,
+ *     primary, outline-variant, …) re-pointed at the scales above, so existing
+ *     markup renders as Untitled UI without a line-by-line rewrite. Old `primary`
+ *     (teal) maps to `brand`; surfaces/neutrals map to the gray scale.
+ */
+@theme {
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Inter", ui-sans-serif, system-ui, sans-serif;
+
+  /* ---- Brand (teal) ---- */
+  --color-brand-25: #f3fbf9;
+  --color-brand-50: #dbf5ef;
+  --color-brand-100: #b7ebe0;
+  --color-brand-200: #86d5c9;
+  --color-brand-300: #56bcae;
+  --color-brand-400: #2f9d8e;
+  --color-brand-500: #0b8275;
+  --color-brand-600: #05685f;
+  --color-brand-700: #045049;
+  --color-brand-800: #033f3a;
+  --color-brand-900: #00201d;
+  --color-brand-950: #001512;
+
+  /* ---- Gray (Untitled UI) ---- */
+  --color-gray-25: #fcfcfd;
+  --color-gray-50: #f9fafb;
+  --color-gray-100: #f2f4f7;
+  --color-gray-200: #eaecf0;
+  --color-gray-300: #d0d5dd;
+  --color-gray-400: #98a2b3;
+  --color-gray-500: #667085;
+  --color-gray-600: #475467;
+  --color-gray-700: #344054;
+  --color-gray-800: #1d2939;
+  --color-gray-900: #101828;
+  --color-gray-950: #0c111d;
+
+  /* ---- Status ramps (Untitled UI) ---- */
+  --color-error-50: #fef3f2;
+  --color-error-100: #fee4e2;
+  --color-error-200: #fecdca;
+  --color-error-500: #f04438;
+  --color-error-600: #d92d20;
+  --color-error-700: #b42318;
+
+  --color-warning-50: #fffaeb;
+  --color-warning-100: #fef0c7;
+  --color-warning-500: #f79009;
+  --color-warning-600: #dc6803;
+  --color-warning-700: #b54708;
+
+  --color-success-50: #ecfdf3;
+  --color-success-100: #dcfae6;
+  --color-success-500: #17b26a;
+  --color-success-600: #079455;
+  --color-success-700: #067647;
+
+  --color-blue-50: #eff8ff;
+  --color-blue-100: #d1e9ff;
+  --color-blue-500: #2e90fa;
+  --color-blue-600: #1570ef;
+  --color-blue-700: #175cd3;
+
+  /* ---- Semantic bridge: app token names → scales above ---- */
+  --color-background: var(--color-gray-50);
+  --color-on-background: var(--color-gray-900);
+
+  --color-surface: #ffffff;
+  --color-surface-bright: #ffffff;
+  --color-surface-dim: var(--color-gray-200);
+  --color-surface-variant: var(--color-gray-200);
+  --color-surface-tint: var(--color-brand-600);
+  --color-surface-container-lowest: #ffffff;
+  --color-surface-container-low: var(--color-gray-50);
+  --color-surface-container: var(--color-gray-100);
+  --color-surface-container-high: var(--color-gray-200);
+  --color-surface-container-highest: var(--color-gray-200);
+
+  --color-on-surface: var(--color-gray-900);
+  --color-on-surface-variant: var(--color-gray-600);
+  --color-inverse-surface: var(--color-gray-900);
+  --color-inverse-on-surface: var(--color-gray-50);
+
+  --color-outline: var(--color-gray-400);
+  --color-outline-variant: var(--color-gray-200);
+
+  --color-primary: var(--color-brand-600);
+  --color-on-primary: #ffffff;
+  --color-primary-container: var(--color-brand-700);
+  --color-on-primary-container: var(--color-brand-25);
+  --color-inverse-primary: var(--color-brand-200);
+  --color-primary-fixed: var(--color-brand-100);
+  --color-primary-fixed-dim: var(--color-brand-200);
+  --color-on-primary-fixed: var(--color-brand-900);
+  --color-on-primary-fixed-variant: var(--color-brand-700);
+
+  --color-secondary: var(--color-gray-600);
+  --color-on-secondary: #ffffff;
+  --color-secondary-container: var(--color-gray-100);
+  --color-on-secondary-container: var(--color-gray-700);
+  --color-secondary-fixed: var(--color-gray-100);
+  --color-secondary-fixed-dim: var(--color-gray-200);
+  --color-on-secondary-fixed: var(--color-gray-900);
+  --color-on-secondary-fixed-variant: var(--color-gray-700);
+
+  --color-tertiary: var(--color-gray-500);
+  --color-on-tertiary: #ffffff;
+  --color-tertiary-container: var(--color-gray-400);
+  --color-on-tertiary-container: #ffffff;
+  --color-tertiary-fixed: var(--color-gray-100);
+  --color-tertiary-fixed-dim: var(--color-gray-200);
+  --color-on-tertiary-fixed: var(--color-gray-900);
+  --color-on-tertiary-fixed-variant: var(--color-gray-600);
+
+  --color-error: var(--color-error-600);
+  --color-on-error: #ffffff;
+  --color-error-container: var(--color-error-100);
+  --color-on-error-container: var(--color-error-700);
+
+  /* Semantic accents (status pills) */
+  --color-success: var(--color-success-600);
+  --color-warning: var(--color-warning-600);
+  --color-info: var(--color-blue-600);
+
+  /* ---- Elevation (Untitled UI shadows) ---- */
+  --shadow-xs: 0 1px 2px rgba(16, 24, 40, 0.05);
+  --shadow-sm: 0 1px 2px rgba(16, 24, 40, 0.06), 0 1px 3px rgba(16, 24, 40, 0.1);
+  --shadow-card: 0 1px 2px rgba(16, 24, 40, 0.06), 0 1px 3px rgba(16, 24, 40, 0.1);
+  --shadow-elevated: 0 8px 8px -4px rgba(16, 24, 40, 0.03), 0 20px 24px -4px rgba(16, 24, 40, 0.08);
+
+  /* ---- Spacing ---- */
+  --spacing-sidebar: 16.25rem; /* 260px */
+}
 
 :root {
   color-scheme: light;
@@ -11,11 +150,20 @@ body {
   height: 100%;
 }
 
-body {
-  @apply bg-background text-on-surface font-sans antialiased;
+@layer base {
+  /* Tailwind v4 defaults borders to currentColor; restore a sane default. */
+  *,
+  ::after,
+  ::before {
+    border-color: var(--color-outline-variant);
+  }
+
+  body {
+    @apply bg-background text-on-surface font-sans antialiased;
+  }
 }
 
-/* Material Symbols (icon font used by the Stitch mockups). */
+/* Material Symbols (still used by the Icon wrapper until the icon-registry phase). */
 .material-symbols-outlined {
   font-family: "Material Symbols Outlined";
   font-weight: normal;
@@ -34,51 +182,58 @@ body {
 }
 
 @layer components {
-  /* Status pills (DESIGN.md): tinted text on tinted background. */
-  .pill {
-    @apply inline-flex items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-semibold;
-  }
-  .pill-success {
-    @apply bg-success/15 text-success;
-  }
-  .pill-warning {
-    @apply bg-warning/20 text-[#7a4f17];
-  }
-  .pill-info {
-    @apply bg-info/20 text-[#4a5878];
-  }
-  .pill-neutral {
-    @apply bg-surface-container-high text-on-surface-variant;
-  }
-  .pill-primary {
-    @apply bg-primary/10 text-primary;
-  }
-
-  .card {
-    @apply rounded-lg bg-surface-container-lowest shadow-card;
-  }
+  /* ---- Buttons (Untitled UI) ---- */
   .btn-primary {
-    @apply inline-flex items-center justify-center gap-2 rounded bg-primary px-4 py-2 text-sm font-semibold text-on-primary transition hover:bg-primary-container disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-on-primary shadow-xs transition hover:bg-primary-container focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30 disabled:opacity-50;
   }
   .btn-secondary {
-    @apply inline-flex items-center justify-center gap-2 rounded border border-primary px-4 py-2 text-sm font-semibold text-primary transition hover:bg-primary/5 disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg border border-outline-variant bg-surface px-4 py-2.5 text-sm font-semibold text-on-surface shadow-xs transition hover:bg-surface-container-low focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 disabled:opacity-50;
   }
   .btn-ghost {
-    @apply inline-flex items-center justify-center gap-2 rounded px-3 py-2 text-sm font-medium text-on-surface-variant transition hover:bg-surface-container disabled:opacity-50;
-  }
-  .input {
-    @apply w-full rounded border border-outline-variant bg-surface-container-lowest px-3 py-2 text-sm text-on-surface placeholder:text-outline focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15;
-  }
-  .label {
-    @apply mb-1 block text-xs font-semibold uppercase tracking-wide text-on-surface-variant;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg px-3 py-2 text-sm font-semibold text-on-surface-variant transition hover:bg-surface-container-low hover:text-on-surface disabled:opacity-50;
   }
   .btn-danger {
-    @apply inline-flex items-center justify-center gap-2 rounded bg-error px-4 py-2 text-sm font-semibold text-on-error transition hover:opacity-90 disabled:opacity-50;
+    @apply inline-flex items-center justify-center gap-2 rounded-lg bg-error px-4 py-2.5 text-sm font-semibold text-on-error shadow-xs transition hover:bg-error-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error/30 disabled:opacity-50;
   }
+
+  /* ---- Surfaces ---- */
+  .card {
+    @apply rounded-xl border border-outline-variant bg-surface shadow-card;
+  }
+
+  /* ---- Form controls ---- */
+  .input {
+    @apply w-full rounded-lg border border-outline bg-surface px-3.5 py-2.5 text-sm text-on-surface shadow-xs placeholder:text-gray-500 focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 disabled:cursor-not-allowed disabled:bg-surface-container-low;
+  }
+  .label {
+    @apply mb-1.5 block text-sm font-medium text-on-surface;
+  }
+
+  /* ---- Badges (status pills) ---- */
+  .pill {
+    @apply inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset;
+  }
+  .pill-success {
+    @apply bg-success/10 text-success-700 ring-success/20;
+  }
+  .pill-warning {
+    @apply bg-warning/10 text-warning-700 ring-warning/20;
+  }
+  .pill-info {
+    @apply bg-blue-50 text-blue-700 ring-blue-600/20;
+  }
+  .pill-neutral {
+    @apply bg-surface-container text-on-surface-variant ring-outline-variant;
+  }
+  .pill-primary {
+    @apply bg-primary/10 text-primary ring-primary/20;
+  }
+
+  /* ---- Modal ---- */
   .modal-overlay {
-    @apply fixed inset-0 z-50 grid place-items-center bg-black/40 p-4;
+    @apply fixed inset-0 z-50 grid place-items-center bg-gray-950/50 p-4 backdrop-blur-sm;
   }
   .modal-card {
-    @apply w-full max-w-lg overflow-hidden rounded-lg bg-surface-container-lowest shadow-elevated;
+    @apply w-full max-w-lg overflow-hidden rounded-xl border border-outline-variant bg-surface shadow-elevated;
   }
 }

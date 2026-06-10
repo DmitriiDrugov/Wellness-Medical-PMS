@@ -2,9 +2,9 @@ import { handle, ok } from "@/platform/http";
 import { requireAuth } from "@/platform/auth/context";
 import { reservationsService } from "@/modules/reservations/reservations.service";
 
-type Params = { params: { id: string } };
+type Params = { params: Promise<{ id: string }> };
 
 export const POST = handle(async (req, { params }: Params) => {
   const ctx = requireAuth(req);
-  return ok(await reservationsService.cancel(ctx, params.id));
+  return ok(await reservationsService.cancel(ctx, (await params).id));
 });
