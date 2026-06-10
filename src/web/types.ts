@@ -197,6 +197,82 @@ export interface RoomListItem {
   status: string;
 }
 
+// ---- Hotel management ----
+export interface Property {
+  id: string;
+  name: string;
+  legalName: string;
+  taxNumber: string;
+  ntakRegNumber: string;
+  addressLine: string;
+  city: string;
+  postalCode: string;
+  country: string;
+  timezone: string;
+  currency: string;
+  touristTaxPerPersonPerNightMinor: number;
+  touristTaxAppliesToChildren: boolean;
+}
+
+export type HousekeepingState = "CLEAN" | "DIRTY" | "INSPECTED" | "OUT_OF_ORDER";
+
+export interface RoomType {
+  id: string;
+  name: string;
+  description: string | null;
+  basePriceMinor: number;
+  maxOccupancy: number;
+}
+
+export interface Room {
+  id: string;
+  number: string;
+  roomTypeId: string;
+  floor: number | null;
+  housekeepingStatus: HousekeepingState;
+  posX: number | null;
+  posY: number | null;
+  width: number;
+  height: number;
+}
+
+export type AreaKind =
+  | "COMMON" | "POOL" | "SPA" | "RESTAURANT" | "CORRIDOR" | "BACK_OFFICE" | "OUTDOOR" | "OTHER";
+
+export interface PropertyArea {
+  id: string;
+  name: string;
+  kind: AreaKind;
+  floor: number | null;
+  posX: number | null;
+  posY: number | null;
+  width: number;
+  height: number;
+  notes: string | null;
+}
+
+export type TaskStatus = "OPEN" | "IN_PROGRESS" | "BLOCKED" | "DONE";
+export type TaskType = "CLEANING" | "TURNDOWN" | "MAINTENANCE" | "INSPECTION" | "RESTOCK" | "OTHER";
+export type TaskPriority = "LOW" | "NORMAL" | "HIGH" | "URGENT";
+
+export interface HousekeepingTask {
+  id: string;
+  title: string;
+  type: TaskType;
+  status: TaskStatus;
+  priority: TaskPriority;
+  notes: string | null;
+  roomId: string | null;
+  areaId: string | null;
+  room: { id: string; number: string; floor: number | null } | null;
+  area: { id: string; name: string; kind: AreaKind; floor: number | null } | null;
+  assignedToStaffId: string | null;
+  assignedTo: { id: string; firstName: string; lastName: string } | null;
+  createdAt: string;
+  startedAt: string | null;
+  completedAt: string | null;
+}
+
 // ---- Booking grid ----
 export interface GridRoom {
   id: string;
