@@ -2,6 +2,7 @@ import type { TreatmentAppointment } from "@prisma/client";
 import type { AuthContext } from "@/platform/auth/context";
 import { requireCapability } from "@/platform/rbac";
 import { recordAudit } from "@/platform/audit";
+import { eventBus } from "@/platform/events";
 import { ConflictError, ForbiddenError, NotFoundError, ValidationError } from "@/platform/errors";
 import { authService } from "@/modules/auth/auth.service";
 import { guestsService } from "@/modules/guests/guests.service";
@@ -125,6 +126,7 @@ export const appointmentsService = {
       entityId: appt.id,
       after: appt,
     });
+    eventBus.emit({ type: "appointment.created", entity: "appointment", entityId: appt.id, propertyId: ctx.propertyId });
     return appt;
   },
 
@@ -173,6 +175,7 @@ export const appointmentsService = {
       before,
       after,
     });
+    eventBus.emit({ type: "appointment.updated", entity: "appointment", entityId: id, propertyId: ctx.propertyId });
     return after;
   },
 
@@ -223,6 +226,7 @@ export const appointmentsService = {
       after,
       metadata: { from: before.status, to: next },
     });
+    eventBus.emit({ type: `appointment.${next.toLowerCase()}`, entity: "appointment", entityId: id, propertyId: ctx.propertyId });
     return after;
   },
 

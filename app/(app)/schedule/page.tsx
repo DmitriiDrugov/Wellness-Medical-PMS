@@ -4,9 +4,11 @@ import { useMemo, useState } from "react";
 import { api } from "@/web/api-client";
 import { useApi } from "@/web/use-api";
 import { useMutation } from "@/web/use-mutation";
+import { useEventStream } from "@/web/use-event-stream";
 import type { Appointment } from "@/web/types";
 import { Icon, DataState } from "@/web/components/ui";
 import { fullName, formatTime, localDayRange } from "@/web/format";
+import { startOfWeek, weekDays, bucketByDay, addDays as addDaysW } from "@/web/schedule-week";
 import { AppointmentFormModal } from "./AppointmentFormModal";
 import { ConfirmDialog } from "@/web/components/ConfirmDialog";
 
@@ -55,6 +57,74 @@ interface PlacedAppt {
  * Lays out one therapist's appointments: stacks overlapping bookings into
  * side-by-side lanes (the Stitch double-booking treatment) and flags conflicts.
  */
+const WEEK_DOW = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+/** 7-day week overview: each column lists that day's appointments chronologically. */
+function WeeklyView({
+  weekStart,
+  appts,
+  loading,
+  error,
+  onPickDay,
+  onPickAppt,
+}: {
+  weekStart: Date;
+  appts: Appointment[];
+  loading: boolean;
+  error: string | null;
+  onPickDay: (d: Date) => void;
+  onPickAppt: (a: Appointment) => void;
+}) {
+  const days = weekDays(weekStart);
+  const buckets = bucketByDay(appts, weekStart);
+  const today = new Date();
+  const isToday = (d: Date) => d.toDateString() === today.toDateString();
+
+  return (
+    <div className="flex-1 overflow-auto bg-surface-container-lowest p-4">
+      <DataState loading={loading} error={error} empty={appts.length === 0} emptyLabel="No appointments scheduled this week.">
+        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-7">
+          {days.map((d, i) => (
+            <div key={i} className="flex flex-col rounded-lg border border-surface-variant bg-surface">
+              <button
+                onClick={() => onPickDay(d)}
+                className={`flex items-center justify-between rounded-t-lg border-b border-surface-variant px-3 py-2 text-left transition hover:bg-surface-container ${
+                  isToday(d) ? "bg-primary/10" : ""
+                }`}
+              >
+                <span className="text-xs font-semibold uppercase tracking-wide text-on-surface-variant">{WEEK_DOW[i]}</span>
+                <span className={`text-sm font-semibold ${isToday(d) ? "text-primary" : "text-on-surface"}`}>{d.getDate()}</span>
+              </button>
+              <div className="flex min-h-[120px] flex-col gap-1.5 p-2">
+                {buckets[i]!.length === 0 && <p className="px-1 py-3 text-center text-xs text-on-surface-variant/60">—</p>}
+                {buckets[i]!.map((a) => {
+                  const cancelled = a.status === "CANCELLED";
+                  const completed = a.status === "COMPLETED";
+                  const tone = completed
+                    ? "border-success bg-success/15"
+                    : cancelled
+                      ? "border-outline-variant bg-surface-container line-through"
+                      : "border-primary bg-primary/10";
+                  return (
+                    <button
+                      key={a.id}
+                      onClick={() => onPickAppt(a)}
+                      className={`block w-full rounded border-l-4 px-2 py-1 text-left transition hover:brightness-95 ${tone}`}
+                    >
+                      <p className="truncate text-xs font-semibold text-on-surface">{formatTime(a.startTime)} {a.treatment?.name ?? "Treatment"}</p>
+                      <p className="truncate text-xs text-on-surface-variant">{fullName(a.guest?.firstName, a.guest?.lastName)}</p>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+        </div>
+      </DataState>
+    </div>
+  );
+}
+
 function layoutColumn(items: Appointment[]): PlacedAppt[] {
   const sorted = [...items].sort(
     (a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime(),
@@ -110,7 +180,14 @@ export default function SchedulePage() {
     d.setHours(0, 0, 0, 0);
     return d;
   });
-  const { from, to } = localDayRange(day);
+  const [view, setView] = useState<"daily" | "weekly">("daily");
+
+  const weekStart = useMemo(() => startOfWeek(day), [day]);
+  // Half-open [from, to) window: a single day, or the Mon–Sun week.
+  const { from, to } =
+    view === "weekly"
+      ? { from: weekStart.toISOString(), to: addDaysW(weekStart, 7).toISOString() }
+      : localDayRange(day);
 
   const { data, loading, error, reload } = useApi<Appointment[]>(
     () => api.get<Appointment[]>("/api/appointments", { from, to, pageSize: 100 }),
@@ -118,7 +195,11 @@ export default function SchedulePage() {
   );
   const appts = data ?? [];
 
-  const [view, setView] = useState<"daily" | "weekly">("daily");
+  // Live: refetch when an appointment (or its booking) changes anywhere.
+  useEventStream((ev) => {
+    if (ev.entity === "appointment" || ev.entity === "booking") reload();
+  });
+
   const [bookOpen, setBookOpen] = useState(false);
   const [selectedAppt, setSelectedAppt] = useState<Appointment | null>(null);
   const [cancelTarget, setCancelTarget] = useState<Appointment | null>(null);
@@ -175,24 +256,21 @@ export default function SchedulePage() {
           <div className="flex items-center gap-2 text-sm text-on-surface-variant">
             <button
               className="grid h-6 w-6 place-items-center rounded hover:bg-surface-container"
-              onClick={() => setDay(addDays(day, -1))}
-              aria-label="Previous day"
+              onClick={() => setDay(addDays(day, view === "weekly" ? -7 : -1))}
+              aria-label="Previous"
             >
               <Icon name="chevron_left" className="text-[18px]" />
             </button>
             <Icon name="calendar_today" className="text-[18px]" />
             <span>
-              {day.toLocaleDateString("en-GB", {
-                weekday: "long",
-                day: "numeric",
-                month: "long",
-                year: "numeric",
-              })}
+              {view === "weekly"
+                ? `${weekStart.toLocaleDateString("en-GB", { day: "numeric", month: "short" })} – ${addDaysW(weekStart, 6).toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" })}`
+                : day.toLocaleDateString("en-GB", { weekday: "long", day: "numeric", month: "long", year: "numeric" })}
             </span>
             <button
               className="grid h-6 w-6 place-items-center rounded hover:bg-surface-container"
-              onClick={() => setDay(addDays(day, 1))}
-              aria-label="Next day"
+              onClick={() => setDay(addDays(day, view === "weekly" ? 7 : 1))}
+              aria-label="Next"
             >
               <Icon name="chevron_right" className="text-[18px]" />
             </button>
@@ -235,6 +313,16 @@ export default function SchedulePage() {
       </div>
 
       {/* Scheduler canvas */}
+      {view === "weekly" ? (
+        <WeeklyView
+          weekStart={weekStart}
+          appts={appts}
+          loading={loading}
+          error={error}
+          onPickDay={(d) => { setDay(d); setView("daily"); }}
+          onPickAppt={(a) => a.status === "SCHEDULED" && setSelectedAppt(a)}
+        />
+      ) : (
       <div className="relative flex-1 overflow-auto bg-surface-container-lowest">
         <DataState
           loading={loading}
@@ -386,6 +474,7 @@ export default function SchedulePage() {
           </div>
         </DataState>
       </div>
+      )}
 
       {/* Appointment detail / actions popover */}
       {selectedAppt && (
