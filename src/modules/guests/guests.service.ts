@@ -2,9 +2,16 @@ import type { Guest } from "@prisma/client";
 import type { AuthContext } from "@/platform/auth/context";
 import { requireCapability } from "@/platform/rbac";
 import { recordAudit } from "@/platform/audit";
+import { eventBus } from "@/platform/events";
 import { NotFoundError } from "@/platform/errors";
 import { guestsRepository } from "@/modules/guests/guests.repository";
-import type { CreateGuestInput, UpdateGuestInput, ListGuestsQuery } from "@/modules/guests/guests.schema";
+import type {
+  CreateGuestInput,
+  UpdateGuestInput,
+  ListGuestsQuery,
+  UpsertMedicalProfileInput,
+  AddDocumentInput,
+} from "@/modules/guests/guests.schema";
 
 async function getOrThrow(id: string): Promise<Guest> {
   const guest = await guestsRepository.findById(id);
@@ -53,6 +60,7 @@ export const guestsService = {
       entityId: guest.id,
       after: guest,
     });
+    eventBus.emit({ type: "guest.created", entity: "guest", entityId: guest.id, propertyId: ctx.propertyId });
     return guest;
   },
 
@@ -76,7 +84,90 @@ export const guestsService = {
       before,
       after,
     });
+    eventBus.emit({ type: "guest.updated", entity: "guest", entityId: id, propertyId: ctx.propertyId });
     return after;
+  },
+
+  // ---- Medical profile (clinical data: clinical:* gated, access is audited) ----
+
+  async getMedicalProfile(ctx: AuthContext, guestId: string) {
+    requireCapability(ctx.role, "clinical:read");
+    await getOrThrow(guestId); // ensure the guest exists / not erased
+    const profile = await guestsRepository.findMedicalProfile(guestId);
+    // Reading clinical data is logged (AuditAction.READ), like the rest of Phase 6.
+    await recordAudit({
+      actorStaffId: ctx.staffId,
+      propertyId: ctx.propertyId,
+      action: "READ",
+      entityType: "MedicalProfile",
+      entityId: profile?.id ?? guestId,
+      metadata: { guestId },
+    });
+    return profile;
+  },
+
+  async upsertMedicalProfile(ctx: AuthContext, guestId: string, input: UpsertMedicalProfileInput) {
+    requireCapability(ctx.role, "clinical:write");
+    await getOrThrow(guestId);
+    const before = await guestsRepository.findMedicalProfile(guestId);
+    const after = await guestsRepository.upsertMedicalProfile(guestId, {
+      ...input,
+      updatedByStaffId: ctx.staffId,
+    });
+    await recordAudit({
+      actorStaffId: ctx.staffId,
+      propertyId: ctx.propertyId,
+      action: before ? "UPDATE" : "CREATE",
+      entityType: "MedicalProfile",
+      entityId: after.id,
+      before,
+      after,
+      metadata: { guestId },
+    });
+    eventBus.emit({ type: "guest.medical-updated", entity: "guest", entityId: guestId, propertyId: ctx.propertyId });
+    return after;
+  },
+
+  // ---- Documents (reference only — guest:* gated) ----
+
+  async listDocuments(ctx: AuthContext, guestId: string) {
+    requireCapability(ctx.role, "guest:read");
+    await getOrThrow(guestId);
+    return guestsRepository.listDocuments(guestId);
+  },
+
+  async addDocument(ctx: AuthContext, guestId: string, input: AddDocumentInput) {
+    requireCapability(ctx.role, "guest:write");
+    await getOrThrow(guestId);
+    const doc = await guestsRepository.addDocument({ guestId, ...input, uploadedByStaffId: ctx.staffId });
+    await recordAudit({
+      actorStaffId: ctx.staffId,
+      propertyId: ctx.propertyId,
+      action: "CREATE",
+      entityType: "GuestDocument",
+      entityId: doc.id,
+      after: doc,
+      metadata: { guestId },
+    });
+    eventBus.emit({ type: "guest.document-added", entity: "guest", entityId: guestId, propertyId: ctx.propertyId });
+    return doc;
+  },
+
+  async removeDocument(ctx: AuthContext, guestId: string, documentId: string): Promise<void> {
+    requireCapability(ctx.role, "guest:write");
+    const doc = await guestsRepository.findDocument(documentId);
+    if (!doc || doc.guestId !== guestId) throw new NotFoundError("Document not found");
+    await guestsRepository.deleteDocument(documentId);
+    await recordAudit({
+      actorStaffId: ctx.staffId,
+      propertyId: ctx.propertyId,
+      action: "DELETE",
+      entityType: "GuestDocument",
+      entityId: documentId,
+      before: doc,
+      metadata: { guestId },
+    });
+    eventBus.emit({ type: "guest.document-removed", entity: "guest", entityId: guestId, propertyId: ctx.propertyId });
   },
 
   /** GDPR soft-delete (erasure request). The row is retained but excluded from reads. */

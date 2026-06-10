@@ -54,6 +54,7 @@ export const reservationsService = {
       take: query.pageSize,
       status: query.status,
       roomId: query.roomId,
+      guestId: query.guestId,
       from: query.from,
       to: query.to,
     });

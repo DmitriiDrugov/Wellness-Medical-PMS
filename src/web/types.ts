@@ -15,12 +15,40 @@ export interface Guest {
   email: string | null;
   phone: string | null;
   nationality: string | null;
+  dateOfBirth: string | null;
+  idDocumentType: string | null;
+  idDocumentNumber: string | null;
+  idDocumentExpiry: string | null;
+  placeOfBirth: string | null;
+  gender: string | null;
   addressLine: string | null;
   city: string | null;
   postalCode: string | null;
   country: string | null;
   gdprConsentDataProcessing: boolean;
   gdprConsentMarketing: boolean;
+  createdAt: string;
+}
+
+export interface MedicalProfile {
+  id: string;
+  guestId: string;
+  dietaryNotes: string | null;
+  allergies: string | null;
+  contraindications: string | null;
+  currentMedications: string | null;
+  prescriptions: string | null;
+  mobilityNotes: string | null;
+  generalNotes: string | null;
+  updatedAt: string;
+}
+
+export interface GuestDocument {
+  id: string;
+  guestId: string;
+  kind: string;
+  label: string;
+  externalRef: string;
   createdAt: string;
 }
 

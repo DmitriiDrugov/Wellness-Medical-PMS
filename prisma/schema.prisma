@@ -247,6 +247,12 @@ model Guest {
   phone                    String?
   nationality              String?
   dateOfBirth              DateTime?
+  // Identity / travel document (deep registration).
+  idDocumentType           String?   // PASSPORT | NATIONAL_ID | DRIVING_LICENCE
+  idDocumentNumber         String?
+  idDocumentExpiry         DateTime?
+  placeOfBirth             String?
+  gender                   String?
   addressLine              String?
   city                     String?
   postalCode               String?
@@ -266,9 +272,47 @@ model Guest {
   treatmentRecords  TreatmentRecord[]
   guestAccount      GuestAccount?
   conversation      Conversation?
+  medicalProfile    MedicalProfile?
+  documents         GuestDocument[]
 
   @@index([email])
   @@index([lastName])
+}
+
+/// Operational medical profile — at-a-glance clinical context a receptionist/therapist
+/// needs to serve the guest safely (diet, allergies, contraindications, medications).
+/// Distinct from the immutable clinical record (TreatmentRecord) and structured
+/// intake (IntakeFormSubmission); this is the editable working summary. 1:1 with Guest.
+model MedicalProfile {
+  id                String   @id @default(cuid())
+  guestId           String   @unique
+  guest             Guest    @relation(fields: [guestId], references: [id])
+  dietaryNotes      String?
+  allergies         String?
+  contraindications String?
+  currentMedications String?
+  prescriptions     String?
+  mobilityNotes     String?
+  generalNotes      String?
+  updatedByStaffId  String?
+  createdAt         DateTime @default(now())
+  updatedAt         DateTime @updatedAt
+}
+
+/// Reference to an external guest document (passport scan, medical report, consent
+/// PDF). No blobs are stored — `externalRef` is an opaque key/URL, mirroring the
+/// docRef/photoRefs pattern used elsewhere.
+model GuestDocument {
+  id               String   @id @default(cuid())
+  guestId          String
+  guest            Guest    @relation(fields: [guestId], references: [id])
+  kind             String   // PASSPORT | MEDICAL_REPORT | PRESCRIPTION | CONSENT | OTHER
+  label            String
+  externalRef      String
+  uploadedByStaffId String?
+  createdAt        DateTime @default(now())
+
+  @@index([guestId])
 }
 
 model RoomType {

@@ -50,6 +50,7 @@ export const listReservationsQuerySchema = z
       .enum(["PENDING", "CONFIRMED", "CHECKED_IN", "CHECKED_OUT", "CANCELLED", "NO_SHOW"])
       .optional(),
     roomId: z.string().min(1).optional(),
+    guestId: z.string().min(1).optional(),
     // Calendar window: when both are given, return reservations overlapping [from, to).
     from: z.coerce.date().optional(),
     to: z.coerce.date().optional(),

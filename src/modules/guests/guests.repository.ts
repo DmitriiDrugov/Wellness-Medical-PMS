@@ -1,4 +1,4 @@
-import type { Prisma, Guest } from "@prisma/client";
+import type { Prisma, Guest, MedicalProfile, GuestDocument } from "@prisma/client";
 import { prisma } from "@/platform/db";
 
 /** Guests module repository — the ONLY place that queries the Guest table. */
@@ -37,5 +37,38 @@ export const guestsRepository = {
 
   softDelete(id: string): Promise<Guest> {
     return prisma.guest.update({ where: { id }, data: { deletedAt: new Date() } });
+  },
+
+  // ---- Medical profile (1:1) ----
+  findMedicalProfile(guestId: string): Promise<MedicalProfile | null> {
+    return prisma.medicalProfile.findUnique({ where: { guestId } });
+  },
+
+  upsertMedicalProfile(
+    guestId: string,
+    data: Omit<Prisma.MedicalProfileUncheckedCreateInput, "guestId">,
+  ): Promise<MedicalProfile> {
+    return prisma.medicalProfile.upsert({
+      where: { guestId },
+      create: { guestId, ...data },
+      update: data,
+    });
+  },
+
+  // ---- Documents ----
+  listDocuments(guestId: string): Promise<GuestDocument[]> {
+    return prisma.guestDocument.findMany({ where: { guestId }, orderBy: { createdAt: "desc" } });
+  },
+
+  addDocument(data: Prisma.GuestDocumentUncheckedCreateInput): Promise<GuestDocument> {
+    return prisma.guestDocument.create({ data });
+  },
+
+  findDocument(id: string): Promise<GuestDocument | null> {
+    return prisma.guestDocument.findUnique({ where: { id } });
+  },
+
+  deleteDocument(id: string): Promise<GuestDocument> {
+    return prisma.guestDocument.delete({ where: { id } });
   },
 };

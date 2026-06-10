@@ -26,6 +26,7 @@ export const reservationsRepository = {
     take: number;
     status?: ReservationStatus;
     roomId?: string;
+    guestId?: string;
     from?: Date;
     to?: Date;
   }) {
@@ -33,6 +34,7 @@ export const reservationsRepository = {
       propertyId: params.propertyId,
       ...(params.status ? { status: params.status } : {}),
       ...(params.roomId ? { roomId: params.roomId } : {}),
+      ...(params.guestId ? { guestId: params.guestId } : {}),
       // Half-open overlap with the requested [from, to) window.
       ...(params.from && params.to
         ? { checkInDate: { lt: params.to }, checkOutDate: { gt: params.from } }

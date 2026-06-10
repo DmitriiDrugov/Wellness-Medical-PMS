@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { api } from "@/web/api-client";
 import { useApi } from "@/web/use-api";
 import { useMutation } from "@/web/use-mutation";
@@ -202,7 +203,11 @@ function GuestDetail({
         </div>
       </div>
 
-      <div className="mt-3 flex gap-2">
+      <Link href={`/guests/${guest.id}`} className="btn-primary mt-3 w-full justify-center">
+        <Icon name="contact_page" className="text-[18px]" /> Open patient profile
+      </Link>
+
+      <div className="mt-2 flex gap-2">
         <button className="btn-secondary flex-1" onClick={() => onEdit(guest)}>
           <Icon name="edit" className="text-[18px]" /> Edit
         </button>
