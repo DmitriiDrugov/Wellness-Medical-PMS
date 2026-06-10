@@ -63,6 +63,15 @@ export const listReservationsQuerySchema = z
     path: ["from"],
   });
 
+export const bookingGridQuerySchema = z
+  .object({
+    from: z.coerce.date(),
+    to: z.coerce.date(),
+    view: z.enum(["day", "week"]).default("week"),
+  })
+  .refine((v) => v.to > v.from, { message: "to must be after from", path: ["to"] });
+
+export type BookingGridQuery = z.infer<typeof bookingGridQuerySchema>;
 export type CreateReservationInput = z.infer<typeof createReservationSchema>;
 export type UpdateReservationInput = z.infer<typeof updateReservationSchema>;
 export type AssignRoomInput = z.infer<typeof assignRoomSchema>;

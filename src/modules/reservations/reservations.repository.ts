@@ -87,6 +87,33 @@ export const reservationsRepository = {
     });
   },
 
+  /** All rooms with their type — the row inventory for the booking grid. */
+  roomsWithType(propertyId: string) {
+    return prisma.room.findMany({
+      where: { propertyId },
+      orderBy: [{ floor: "asc" }, { number: "asc" }],
+      include: { roomType: { select: { id: true, name: true } } },
+    });
+  },
+
+  /** Reservations overlapping [from, to) for the booking grid (guest + room + type). */
+  reservationsInWindow(propertyId: string, from: Date, to: Date) {
+    return prisma.reservation.findMany({
+      where: {
+        propertyId,
+        status: { notIn: ["CANCELLED", "NO_SHOW"] },
+        checkInDate: { lt: to },
+        checkOutDate: { gt: from },
+      },
+      orderBy: { checkInDate: "asc" },
+      include: {
+        guest: { select: { id: true, firstName: true, lastName: true } },
+        room: { select: { id: true, number: true } },
+        roomType: { select: { id: true, name: true } },
+      },
+    });
+  },
+
   /** All blocking reservations overlapping [from, to) for the given rooms. */
   findBlockingForRooms(roomIds: string[], from: Date, to: Date): Promise<Reservation[]> {
     return prisma.reservation.findMany({

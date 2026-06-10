@@ -168,3 +168,36 @@ export interface RoomListItem {
   roomTypeId: string;
   status: string;
 }
+
+// ---- Booking grid ----
+export interface GridRoom {
+  id: string;
+  number: string;
+  floor: number | null;
+  roomTypeId: string;
+  roomTypeName: string;
+  housekeepingStatus: "CLEAN" | "DIRTY" | "INSPECTED" | "OUT_OF_ORDER";
+}
+export interface GridBooking {
+  id: string;
+  guestId: string;
+  guestName: string;
+  roomId: string | null;
+  roomNumber: string | null;
+  roomTypeId: string;
+  roomTypeName: string;
+  checkInDate: string;
+  checkOutDate: string;
+  status: ReservationStatus;
+  adults: number;
+  children: number;
+}
+export interface BookingGridResponse {
+  from: string;
+  to: string;
+  view: "day" | "week";
+  rooms: GridRoom[];
+  roomTypes: { id: string; name: string }[];
+  bookings: GridBooking[];
+  utilization: { occupiedRoomNights: number; availableRoomNights: number; ratePct: number };
+}

@@ -14,7 +14,7 @@ export interface NavItem {
 /** Sidebar information architecture, mirrors the Stitch mockups' left nav. */
 export const NAV_ITEMS: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: "dashboard" },
-  { label: "Reservations", href: "/reservations", icon: "calendar_month", capability: "reservation:read" },
+  { label: "Booking", href: "/booking", icon: "calendar_month", capability: "reservation:read" },
   { label: "Guests", href: "/guests", icon: "group", capability: "guest:read" },
   { label: "Treatments", href: "/schedule", icon: "spa", capability: "appointment:read" },
   { label: "Packages", href: "/catalog", icon: "inventory_2", capability: "catalog:read" },
