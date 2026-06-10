@@ -2,7 +2,7 @@ import type { AuthContext } from "@/platform/auth/context";
 import { requireCapability } from "@/platform/rbac";
 import { nightsBetween } from "@/platform/intervals";
 import { reportingRepository } from "@/modules/reporting/reporting.repository";
-import { nightsInWindow, occupancyRate, groupChargesByType, sumAmounts } from "@/modules/reporting/aggregate";
+import { nightsInWindow, occupancyRate, groupChargesByType, sumAmounts, summarizeTouristTax } from "@/modules/reporting/aggregate";
 import type { DateRangeQuery } from "@/modules/reporting/reporting.schema";
 
 export const reportingService = {
@@ -42,6 +42,25 @@ export const reportingService = {
       chargesByTypeMinor,
       totalChargesMinor: sumAmounts(items),
       totalPaymentsMinor: sumAmounts(payments),
+    };
+  },
+
+  /** Tourist-tax (IFA) return: per-stay rows + totals for the municipal/NTAK report. */
+  async touristTax(ctx: AuthContext, q: DateRangeQuery) {
+    requireCapability(ctx.role, "report:read");
+    const rows = await reportingRepository.touristTaxInRange(ctx.propertyId, q.from, q.to);
+    return {
+      from: q.from,
+      to: q.to,
+      currency: "HUF",
+      ...summarizeTouristTax(rows),
+      rows: rows.map((r) => ({
+        id: r.id,
+        guestName: `${r.folio.guest.firstName} ${r.folio.guest.lastName}`.trim(),
+        personNights: r.quantity,
+        taxMinor: r.amountMinor,
+        postedAt: r.createdAt,
+      })),
     };
   },
 

@@ -182,6 +182,14 @@ export const reservationsService = {
       ratePerNightMinor: before.ratePerNightMinor,
       description: `${before.roomType.name} — ${nights} night(s)`,
     });
+    // Accrue the Hungarian tourist tax (IFA) for the stay onto the same folio.
+    await folioService.postTouristTax(ctx, {
+      reservationId: id,
+      guestId: before.guestId,
+      adults: before.adults,
+      children: before.children,
+      nights,
+    });
     eventBus.emit({ type: "booking.checked-out", entity: "booking", entityId: id, propertyId: ctx.propertyId });
     return after;
   },

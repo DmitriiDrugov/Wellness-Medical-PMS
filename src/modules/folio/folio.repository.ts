@@ -41,6 +41,19 @@ export const folioRepository = {
     return prisma.folioLineItem.create({ data });
   },
 
+  /** Remove line items of a type that originated from a given source (idempotent recompute). */
+  deleteLineItemsBySource(folioId: string, type: Prisma.FolioLineItemWhereInput["type"], sourceType: string, sourceId: string) {
+    return prisma.folioLineItem.deleteMany({ where: { folioId, type, sourceType, sourceId } });
+  },
+
+  /** Property tourist-tax configuration. */
+  taxConfig(propertyId: string) {
+    return prisma.property.findUnique({
+      where: { id: propertyId },
+      select: { touristTaxPerPersonPerNightMinor: true, touristTaxAppliesToChildren: true },
+    });
+  },
+
   addPayment(data: Prisma.PaymentUncheckedCreateInput): Promise<Payment> {
     return prisma.payment.create({ data });
   },

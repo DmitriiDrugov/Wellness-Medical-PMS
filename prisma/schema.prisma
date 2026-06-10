@@ -59,6 +59,7 @@ enum LineItemType {
   ROOM
   PACKAGE
   TREATMENT
+  TOURIST_TAX
   ADJUSTMENT
 }
 
@@ -153,6 +154,10 @@ model Property {
   country       String   @default("HU")
   timezone      String   @default("Europe/Budapest")
   currency      String   @default("HUF")
+  // Hungarian tourist tax (IFA): fixed amount per taxable person per night.
+  // Under-18s are exempt by default (appliesToChildren = false).
+  touristTaxPerPersonPerNightMinor Int     @default(0)
+  touristTaxAppliesToChildren      Boolean @default(false)
   createdAt     DateTime @default(now())
 
   staff             Staff[]
