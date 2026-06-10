@@ -4,7 +4,7 @@ import type { Role } from "@/web/auth-context";
 export interface NavItem {
   label: string;
   href: string;
-  icon: string; // Material Symbols name
+  icon: string; // Icon registry name (see src/web/components/icon.tsx)
   capability?: Capability; // required capability to see the item
   roles?: Role[]; // additional role gate (for features with no capability yet)
   /** Screen maps to an un-built backend phase (7–10) or Housekeeping — rendered as a disabled placeholder. */

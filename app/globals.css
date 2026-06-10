@@ -163,24 +163,6 @@ body {
   }
 }
 
-/* Material Symbols (still used by the Icon wrapper until the icon-registry phase). */
-.material-symbols-outlined {
-  font-family: "Material Symbols Outlined";
-  font-weight: normal;
-  font-style: normal;
-  font-size: 1.25rem;
-  line-height: 1;
-  letter-spacing: normal;
-  text-transform: none;
-  display: inline-block;
-  white-space: nowrap;
-  word-wrap: normal;
-  direction: ltr;
-  font-feature-settings: "liga";
-  -webkit-font-feature-settings: "liga";
-  -webkit-font-smoothing: antialiased;
-}
-
 @layer components {
   /* ---- Buttons (Untitled UI) ---- */
   .btn-primary {

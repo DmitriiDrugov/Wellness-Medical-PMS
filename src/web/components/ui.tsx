@@ -1,8 +1,9 @@
 import Link from "next/link";
 
-export function Icon({ name, className }: { name: string; className?: string }) {
-  return <span className={`material-symbols-outlined ${className ?? ""}`}>{name}</span>;
-}
+// Icon now renders Untitled UI icons via a name registry; imported and re-exported
+// here so the many `import { Icon } from "@/web/components/ui"` call sites keep working.
+import { Icon } from "@/web/components/icon";
+export { Icon };
 
 export function PageHeader({
   title,
