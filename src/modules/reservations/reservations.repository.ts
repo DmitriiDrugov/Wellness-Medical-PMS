@@ -78,6 +78,30 @@ export const reservationsRepository = {
     return prisma.roomType.findUnique({ where: { id } });
   },
 
+  createRoomType(data: Prisma.RoomTypeUncheckedCreateInput): Promise<RoomType> {
+    return prisma.roomType.create({ data });
+  },
+
+  updateRoomType(id: string, data: Prisma.RoomTypeUpdateInput): Promise<RoomType> {
+    return prisma.roomType.update({ where: { id }, data });
+  },
+
+  createRoom(data: Prisma.RoomUncheckedCreateInput): Promise<Room> {
+    return prisma.room.create({ data });
+  },
+
+  updateRoom(id: string, data: Prisma.RoomUpdateInput): Promise<Room> {
+    return prisma.room.update({ where: { id }, data });
+  },
+
+  deleteRoom(id: string): Promise<Room> {
+    return prisma.room.delete({ where: { id } });
+  },
+
+  countRoomReservations(roomId: string): Promise<number> {
+    return prisma.reservation.count({ where: { roomId } });
+  },
+
   listRoomTypes(propertyId: string): Promise<RoomType[]> {
     return prisma.roomType.findMany({ where: { propertyId }, orderBy: { name: "asc" } });
   },

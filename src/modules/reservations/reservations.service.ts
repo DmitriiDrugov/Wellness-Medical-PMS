@@ -14,6 +14,10 @@ import type {
   AvailabilityQuery,
   ListReservationsQuery,
   BookingGridQuery,
+  CreateRoomTypeInput,
+  UpdateRoomTypeInput,
+  CreateRoomInput,
+  UpdateRoomInput,
 } from "@/modules/reservations/reservations.schema";
 
 async function getOrThrow(id: string) {
@@ -287,6 +291,61 @@ export const reservationsService = {
   async listRoomTypes(ctx: AuthContext) {
     requireCapability(ctx.role, "reservation:read");
     return reservationsRepository.listRoomTypes(ctx.propertyId);
+  },
+
+  // ---- Room-type & room management (property:manage) ----
+
+  async createRoomType(ctx: AuthContext, input: CreateRoomTypeInput) {
+    requireCapability(ctx.role, "property:manage");
+    const rt = await reservationsRepository.createRoomType({ propertyId: ctx.propertyId, ...input });
+    await recordAudit({ actorStaffId: ctx.staffId, propertyId: ctx.propertyId, action: "CREATE", entityType: "RoomType", entityId: rt.id, after: rt });
+    eventBus.emit({ type: "room.type-created", entity: "room", entityId: rt.id, propertyId: ctx.propertyId });
+    return rt;
+  },
+
+  async updateRoomType(ctx: AuthContext, id: string, input: UpdateRoomTypeInput) {
+    requireCapability(ctx.role, "property:manage");
+    const before = await reservationsRepository.roomTypeById(id);
+    if (!before || before.propertyId !== ctx.propertyId) throw new NotFoundError("Room type not found");
+    const after = await reservationsRepository.updateRoomType(id, input);
+    await recordAudit({ actorStaffId: ctx.staffId, propertyId: ctx.propertyId, action: "UPDATE", entityType: "RoomType", entityId: id, before, after });
+    eventBus.emit({ type: "room.type-updated", entity: "room", entityId: id, propertyId: ctx.propertyId });
+    return after;
+  },
+
+  async createRoom(ctx: AuthContext, input: CreateRoomInput) {
+    requireCapability(ctx.role, "property:manage");
+    const roomType = await reservationsRepository.roomTypeById(input.roomTypeId);
+    if (!roomType || roomType.propertyId !== ctx.propertyId) throw new NotFoundError("Room type not found");
+    const room = await reservationsRepository.createRoom({ propertyId: ctx.propertyId, ...input });
+    await recordAudit({ actorStaffId: ctx.staffId, propertyId: ctx.propertyId, action: "CREATE", entityType: "Room", entityId: room.id, after: room });
+    eventBus.emit({ type: "room.created", entity: "room", entityId: room.id, propertyId: ctx.propertyId });
+    return room;
+  },
+
+  async updateRoom(ctx: AuthContext, id: string, input: UpdateRoomInput) {
+    requireCapability(ctx.role, "property:manage");
+    const before = await reservationsRepository.roomById(id);
+    if (!before || before.propertyId !== ctx.propertyId) throw new NotFoundError("Room not found");
+    if (input.roomTypeId) {
+      const rt = await reservationsRepository.roomTypeById(input.roomTypeId);
+      if (!rt || rt.propertyId !== ctx.propertyId) throw new NotFoundError("Room type not found");
+    }
+    const after = await reservationsRepository.updateRoom(id, input);
+    await recordAudit({ actorStaffId: ctx.staffId, propertyId: ctx.propertyId, action: "UPDATE", entityType: "Room", entityId: id, before, after });
+    eventBus.emit({ type: "room.updated", entity: "room", entityId: id, propertyId: ctx.propertyId });
+    return after;
+  },
+
+  async deleteRoom(ctx: AuthContext, id: string): Promise<void> {
+    requireCapability(ctx.role, "property:manage");
+    const before = await reservationsRepository.roomById(id);
+    if (!before || before.propertyId !== ctx.propertyId) throw new NotFoundError("Room not found");
+    const used = await reservationsRepository.countRoomReservations(id);
+    if (used > 0) throw new ConflictError("Cannot delete a room that has reservations; mark it out of order instead");
+    await reservationsRepository.deleteRoom(id);
+    await recordAudit({ actorStaffId: ctx.staffId, propertyId: ctx.propertyId, action: "DELETE", entityType: "Room", entityId: id, before });
+    eventBus.emit({ type: "room.deleted", entity: "room", entityId: id, propertyId: ctx.propertyId });
   },
 
   async listRooms(ctx: AuthContext) {

@@ -28,6 +28,7 @@ export type Capability =
   | "audit:read"
   | "compliance:manage"
   | "staff:manage"
+  | "property:manage"
   // Phase 6 — clinical
   | "forms:manage"
   | "submission:write"
@@ -47,6 +48,7 @@ const ALL: Capability[] = [
   "housekeeping:read", "housekeeping:manage",
   "folio:read", "folio:write", "folio:close",
   "report:read", "audit:read", "compliance:manage", "staff:manage",
+  "property:manage",
   "forms:manage", "submission:write",
   "clinical:read", "clinical:write",
   "consent:write", "consent:read", "consent:status:read",

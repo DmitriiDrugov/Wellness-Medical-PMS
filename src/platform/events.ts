@@ -18,7 +18,15 @@ import { EventEmitter } from "node:events";
  */
 
 /** Coarse entity buckets the UI subscribes to. */
-export type DomainEntity = "booking" | "appointment" | "folio" | "guest" | "room";
+export type DomainEntity =
+  | "booking"
+  | "appointment"
+  | "folio"
+  | "guest"
+  | "room"
+  | "area"
+  | "housekeeping"
+  | "property";
 
 export interface DomainEvent {
   /** e.g. "booking.created", "folio.charged", "appointment.completed". */

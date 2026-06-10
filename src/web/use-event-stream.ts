@@ -6,7 +6,7 @@ import { getStoredAccessToken } from "@/web/api-client";
 /** Domain event shape mirrored from src/platform/events.ts. */
 export interface DomainEvent {
   type: string;
-  entity: "booking" | "appointment" | "folio" | "guest" | "room";
+  entity: "booking" | "appointment" | "folio" | "guest" | "room" | "area" | "housekeeping" | "property";
   entityId: string;
   propertyId: string;
   at: string;

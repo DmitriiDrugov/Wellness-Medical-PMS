@@ -50,6 +50,42 @@ enum HousekeepingStatus {
   OUT_OF_ORDER
 }
 
+/// Lifecycle of a housekeeping work order (distinct from a room's cleanliness state).
+enum HousekeepingTaskStatus {
+  OPEN
+  IN_PROGRESS
+  BLOCKED
+  DONE
+}
+
+enum HousekeepingTaskType {
+  CLEANING
+  TURNDOWN
+  MAINTENANCE
+  INSPECTION
+  RESTOCK
+  OTHER
+}
+
+enum TaskPriority {
+  LOW
+  NORMAL
+  HIGH
+  URGENT
+}
+
+/// Non-room zones of the property that can host housekeeping tasks and appear on the map.
+enum AreaKind {
+  COMMON
+  POOL
+  SPA
+  RESTAURANT
+  CORRIDOR
+  BACK_OFFICE
+  OUTDOOR
+  OTHER
+}
+
 enum FolioStatus {
   OPEN
   CLOSED
@@ -163,6 +199,7 @@ model Property {
   staff             Staff[]
   roomTypes         RoomType[]
   rooms             Room[]
+  areas             PropertyArea[]
   reservations      Reservation[]
   treatments        Treatment[]
   packages          ServicePackage[]
@@ -340,6 +377,11 @@ model Room {
   roomType           RoomType           @relation(fields: [roomTypeId], references: [id])
   floor              Int?
   housekeepingStatus HousekeepingStatus @default(DIRTY)
+  // Floor-plan placement (grid cells). Null until the room is dragged onto the map.
+  posX               Int?
+  posY               Int?
+  width              Int                @default(2)
+  height             Int                @default(2)
   createdAt          DateTime           @default(now())
 
   reservations     Reservation[]
@@ -524,21 +566,54 @@ model Payment {
 // HOUSEKEEPING (operational, but its own lifecycle)
 // ============================================================
 
-model HousekeepingTask {
-  id               String             @id @default(cuid())
-  propertyId       String
-  property         Property           @relation(fields: [propertyId], references: [id])
-  roomId           String
-  room             Room               @relation(fields: [roomId], references: [id])
-  status           HousekeepingStatus
-  assignedToStaffId String?
-  assignedTo       Staff?             @relation(fields: [assignedToStaffId], references: [id])
-  notes            String?
-  createdAt        DateTime           @default(now())
-  completedAt      DateTime?
+/// A non-room zone of the property (lobby, pool, spa, corridor). A housekeeping
+/// task can target an Area instead of a Room. Also rendered on the property map.
+model PropertyArea {
+  id         String   @id @default(cuid())
+  propertyId String
+  property   Property @relation(fields: [propertyId], references: [id])
+  name       String
+  kind       AreaKind @default(COMMON)
+  floor      Int?
+  posX       Int?
+  posY       Int?
+  width      Int      @default(3)
+  height     Int      @default(2)
+  notes      String?
+  createdAt  DateTime @default(now())
+
+  housekeepingTasks HousekeepingTask[]
 
   @@index([propertyId])
+}
+
+/// A housekeeping work order. Targets a Room OR a PropertyArea (both optional so a
+/// task can be a general property job). Its `status` is a work-order lifecycle,
+/// separate from a Room's `housekeepingStatus` cleanliness flag.
+model HousekeepingTask {
+  id                String                 @id @default(cuid())
+  propertyId        String
+  property          Property               @relation(fields: [propertyId], references: [id])
+  roomId            String?
+  room              Room?                  @relation(fields: [roomId], references: [id])
+  areaId            String?
+  area              PropertyArea?          @relation(fields: [areaId], references: [id])
+  type              HousekeepingTaskType   @default(CLEANING)
+  status            HousekeepingTaskStatus @default(OPEN)
+  priority          TaskPriority           @default(NORMAL)
+  title             String
+  notes             String?
+  assignedToStaffId String?
+  assignedTo        Staff?                 @relation(fields: [assignedToStaffId], references: [id])
+  createdByStaffId  String?
+  createdAt         DateTime               @default(now())
+  startedAt         DateTime?
+  completedAt       DateTime?
+
+  @@index([propertyId, status])
+  @@index([assignedToStaffId, status])
   @@index([roomId])
+  @@index([areaId])
 }
 
 // ============================================================
