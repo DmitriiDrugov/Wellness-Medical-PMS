@@ -123,10 +123,13 @@ export function PropertyMap({
       }
       const pos = overridesRef.current[p.id];
       if (pos) {
+        // Persist silently. The optimistic override already shows the new spot, and
+        // the server's room.updated event keeps siblings in sync — so we deliberately
+        // DON'T refetch here (a refetch would flip the parent into its loading state
+        // and remount the map mid-interaction).
         try {
           await api.patch(p.kind === "room" ? `/api/rooms/${p.id}` : `/api/areas/${p.id}`, pos);
-          onReload();
-        } catch { /* keep optimistic */ }
+        } catch { /* keep optimistic position; next load reconciles */ }
       }
     }
     window.addEventListener("pointermove", onMove);
@@ -135,7 +138,8 @@ export function PropertyMap({
       window.removeEventListener("pointermove", onMove);
       window.removeEventListener("pointerup", onUp);
     };
-  }, [onReload]);
+    // Listeners use only refs + stable setters, so they're attached once.
+  }, []);
 
   const tilesRef = useRef(tiles);
   tilesRef.current = tiles;

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { api } from "@/web/api-client";
 import { useApi } from "@/web/use-api";
 import { useMutation } from "@/web/use-mutation";
@@ -263,15 +263,25 @@ function RoomsTab({ rooms, roomTypes, loading, error, onChanged }: { rooms: Room
 // ---------- Map ----------
 function MapTab({ rooms, areas, loading, error, onReload, onTaskCreated }: { rooms: Room[]; areas: PropertyArea[]; loading: boolean; error: string | null; onReload: () => void; onTaskCreated: () => void }) {
   const [areaOpen, setAreaOpen] = useState(false);
+  // Latch "loaded" on the first completed fetch. Background refetches (drag saves,
+  // SSE events) must NOT swap the live map for a spinner — that would remount it
+  // and interrupt the drag. Once ready, the map stays mounted and just re-renders.
+  const [ready, setReady] = useState(false);
+  useEffect(() => { if (!loading) setReady(true); }, [loading]);
+
   return (
     <Card>
       <div className="mb-3 flex items-center justify-between">
         <h3 className="text-sm font-semibold uppercase tracking-wide text-on-surface-variant">Property map</h3>
         <button className="btn-secondary" onClick={() => setAreaOpen(true)}><Icon name="add" className="text-[18px]" /> Add area / zone</button>
       </div>
-      <DataState loading={loading} error={error}>
+      {error ? (
+        <DataState loading={false} error={error}>{null}</DataState>
+      ) : !ready ? (
+        <DataState loading error={null}>{null}</DataState>
+      ) : (
         <PropertyMap rooms={rooms} areas={areas} onReload={onReload} onTaskCreated={onTaskCreated} />
-      </DataState>
+      )}
       {areaOpen && <AreaFormModal open={areaOpen} onClose={() => setAreaOpen(false)} onSaved={() => { setAreaOpen(false); onReload(); }} />}
     </Card>
   );
