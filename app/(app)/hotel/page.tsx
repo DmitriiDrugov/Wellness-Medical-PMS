@@ -263,7 +263,6 @@ function RoomsTab({ rooms, roomTypes, loading, error, onChanged }: { rooms: Room
 // ---------- Map ----------
 function MapTab({ rooms, areas, loading, error, onReload, onTaskCreated }: { rooms: Room[]; areas: PropertyArea[]; loading: boolean; error: string | null; onReload: () => void; onTaskCreated: () => void }) {
   const [areaOpen, setAreaOpen] = useState(false);
-  const [taskPreset, setTaskPreset] = useState<{ roomId?: string; areaId?: string; label: string } | null>(null);
   return (
     <Card>
       <div className="mb-3 flex items-center justify-between">
@@ -271,14 +270,9 @@ function MapTab({ rooms, areas, loading, error, onReload, onTaskCreated }: { roo
         <button className="btn-secondary" onClick={() => setAreaOpen(true)}><Icon name="add" className="text-[18px]" /> Add area / zone</button>
       </div>
       <DataState loading={loading} error={error}>
-        <PropertyMap rooms={rooms} areas={areas} onReload={onReload} onCreateTask={setTaskPreset} />
+        <PropertyMap rooms={rooms} areas={areas} onReload={onReload} onTaskCreated={onTaskCreated} />
       </DataState>
       {areaOpen && <AreaFormModal open={areaOpen} onClose={() => setAreaOpen(false)} onSaved={() => { setAreaOpen(false); onReload(); }} />}
-      {taskPreset && (
-        <TaskFormModal open={!!taskPreset} preset={taskPreset}
-          onClose={() => setTaskPreset(null)}
-          onSaved={() => { setTaskPreset(null); onTaskCreated(); }} />
-      )}
     </Card>
   );
 }
