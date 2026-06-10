@@ -44,6 +44,17 @@ import {
   ClipboardCheck,
   Loading01,
   Zap,
+  Mail01,
+  Home02,
+  Phone,
+  MarkerPin01,
+  TrendUp01,
+  Wallet02,
+  Eye,
+  EyeOff,
+  Hand,
+  Stars01,
+  CheckVerified01,
 } from "@untitledui/icons";
 import type { FC, SVGProps } from "react";
 
@@ -100,6 +111,19 @@ const REGISTRY: Record<string, IconComponent> = {
   settings: Settings01,
   spa: Feather,
   warning: AlertTriangle,
+  // additional icons found in multi-line / dynamic / StatCard usages
+  account_balance_wallet: Wallet02,
+  back_hand: Hand,
+  bed: Home02,
+  call: Phone,
+  hotel: Building02,
+  location_on: MarkerPin01,
+  mail: Mail01,
+  smart_toy: Stars01,
+  trending_up: TrendUp01,
+  verified: CheckVerified01,
+  visibility: Eye,
+  visibility_off: EyeOff,
 };
 
 /**
