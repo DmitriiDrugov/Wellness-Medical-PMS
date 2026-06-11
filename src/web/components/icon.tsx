@@ -55,6 +55,7 @@ import {
   Hand,
   Stars01,
   CheckVerified01,
+  UserX01,
 } from "@untitledui/icons";
 import type { FC, SVGProps } from "react";
 
@@ -103,6 +104,7 @@ const REGISTRY: Record<string, IconComponent> = {
   payments: Coins01,
   person: User01,
   person_add: UserPlus01,
+  person_off: UserX01,
   progress_activity: Loading01,
   receipt_long: Receipt,
   schedule: Clock,

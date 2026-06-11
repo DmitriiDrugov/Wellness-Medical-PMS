@@ -190,6 +190,16 @@ export interface StaffRef {
   lastName: string;
   role: string;
 }
+/** Full directory entry on the Staff page (staff:manage only). */
+export interface StaffMember {
+  id: string;
+  email: string;
+  role: "RECEPTION" | "RESERVATION_ADMIN" | "THERAPIST" | "HOUSEKEEPING" | "MANAGER" | "ADMIN" | "AI_AGENT";
+  firstName: string;
+  lastName: string;
+  isActive: boolean;
+  propertyId: string;
+}
 export interface RoomListItem {
   id: string;
   number: string;

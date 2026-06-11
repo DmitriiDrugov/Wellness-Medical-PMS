@@ -12,6 +12,7 @@ import { describe, it, expect, vi, beforeEach } from "vitest";
 
 const linkedAppt = {
   id: "appt1",
+  propertyId: "p1",
   therapistId: "th1",
   status: "SCHEDULED",
   reservationId: "resv1",
