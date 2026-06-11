@@ -88,6 +88,15 @@ export interface Treatment {
   active: boolean;
 }
 
+export type ResourceType = "TREATMENT_ROOM" | "EQUIPMENT";
+export interface Resource {
+  id: string;
+  name: string;
+  type: ResourceType;
+  capacity: number;
+  active: boolean;
+}
+
 export interface ServicePackage {
   id: string;
   name: string;

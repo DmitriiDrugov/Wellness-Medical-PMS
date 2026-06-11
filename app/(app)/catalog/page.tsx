@@ -3,19 +3,23 @@
 import { useState } from "react";
 import { api } from "@/web/api-client";
 import { useApi } from "@/web/use-api";
-import type { Treatment, ServicePackage } from "@/web/types";
+import type { Treatment, ServicePackage, Resource } from "@/web/types";
 import { PageHeader, Card, StatusPill, Icon, DataState } from "@/web/components/ui";
 import { formatMinor } from "@/web/format";
 import { TreatmentFormModal } from "./TreatmentFormModal";
 import { PackageFormModal } from "./PackageFormModal";
+import { ResourceFormModal } from "./ResourceFormModal";
 
 export default function CatalogPage() {
   const treatments = useApi<Treatment[]>(() => api.get<Treatment[]>("/api/treatments", { pageSize: 100 }), []);
   const packages = useApi<ServicePackage[]>(() => api.get<ServicePackage[]>("/api/packages", { pageSize: 100 }), []);
+  const resources = useApi<Resource[]>(() => api.get<Resource[]>("/api/resources"), []);
 
   const [treatmentOpen, setTreatmentOpen] = useState(false);
   const [packageOpen, setPackageOpen] = useState(false);
+  const [resourceOpen, setResourceOpen] = useState(false);
   const [editingTreatment, setEditingTreatment] = useState<Treatment | null>(null);
+  const [editingResource, setEditingResource] = useState<Resource | null>(null);
 
   return (
     <div>
@@ -24,6 +28,9 @@ export default function CatalogPage() {
         subtitle="Manage wellness packages and à-la-carte treatments."
         actions={
           <>
+            <button className="btn-secondary" onClick={() => { setEditingResource(null); setResourceOpen(true); }}>
+              <Icon name="add" className="text-[20px]" /> New Therapy Room
+            </button>
             <button className="btn-secondary" onClick={() => setPackageOpen(true)}>
               <Icon name="library_add" className="text-[20px]" /> New Package
             </button>
@@ -116,6 +123,61 @@ export default function CatalogPage() {
         </Card>
       </section>
 
+      <section className="mt-8">
+        <h2 className="mb-3 text-base font-semibold text-on-surface">Therapy Rooms & Resources</h2>
+        <Card className="p-0">
+          <DataState
+            loading={resources.loading}
+            error={resources.error}
+            empty={(resources.data ?? []).length === 0}
+            emptyLabel="No therapy rooms or resources defined yet."
+          >
+            <table className="w-full text-left text-sm">
+              <thead>
+                <tr className="border-b border-outline-variant/50 text-xs font-semibold uppercase tracking-wide text-on-surface-variant">
+                  <th className="px-4 py-3">Name</th>
+                  <th className="px-4 py-3">Type</th>
+                  <th className="px-4 py-3">Capacity</th>
+                  <th className="px-4 py-3">Status</th>
+                  <th className="px-4 py-3"></th>
+                </tr>
+              </thead>
+              <tbody>
+                {(resources.data ?? []).map((r) => (
+                  <tr key={r.id} className="border-b border-outline-variant/30 hover:bg-[#f4f8f7]">
+                    <td className="px-4 py-3 font-medium text-on-surface">{r.name}</td>
+                    <td className="px-4 py-3 text-on-surface-variant">
+                      {r.type === "TREATMENT_ROOM" ? "Treatment room" : "Equipment"}
+                    </td>
+                    <td className="px-4 py-3 text-on-surface-variant">{r.capacity}</td>
+                    <td className="px-4 py-3">
+                      <StatusPill tone={r.active ? "success" : "neutral"}>{r.active ? "Active" : "Inactive"}</StatusPill>
+                    </td>
+                    <td className="px-4 py-3">
+                      <button
+                        className="btn-ghost px-2"
+                        aria-label="Edit resource"
+                        onClick={() => { setEditingResource(r); setResourceOpen(true); }}
+                      >
+                        <Icon name="edit" className="text-[18px]" />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </DataState>
+        </Card>
+      </section>
+
+      {resourceOpen && (
+        <ResourceFormModal
+          open={resourceOpen}
+          resource={editingResource}
+          onClose={() => setResourceOpen(false)}
+          onSaved={() => { setResourceOpen(false); resources.reload(); }}
+        />
+      )}
       {treatmentOpen && (
         <TreatmentFormModal
           open={treatmentOpen}
