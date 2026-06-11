@@ -19,8 +19,10 @@ a `ComplianceGateway`. See [`docs/`](docs/) for the design spec, ADRs, and domai
 2. **Database:** create a hosted Postgres (Neon/Supabase). Copy `.env.example` → `.env` and set
    `DATABASE_URL` (pooled) + `DIRECT_URL` (direct) and the JWT secrets.
 3. **Migrate:** `npm run prisma:migrate` (creates tables)
-4. **Seed:** `npm run seed` (1 property, 9 staff incl. 4 therapists, 10 rooms, 6 treatments,
-   2 packages, demo guests/reservations). Demo staff password: `Passw0rd!`
+4. **Seed:** `npm run seed` (demo property, staff for every role incl. AI, 10 rooms,
+   6 treatments, 2 packages, demo guests/reservations, folios, clinical records,
+   housekeeping, messaging, and compliance events). Demo staff password: `Passw0rd!`;
+   guest portal demo: `guest@demo.test` / `Passw0rd!`.
 5. **Run:** `npm run dev`
 
 ## Scripts
