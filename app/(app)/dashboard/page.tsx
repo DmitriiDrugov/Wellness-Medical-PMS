@@ -42,8 +42,8 @@ export default function DashboardPage() {
           <Card className="lg:col-span-2">
             <div className="mb-4 flex items-center justify-between">
               <h2 className="text-base font-semibold text-on-surface">Arrivals & In-House</h2>
-              <Link href="/reservations" className="text-sm font-medium text-primary hover:underline">
-                Open calendar
+              <Link href="/booking" className="text-sm font-medium text-primary hover:underline">
+                Open booking grid
               </Link>
             </div>
             {reservations.length === 0 ? (
@@ -77,8 +77,8 @@ export default function DashboardPage() {
             <Card>
               <h2 className="mb-3 text-base font-semibold text-on-surface">Quick Actions</h2>
               <div className="grid grid-cols-1 gap-2">
-                <Link href="/reservations" className="btn-secondary justify-start">
-                  <Icon name="add_circle" className="text-[20px]" /> New reservation
+                <Link href="/booking" className="btn-secondary justify-start">
+                  <Icon name="add_circle" className="text-[20px]" /> New booking
                 </Link>
                 <Link href="/guests" className="btn-secondary justify-start">
                   <Icon name="person_add" className="text-[20px]" /> Add guest

@@ -14,22 +14,17 @@ export interface NavItem {
 /** Sidebar information architecture, mirrors the Stitch mockups' left nav. */
 export const NAV_ITEMS: NavItem[] = [
   { label: "Dashboard", href: "/dashboard", icon: "dashboard" },
-  { label: "Reservations", href: "/reservations", icon: "calendar_month", capability: "reservation:read" },
+  { label: "Booking", href: "/booking", icon: "calendar_month", capability: "reservation:read" },
   { label: "Guests", href: "/guests", icon: "group", capability: "guest:read" },
   { label: "Treatments", href: "/schedule", icon: "spa", capability: "appointment:read" },
   { label: "Packages", href: "/catalog", icon: "inventory_2", capability: "catalog:read" },
   { label: "Billing", href: "/billing", icon: "receipt_long", capability: "folio:read" },
+  { label: "Housekeeping", href: "/housekeeping", icon: "cleaning_services", roles: ["HOUSEKEEPING", "MANAGER", "ADMIN"] },
+  { label: "Hotel", href: "/hotel", icon: "settings", capability: "property:manage" },
   { label: "Reports", href: "/reports", icon: "assessment", capability: "report:read" },
   { label: "Audit Log", href: "/audit", icon: "history", capability: "audit:read" },
   { label: "Form Templates", href: "/form-templates", icon: "description", capability: "forms:manage" },
-  // ---- Stubs: backend not yet built (Phases 7–10 + Housekeeping) ----
-  {
-    label: "Housekeeping",
-    href: "/housekeeping",
-    icon: "cleaning_services",
-    roles: ["HOUSEKEEPING", "MANAGER", "ADMIN"],
-    stub: true,
-  },
+  // ---- Stubs: backend not yet built (Phases 8–10) ----
   { label: "Membership", href: "/membership", icon: "card_membership", roles: ["MANAGER", "ADMIN"], stub: true },
   { label: "Messages", href: "/messages", icon: "forum", capability: "messaging:read" },
 ];

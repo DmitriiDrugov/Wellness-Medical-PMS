@@ -42,6 +42,21 @@ export const reportingRepository = {
     });
   },
 
+  /** Posted tourist-tax line items in [from, to), with the stay's guest for the return. */
+  touristTaxInRange(propertyId: string, from: Date, to: Date) {
+    return prisma.folioLineItem.findMany({
+      where: { folio: { propertyId }, type: "TOURIST_TAX", createdAt: { gte: from, lt: to } },
+      orderBy: { createdAt: "asc" },
+      select: {
+        id: true,
+        quantity: true,
+        amountMinor: true,
+        createdAt: true,
+        folio: { select: { guest: { select: { firstName: true, lastName: true } } } },
+      },
+    });
+  },
+
   /** Blocking appointments overlapping [from, to), with treatment details. */
   appointmentsInRange(propertyId: string, from: Date, to: Date) {
     return prisma.treatmentAppointment.findMany({

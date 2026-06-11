@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { api } from "@/web/api-client";
 import { useApi } from "@/web/use-api";
+import { useEventStream } from "@/web/use-event-stream";
 import type { Reservation, Folio, FolioSummary } from "@/web/types";
 import { PageHeader, Card, StatusPill, Icon, DataState } from "@/web/components/ui";
 import { fullName, formatDate, formatMinor } from "@/web/format";
@@ -77,6 +78,15 @@ function FolioPanel({ reservationId }: { reservationId: string }) {
     [folioId],
   );
   const reloadFolio = folio.reload;
+
+  // Live: refetch the folio whenever a folio/booking change lands (e.g. a treatment
+  // completed elsewhere posts a charge, or check-out adds room + tax).
+  useEventStream((ev) => {
+    if (ev.entity === "folio" || ev.entity === "booking") {
+      summaries.reload();
+      reloadFolio();
+    }
+  });
 
   if (summaries.loading) return <Card>Loading folio…</Card>;
   if (!folioId) {

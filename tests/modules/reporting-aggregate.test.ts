@@ -34,6 +34,6 @@ describe("groupChargesByType", () => {
       { type: "ROOM", amountMinor: 3_500_000 },
       { type: "TREATMENT", amountMinor: 1_400_000 },
     ]);
-    expect(totals).toEqual({ ROOM: 7_000_000, PACKAGE: 0, TREATMENT: 1_400_000, ADJUSTMENT: 0 });
+    expect(totals).toEqual({ ROOM: 7_000_000, PACKAGE: 0, TREATMENT: 1_400_000, TOURIST_TAX: 0, ADJUSTMENT: 0 });
   });
 });

@@ -1,13 +1,21 @@
-import { PrismaClient, ResourceType } from "@prisma/client";
+import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
-// Helper: HUF -> minor units (fillér). 35000 HUF -> 3_500_000.
-const huf = (amount: number) => amount * 100;
+/**
+ * Minimal bootstrap seed — NOT demo data.
+ *
+ * The system is shipped clean for real-world testing: this creates only the single
+ * Property the runtime requires (FKs hang off it) and one ADMIN login. Everything
+ * else — rooms, guests, bookings, catalog, appointments — is created through the
+ * app. Re-running wipes the database back to this clean baseline.
+ *
+ * Admin credentials: admin@hotel.example / $SEED_ADMIN_PASSWORD (default "Passw0rd!").
+ */
 
-// Shared demo password for all seeded staff accounts.
-const DEMO_PASSWORD = "Passw0rd!";
+const ADMIN_EMAIL = "admin@hotel.example";
+const ADMIN_PASSWORD = process.env.SEED_ADMIN_PASSWORD ?? "Passw0rd!";
 
 async function clear() {
   // Delete in FK-safe order (children first).
@@ -32,6 +40,8 @@ async function clear() {
   await prisma.refreshToken.deleteMany();
   await prisma.message.deleteMany();
   await prisma.conversation.deleteMany();
+  await prisma.guestDocument.deleteMany();
+  await prisma.medicalProfile.deleteMany();
   await prisma.guestAccount.deleteMany();
   await prisma.guest.deleteMany();
   await prisma.staff.deleteMany();
@@ -41,9 +51,6 @@ async function clear() {
 async function main() {
   await clear();
 
-  const passwordHash = await bcrypt.hash(DEMO_PASSWORD, 10);
-
-  // --- Property ---
   const property = await prisma.property.create({
     data: {
       name: "Thermál Wellness Hotel",
@@ -54,280 +61,33 @@ async function main() {
       city: "Hévíz",
       postalCode: "8380",
       country: "HU",
+      // Hungarian tourist tax (IFA): 500 HUF per adult per night, under-18 exempt.
+      touristTaxPerPersonPerNightMinor: 50_000,
+      touristTaxAppliesToChildren: false,
     },
   });
-  const propertyId = property.id;
 
-  // --- Staff (all 7 roles; 4 therapists + 1 AI agent) ---
-  const staffData = [
-    { email: "admin@hotel.test", role: "ADMIN", firstName: "Anna", lastName: "Admin" },
-    { email: "manager@hotel.test", role: "MANAGER", firstName: "Márton", lastName: "Manager" },
-    { email: "reception@hotel.test", role: "RECEPTION", firstName: "Réka", lastName: "Reception" },
-    { email: "reservations@hotel.test", role: "RESERVATION_ADMIN", firstName: "Róbert", lastName: "Reserve" },
-    { email: "housekeeping@hotel.test", role: "HOUSEKEEPING", firstName: "Hanna", lastName: "House" },
-    { email: "therapist1@hotel.test", role: "THERAPIST", firstName: "Tamás", lastName: "Tóth" },
-    { email: "therapist2@hotel.test", role: "THERAPIST", firstName: "Tímea", lastName: "Takács" },
-    { email: "therapist3@hotel.test", role: "THERAPIST", firstName: "Tibor", lastName: "Tar" },
-    { email: "therapist4@hotel.test", role: "THERAPIST", firstName: "Teréz", lastName: "Tóth" },
-    { email: "ai@hotel.test", role: "AI_AGENT", firstName: "Aria", lastName: "AI" },
-  ] as const;
-
-  const staff = [];
-  for (const s of staffData) {
-    staff.push(
-      await prisma.staff.create({
-        data: { ...s, propertyId, passwordHash },
-      }),
-    );
-  }
-  const therapists = staff.filter((s) => s.role === "THERAPIST");
-
-  // --- Room types & 10 rooms ---
-  const roomTypeDefs = [
-    { name: "Standard Double", basePriceMinor: huf(32000), maxOccupancy: 2, count: 4 },
-    { name: "Superior Double", basePriceMinor: huf(42000), maxOccupancy: 2, count: 3 },
-    { name: "Wellness Suite", basePriceMinor: huf(68000), maxOccupancy: 3, count: 2 },
-    { name: "Family Room", basePriceMinor: huf(55000), maxOccupancy: 4, count: 1 },
-  ];
-
-  let roomCounter = 100;
-  const roomTypes = [];
-  const rooms = [];
-  for (const def of roomTypeDefs) {
-    const rt = await prisma.roomType.create({
-      data: {
-        propertyId,
-        name: def.name,
-        basePriceMinor: def.basePriceMinor,
-        maxOccupancy: def.maxOccupancy,
-        description: `${def.name} with thermal spa access`,
-      },
-    });
-    roomTypes.push(rt);
-    for (let i = 0; i < def.count; i++) {
-      roomCounter += 1;
-      rooms.push(
-        await prisma.room.create({
-          data: {
-            propertyId,
-            number: String(roomCounter),
-            roomTypeId: rt.id,
-            floor: Math.floor(roomCounter / 100),
-            housekeepingStatus: "CLEAN",
-          },
-        }),
-      );
-    }
-  }
-
-  // --- Resources (treatment rooms + equipment) ---
-  const resourceDefs = [
-    { name: "Massage Room A", type: ResourceType.TREATMENT_ROOM },
-    { name: "Massage Room B", type: ResourceType.TREATMENT_ROOM },
-    { name: "Hydrotherapy Room", type: ResourceType.TREATMENT_ROOM },
-    { name: "Physio Room", type: ResourceType.TREATMENT_ROOM },
-    { name: "Mud Wrap Station", type: ResourceType.EQUIPMENT },
-  ];
-  const resources = [];
-  for (const r of resourceDefs) {
-    resources.push(await prisma.resource.create({ data: { propertyId, ...r } }));
-  }
-
-  // --- 6 Treatments ---
-  const treatmentDefs = [
-    { name: "Swedish Massage", durationMinutes: 50, priceMinor: huf(14000), requiredResourceType: ResourceType.TREATMENT_ROOM },
-    { name: "Deep Tissue Massage", durationMinutes: 60, priceMinor: huf(17000), requiredResourceType: ResourceType.TREATMENT_ROOM },
-    { name: "Thermal Mud Wrap", durationMinutes: 45, priceMinor: huf(13000), requiredResourceType: ResourceType.EQUIPMENT },
-    { name: "Hydrotherapy Session", durationMinutes: 40, priceMinor: huf(12000), requiredResourceType: ResourceType.TREATMENT_ROOM },
-    { name: "Physiotherapy Consultation", durationMinutes: 30, priceMinor: huf(11000), requiredResourceType: ResourceType.TREATMENT_ROOM },
-    { name: "Aromatherapy Facial", durationMinutes: 55, priceMinor: huf(15000), requiredResourceType: ResourceType.TREATMENT_ROOM },
-  ];
-  const treatments = [];
-  for (const t of treatmentDefs) {
-    treatments.push(await prisma.treatment.create({ data: { propertyId, ...t } }));
-  }
-
-  // --- 2 Service packages ---
-  const relaxPackage = await prisma.servicePackage.create({
+  await prisma.staff.create({
     data: {
-      propertyId,
-      name: "Relax & Renew",
-      description: "Swedish massage + aromatherapy facial",
-      priceMinor: huf(26000),
-      items: {
-        create: [
-          { treatmentId: treatments[0]!.id, quantity: 1 },
-          { treatmentId: treatments[5]!.id, quantity: 1 },
-        ],
-      },
-    },
-  });
-  const thermalPackage = await prisma.servicePackage.create({
-    data: {
-      propertyId,
-      name: "Thermal Therapy",
-      description: "Mud wrap + hydrotherapy + physio consult",
-      priceMinor: huf(33000),
-      items: {
-        create: [
-          { treatmentId: treatments[2]!.id, quantity: 1 },
-          { treatmentId: treatments[3]!.id, quantity: 1 },
-          { treatmentId: treatments[4]!.id, quantity: 1 },
-        ],
-      },
+      propertyId: property.id,
+      email: ADMIN_EMAIL,
+      passwordHash: await bcrypt.hash(ADMIN_PASSWORD, 10),
+      role: "ADMIN",
+      firstName: "System",
+      lastName: "Admin",
     },
   });
 
-  // --- Guests ---
-  const guestDefs = [
-    { firstName: "János", lastName: "Kovács", email: "janos.kovacs@example.com", nationality: "HU" },
-    { firstName: "Eszter", lastName: "Nagy", email: "eszter.nagy@example.com", nationality: "HU" },
-    { firstName: "Liam", lastName: "Schmidt", email: "liam.schmidt@example.de", nationality: "DE" },
-    { firstName: "Sophie", lastName: "Dubois", email: "sophie.dubois@example.fr", nationality: "FR" },
-  ];
-  const guests = [];
-  for (const g of guestDefs) {
-    guests.push(
-      await prisma.guest.create({
-        data: {
-          ...g,
-          gdprConsentDataProcessing: true,
-          gdprConsentAt: new Date(),
-        },
-      }),
-    );
-  }
-
-  // --- Demo guest account & AI conversation ---
-  const demoGuest = guests[0]!;
-  await prisma.guestAccount.create({
-    data: {
-      guestId: demoGuest.id,
-      email: demoGuest.email ?? "guest@demo.test",
-      passwordHash: await bcrypt.hash(DEMO_PASSWORD, 10),
-      activatedAt: new Date(),
-    },
-  });
-  const convo = await prisma.conversation.create({
-    data: { propertyId: property.id, guestId: demoGuest.id, handling: "AI" },
-  });
-  await prisma.message.create({
-    data: { conversationId: convo.id, senderKind: "GUEST", body: "Hi, what time does the spa open?" },
-  });
-  await prisma.message.create({
-    data: { conversationId: convo.id, senderKind: "AI", body: "Good day! Our spa is open 08:00–20:00 daily." },
-  });
-
-  // --- Reservations + a folio ---
-  const today = new Date();
-  const addDays = (d: Date, n: number) => new Date(d.getFullYear(), d.getMonth(), d.getDate() + n);
-
-  const res1 = await prisma.reservation.create({
-    data: {
-      propertyId,
-      guestId: guests[0]!.id,
-      roomTypeId: roomTypes[0]!.id,
-      roomId: rooms[0]!.id,
-      checkInDate: addDays(today, -1),
-      checkOutDate: addDays(today, 2),
-      status: "CHECKED_IN",
-      adults: 2,
-      ratePerNightMinor: roomTypes[0]!.basePriceMinor,
-    },
-  });
-
-  await prisma.reservation.create({
-    data: {
-      propertyId,
-      guestId: guests[1]!.id,
-      roomTypeId: roomTypes[1]!.id,
-      checkInDate: addDays(today, 5),
-      checkOutDate: addDays(today, 8),
-      status: "CONFIRMED",
-      adults: 1,
-      ratePerNightMinor: roomTypes[1]!.basePriceMinor,
-    },
-  });
-
-  // Open folio for the checked-in guest, with one room-night charge.
-  await prisma.folio.create({
-    data: {
-      propertyId,
-      guestId: guests[0]!.id,
-      reservationId: res1.id,
-      lineItems: {
-        create: [
-          {
-            type: "ROOM",
-            description: "Standard Double — night 1",
-            quantity: 1,
-            unitPriceMinor: roomTypes[0]!.basePriceMinor,
-            amountMinor: roomTypes[0]!.basePriceMinor,
-            sourceType: "Reservation",
-            sourceId: res1.id,
-          },
-        ],
-      },
-    },
-  });
-
-  // A sample appointment for the checked-in guest.
-  const apptStart = new Date(today.getFullYear(), today.getMonth(), today.getDate(), 10, 0, 0);
-  const apptEnd = new Date(apptStart.getTime() + treatments[0]!.durationMinutes * 60_000);
-  await prisma.treatmentAppointment.create({
-    data: {
-      propertyId,
-      guestId: guests[0]!.id,
-      treatmentId: treatments[0]!.id,
-      therapistId: therapists[0]!.id,
-      resourceId: resources[0]!.id,
-      startTime: apptStart,
-      endTime: apptEnd,
-      status: "SCHEDULED",
-      reservationId: res1.id,
-    },
-  });
-
-  // --- Phase 6: clinical forms & consents ---
-  await prisma.formTemplate.create({
-    data: {
-      propertyId,
-      name: "Wellness Intake",
-      type: "INTAKE",
-      schema: {
-        questions: [
-          { key: "allergies", label: "Known allergies", type: "text" },
-          { key: "conditions", label: "Existing medical conditions", type: "text" },
-          { key: "pregnant", label: "Currently pregnant?", type: "boolean" },
-          { key: "goals", label: "Wellness goals", type: "text" },
-        ],
-      },
-    },
-  });
-
-  // Grant the consents required to author a TreatmentRecord for the checked-in guest.
-  for (const type of ["TREATMENT", "GDPR_DATA_PROCESSING"] as const) {
-    await prisma.consent.create({
-      data: { propertyId, guestId: guests[0]!.id, type, version: "v1", text: `${type} consent v1` },
-    });
-  }
-
-  console.log("Seed complete:");
-  console.log(`  Property: ${property.name} (${propertyId})`);
-  console.log(`  Staff: ${staff.length} (${therapists.length} therapists, 1 AI agent)`);
-  console.log(`  Rooms: ${rooms.length} across ${roomTypes.length} room types`);
-  console.log(`  Treatments: ${treatments.length}, Packages: 2, Resources: ${resources.length}`);
-  console.log(`  Guests: ${guests.length}, Reservations: 2, Folio: 1, Appointment: 1`);
-  console.log(`  GuestAccount: 1 (${demoGuest.email}), Conversation: 1, Messages: 2`);
-  console.log(`  Demo login password for all staff: ${DEMO_PASSWORD}`);
+  console.log("Bootstrap complete — clean system ready for testing.");
+  console.log(`  Property: ${property.name} (${property.id})`);
+  console.log(`  Admin login: ${ADMIN_EMAIL} / ${ADMIN_PASSWORD}`);
 }
 
 main()
-  .then(async () => {
-    await prisma.$disconnect();
-  })
-  .catch(async (e) => {
+  .catch((e) => {
     console.error(e);
-    await prisma.$disconnect();
     process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
   });

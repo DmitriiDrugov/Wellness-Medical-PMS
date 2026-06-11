@@ -9,15 +9,27 @@ import { Field, FormError, FormActions } from "@/web/components/form";
 import { fullName } from "@/web/format";
 import type { Guest, RoomTypeRef } from "@/web/types";
 
-export function ReservationFormModal({ open, onClose, onSaved }: { open: boolean; onClose: () => void; onSaved: () => void }) {
+export function BookingFormModal({
+  open,
+  onClose,
+  onSaved,
+  defaultRoomTypeId,
+  defaultCheckIn,
+}: {
+  open: boolean;
+  onClose: () => void;
+  onSaved: () => void;
+  defaultRoomTypeId?: string;
+  defaultCheckIn?: string;
+}) {
   const { submit, submitting, error, fieldErrors } = useMutation();
   const guests = useApi<Guest[]>(() => api.get<Guest[]>("/api/guests", { pageSize: 100 }), []);
   const roomTypes = useApi<RoomTypeRef[]>(() => api.get<RoomTypeRef[]>("/api/room-types"), []);
 
   const [form, setForm] = useState({
     guestId: "",
-    roomTypeId: "",
-    checkInDate: "",
+    roomTypeId: defaultRoomTypeId ?? "",
+    checkInDate: defaultCheckIn ?? "",
     checkOutDate: "",
     adults: "1",
     children: "0",
@@ -41,7 +53,7 @@ export function ReservationFormModal({ open, onClose, onSaved }: { open: boolean
   }
 
   return (
-    <Modal open={open} onClose={onClose} title="New Reservation">
+    <Modal open={open} onClose={onClose} title="New Booking">
       <form onSubmit={onSubmit} className="space-y-4">
         <FormError message={error} />
         <Field label="Guest" required error={fieldErrors.guestId}>
@@ -81,7 +93,7 @@ export function ReservationFormModal({ open, onClose, onSaved }: { open: boolean
           </Field>
         </div>
         <div className="flex justify-end gap-2 pt-2">
-          <FormActions onCancel={onClose} submitting={submitting} submitLabel="Create reservation" />
+          <FormActions onCancel={onClose} submitting={submitting} submitLabel="Create booking" />
         </div>
       </form>
     </Modal>

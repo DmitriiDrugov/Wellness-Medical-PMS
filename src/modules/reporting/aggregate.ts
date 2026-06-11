@@ -29,7 +29,22 @@ export function sumAmounts(rows: ReadonlyArray<{ amountMinor: number }>): number
 export function groupChargesByType(
   items: ReadonlyArray<{ type: LineItemType; amountMinor: number }>,
 ): Record<LineItemType, number> {
-  const totals: Record<LineItemType, number> = { ROOM: 0, PACKAGE: 0, TREATMENT: 0, ADJUSTMENT: 0 };
+  const totals: Record<LineItemType, number> = { ROOM: 0, PACKAGE: 0, TREATMENT: 0, TOURIST_TAX: 0, ADJUSTMENT: 0 };
   for (const item of items) totals[item.type] += item.amountMinor;
   return totals;
+}
+
+/**
+ * Tourist-tax return totals for a reporting window. Each row is a posted
+ * TOURIST_TAX line item whose `quantity` is the stay's taxable person-nights and
+ * whose `amountMinor` is the tax collected.
+ */
+export function summarizeTouristTax(
+  rows: ReadonlyArray<{ quantity: number; amountMinor: number }>,
+): { taxableStays: number; taxablePersonNights: number; totalTaxMinor: number } {
+  return {
+    taxableStays: rows.length,
+    taxablePersonNights: rows.reduce((n, r) => n + r.quantity, 0),
+    totalTaxMinor: rows.reduce((n, r) => n + r.amountMinor, 0),
+  };
 }

@@ -2,10 +2,12 @@ import type { Folio } from "@prisma/client";
 import type { AuthContext } from "@/platform/auth/context";
 import { requireCapability } from "@/platform/rbac";
 import { recordAudit } from "@/platform/audit";
+import { eventBus } from "@/platform/events";
 import { ConflictError, NotFoundError } from "@/platform/errors";
 import { packagesService } from "@/modules/packages/packages.service";
 import { folioRepository } from "@/modules/folio/folio.repository";
 import { sumAmounts } from "@/modules/folio/money";
+import { computeTouristTax, taxablePersonNights } from "@/modules/folio/tax";
 import type { AddChargeInput, ChargePackageInput, AddPaymentInput, ListFoliosQuery } from "@/modules/folio/folio.schema";
 
 /** Actor identity passed to internal posting methods (no capability check there). */
@@ -68,6 +70,7 @@ export const folioService = {
       after: item,
       metadata: { folioId: id },
     });
+    eventBus.emit({ type: "folio.charged", entity: "folio", entityId: id, propertyId: ctx.propertyId });
     return this.get(ctx, id);
   },
 
@@ -96,6 +99,7 @@ export const folioService = {
       after: item,
       metadata: { folioId: id, packageId: pkg.id },
     });
+    eventBus.emit({ type: "folio.charged", entity: "folio", entityId: id, propertyId: ctx.propertyId });
     return this.get(ctx, id);
   },
 
@@ -119,6 +123,7 @@ export const folioService = {
       after: payment,
       metadata: { folioId: id },
     });
+    eventBus.emit({ type: "folio.payment", entity: "folio", entityId: id, propertyId: ctx.propertyId });
     return this.get(ctx, id);
   },
 
@@ -141,6 +146,7 @@ export const folioService = {
       before: { status: "OPEN" },
       after: { status: "CLOSED" },
     });
+    eventBus.emit({ type: "folio.closed", entity: "folio", entityId: id, propertyId: ctx.propertyId });
     return this.get(ctx, id);
   },
 
@@ -214,5 +220,59 @@ export const folioService = {
       after: item,
       metadata: { folioId: folio.id, auto: "treatment-charge" },
     });
+    eventBus.emit({ type: "folio.treatment-charged", entity: "folio", entityId: folio.id, propertyId: actor.propertyId });
+  },
+
+  /**
+   * Recompute and post the stay's tourist tax as a single idempotent TOURIST_TAX
+   * line item. Safe to call repeatedly (e.g. on check-out, or after the stay's
+   * dates/occupancy change): the prior tax line for the reservation is removed first.
+   */
+  async postTouristTax(
+    actor: Actor,
+    input: { reservationId: string; guestId: string; adults: number; children: number; nights: number },
+  ): Promise<void> {
+    const cfg = await folioRepository.taxConfig(actor.propertyId);
+    if (!cfg) return;
+    const config = {
+      perPersonPerNightMinor: cfg.touristTaxPerPersonPerNightMinor,
+      appliesToChildren: cfg.touristTaxAppliesToChildren,
+    };
+    const stay = { adults: input.adults, children: input.children, nights: input.nights };
+    const amountMinor = computeTouristTax(stay, config);
+
+    const folio = await this.ensureForReservation({
+      propertyId: actor.propertyId,
+      reservationId: input.reservationId,
+      guestId: input.guestId,
+    });
+    if (folio.status !== "OPEN") return;
+
+    // Idempotent recompute: drop any prior tax line for this reservation.
+    await folioRepository.deleteLineItemsBySource(folio.id, "TOURIST_TAX", "Reservation", input.reservationId);
+    if (amountMinor <= 0) return;
+
+    const personNights = taxablePersonNights(stay, config);
+    const item = await folioRepository.addLineItem({
+      folioId: folio.id,
+      type: "TOURIST_TAX",
+      description: `Tourist tax — ${personNights} person-night(s)`,
+      quantity: personNights,
+      unitPriceMinor: config.perPersonPerNightMinor,
+      amountMinor,
+      sourceType: "Reservation",
+      sourceId: input.reservationId,
+      createdByStaffId: actor.staffId,
+    });
+    await recordAudit({
+      actorStaffId: actor.staffId,
+      propertyId: actor.propertyId,
+      action: "CREATE",
+      entityType: "FolioLineItem",
+      entityId: item.id,
+      after: item,
+      metadata: { folioId: folio.id, auto: "tourist-tax" },
+    });
+    eventBus.emit({ type: "folio.tax-posted", entity: "folio", entityId: folio.id, propertyId: actor.propertyId });
   },
 };

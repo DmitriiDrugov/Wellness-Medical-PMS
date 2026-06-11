@@ -2,15 +2,22 @@ import type { Reservation, Room } from "@prisma/client";
 import type { AuthContext } from "@/platform/auth/context";
 import { requireCapability } from "@/platform/rbac";
 import { recordAudit } from "@/platform/audit";
+import { eventBus } from "@/platform/events";
 import { ConflictError, NotFoundError, ValidationError } from "@/platform/errors";
 import { nightsBetween } from "@/platform/intervals";
 import { folioService } from "@/modules/folio/folio.service";
 import { reservationsRepository } from "@/modules/reservations/reservations.repository";
+import { computeUtilization } from "@/modules/reservations/grid";
 import type {
   CreateReservationInput,
   UpdateReservationInput,
   AvailabilityQuery,
   ListReservationsQuery,
+  BookingGridQuery,
+  CreateRoomTypeInput,
+  UpdateRoomTypeInput,
+  CreateRoomInput,
+  UpdateRoomInput,
 } from "@/modules/reservations/reservations.schema";
 
 async function getOrThrow(id: string) {
@@ -51,6 +58,7 @@ export const reservationsService = {
       take: query.pageSize,
       status: query.status,
       roomId: query.roomId,
+      guestId: query.guestId,
       from: query.from,
       to: query.to,
     });
@@ -97,6 +105,7 @@ export const reservationsService = {
       entityId: reservation.id,
       after: reservation,
     });
+    eventBus.emit({ type: "booking.created", entity: "booking", entityId: reservation.id, propertyId: ctx.propertyId });
     return reservation;
   },
 
@@ -120,6 +129,7 @@ export const reservationsService = {
       before,
       after,
     });
+    eventBus.emit({ type: "booking.updated", entity: "booking", entityId: id, propertyId: ctx.propertyId });
     return after;
   },
 
@@ -138,6 +148,7 @@ export const reservationsService = {
       after,
       metadata: { operation: "assign-room", roomId },
     });
+    eventBus.emit({ type: "booking.room-assigned", entity: "booking", entityId: id, propertyId: ctx.propertyId });
     return after;
   },
 
@@ -176,6 +187,15 @@ export const reservationsService = {
       ratePerNightMinor: before.ratePerNightMinor,
       description: `${before.roomType.name} — ${nights} night(s)`,
     });
+    // Accrue the Hungarian tourist tax (IFA) for the stay onto the same folio.
+    await folioService.postTouristTax(ctx, {
+      reservationId: id,
+      guestId: before.guestId,
+      adults: before.adults,
+      children: before.children,
+      nights,
+    });
+    eventBus.emit({ type: "booking.checked-out", entity: "booking", entityId: id, propertyId: ctx.propertyId });
     return after;
   },
 
@@ -208,12 +228,124 @@ export const reservationsService = {
       after,
       metadata: { from: before.status, to: next },
     });
+    eventBus.emit({ type: `booking.${next.toLowerCase()}`, entity: "booking", entityId: id, propertyId: ctx.propertyId });
     return after;
+  },
+
+  /**
+   * Booking-grid payload: the full room inventory (rows), every booking overlapping
+   * the window (bars), the room-type list (filters) and occupancy for the footer.
+   * One read powers the whole resource × time tape-chart.
+   */
+  async grid(ctx: AuthContext, query: BookingGridQuery) {
+    requireCapability(ctx.role, "reservation:read");
+    const [rooms, reservations] = await Promise.all([
+      reservationsRepository.roomsWithType(ctx.propertyId),
+      reservationsRepository.reservationsInWindow(ctx.propertyId, query.from, query.to),
+    ]);
+
+    const roomTypes = [...new Map(rooms.map((r) => [r.roomType.id, r.roomType])).values()].sort((a, b) =>
+      a.name.localeCompare(b.name),
+    );
+
+    const bookings = reservations.map((r) => ({
+      id: r.id,
+      guestId: r.guestId,
+      guestName: `${r.guest.firstName} ${r.guest.lastName}`.trim(),
+      roomId: r.roomId,
+      roomNumber: r.room?.number ?? null,
+      roomTypeId: r.roomTypeId,
+      roomTypeName: r.roomType.name,
+      checkInDate: r.checkInDate,
+      checkOutDate: r.checkOutDate,
+      status: r.status,
+      adults: r.adults,
+      children: r.children,
+    }));
+
+    const utilization = computeUtilization(
+      reservations.map((r) => ({ roomId: r.roomId, checkInDate: r.checkInDate, checkOutDate: r.checkOutDate })),
+      rooms.length,
+      query.from,
+      query.to,
+    );
+
+    return {
+      from: query.from,
+      to: query.to,
+      view: query.view,
+      rooms: rooms.map((r) => ({
+        id: r.id,
+        number: r.number,
+        floor: r.floor,
+        roomTypeId: r.roomTypeId,
+        roomTypeName: r.roomType.name,
+        housekeepingStatus: r.housekeepingStatus,
+      })),
+      roomTypes,
+      bookings,
+      utilization,
+    };
   },
 
   async listRoomTypes(ctx: AuthContext) {
     requireCapability(ctx.role, "reservation:read");
     return reservationsRepository.listRoomTypes(ctx.propertyId);
+  },
+
+  // ---- Room-type & room management (property:manage) ----
+
+  async createRoomType(ctx: AuthContext, input: CreateRoomTypeInput) {
+    requireCapability(ctx.role, "property:manage");
+    const rt = await reservationsRepository.createRoomType({ propertyId: ctx.propertyId, ...input });
+    await recordAudit({ actorStaffId: ctx.staffId, propertyId: ctx.propertyId, action: "CREATE", entityType: "RoomType", entityId: rt.id, after: rt });
+    eventBus.emit({ type: "room.type-created", entity: "room", entityId: rt.id, propertyId: ctx.propertyId });
+    return rt;
+  },
+
+  async updateRoomType(ctx: AuthContext, id: string, input: UpdateRoomTypeInput) {
+    requireCapability(ctx.role, "property:manage");
+    const before = await reservationsRepository.roomTypeById(id);
+    if (!before || before.propertyId !== ctx.propertyId) throw new NotFoundError("Room type not found");
+    const after = await reservationsRepository.updateRoomType(id, input);
+    await recordAudit({ actorStaffId: ctx.staffId, propertyId: ctx.propertyId, action: "UPDATE", entityType: "RoomType", entityId: id, before, after });
+    eventBus.emit({ type: "room.type-updated", entity: "room", entityId: id, propertyId: ctx.propertyId });
+    return after;
+  },
+
+  async createRoom(ctx: AuthContext, input: CreateRoomInput) {
+    requireCapability(ctx.role, "property:manage");
+    const roomType = await reservationsRepository.roomTypeById(input.roomTypeId);
+    if (!roomType || roomType.propertyId !== ctx.propertyId) throw new NotFoundError("Room type not found");
+    const room = await reservationsRepository.createRoom({ propertyId: ctx.propertyId, ...input });
+    await recordAudit({ actorStaffId: ctx.staffId, propertyId: ctx.propertyId, action: "CREATE", entityType: "Room", entityId: room.id, after: room });
+    eventBus.emit({ type: "room.created", entity: "room", entityId: room.id, propertyId: ctx.propertyId });
+    return room;
+  },
+
+  async updateRoom(ctx: AuthContext, id: string, input: UpdateRoomInput) {
+    requireCapability(ctx.role, "property:manage");
+    const before = await reservationsRepository.roomById(id);
+    if (!before || before.propertyId !== ctx.propertyId) throw new NotFoundError("Room not found");
+    if (input.roomTypeId) {
+      const rt = await reservationsRepository.roomTypeById(input.roomTypeId);
+      if (!rt || rt.propertyId !== ctx.propertyId) throw new NotFoundError("Room type not found");
+    }
+    const after = await reservationsRepository.updateRoom(id, input);
+    await recordAudit({ actorStaffId: ctx.staffId, propertyId: ctx.propertyId, action: "UPDATE", entityType: "Room", entityId: id, before, after });
+    eventBus.emit({ type: "room.updated", entity: "room", entityId: id, propertyId: ctx.propertyId });
+    return after;
+  },
+
+  async deleteRoom(ctx: AuthContext, id: string): Promise<void> {
+    requireCapability(ctx.role, "property:manage");
+    const before = await reservationsRepository.roomById(id);
+    if (!before || before.propertyId !== ctx.propertyId) throw new NotFoundError("Room not found");
+    const used = await reservationsRepository.countRoomReservations(id);
+    if (used > 0) throw new ConflictError("Cannot delete a room that has reservations; mark it out of order instead");
+    await reservationsRepository.deleteRoom(id);
+    await recordAudit({ actorStaffId: ctx.staffId, propertyId: ctx.propertyId, action: "DELETE", entityType: "Room", entityId: id, before });
+    eventBus.emit({ type: "room.deleted", entity: "room", entityId: id, propertyId: ctx.propertyId });
   },
 
   async listRooms(ctx: AuthContext) {

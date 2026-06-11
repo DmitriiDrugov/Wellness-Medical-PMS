@@ -1,34 +1,51 @@
 "use client";
 
-import { PageHeader, Card, StubBanner, Icon } from "@/web/components/ui";
-
-const COLUMNS = [
-  { title: "Dirty", tone: "warning", icon: "warning" },
-  { title: "In Progress", tone: "info", icon: "cleaning_services" },
-  { title: "Inspected", tone: "info", icon: "verified" },
-  { title: "Ready", tone: "success", icon: "check_circle" },
-] as const;
+import { useState } from "react";
+import { api } from "@/web/api-client";
+import { useApi } from "@/web/use-api";
+import { useEventStream } from "@/web/use-event-stream";
+import { useAuth } from "@/web/auth-context";
+import type { HousekeepingTask } from "@/web/types";
+import { PageHeader, DataState, Icon } from "@/web/components/ui";
+import { TaskBoard } from "../hotel/TaskBoard";
+import { TaskFormModal } from "../hotel/TaskFormModal";
 
 export default function HousekeepingPage() {
+  const { user } = useAuth();
+  // Housekeeping staff default to their own queue (the mobile view); managers see all.
+  const [mine, setMine] = useState(user?.role === "HOUSEKEEPING");
+  const [createOpen, setCreateOpen] = useState(false);
+
+  const tasks = useApi<HousekeepingTask[]>(
+    () => api.get<HousekeepingTask[]>("/api/housekeeping/tasks", mine ? { mine: "true" } : undefined),
+    [mine],
+  );
+  useEventStream((ev) => {
+    if (ev.entity === "housekeeping") tasks.reload();
+  });
+
   return (
     <div>
-      <PageHeader title="Housekeeping Board" subtitle="Room turnover and cleaning workflow." />
-      <div className="mb-6">
-        <StubBanner feature="Housekeeping" phase="the Housekeeping module (HousekeepingTask + Room status exist in the schema; endpoints are not yet built)" />
-      </div>
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-        {COLUMNS.map((c) => (
-          <Card key={c.title} className="opacity-60">
-            <div className="mb-3 flex items-center gap-2">
-              <Icon name={c.icon} className="text-[20px] text-on-surface-variant" />
-              <h2 className="text-sm font-semibold text-on-surface">{c.title}</h2>
-            </div>
-            <div className="grid place-items-center rounded-lg border border-dashed border-outline-variant py-10 text-xs text-on-surface-variant">
-              Awaiting housekeeping API
-            </div>
-          </Card>
-        ))}
-      </div>
+      <PageHeader
+        title="Housekeeping Board"
+        subtitle="Cleaning, maintenance and inspection tasks across the property."
+        actions={
+          <div className="flex items-center gap-3">
+            <label className="flex items-center gap-2 text-sm text-on-surface-variant">
+              <input type="checkbox" checked={mine} onChange={(e) => setMine(e.target.checked)} /> My tasks only
+            </label>
+            <button className="btn-primary" onClick={() => setCreateOpen(true)}>
+              <Icon name="add" className="text-[20px]" /> New task
+            </button>
+          </div>
+        }
+      />
+      <DataState loading={tasks.loading} error={tasks.error}>
+        <TaskBoard tasks={tasks.data ?? []} onChanged={tasks.reload} />
+      </DataState>
+      {createOpen && (
+        <TaskFormModal open={createOpen} onClose={() => setCreateOpen(false)} onSaved={() => { setCreateOpen(false); tasks.reload(); }} />
+      )}
     </div>
   );
 }
