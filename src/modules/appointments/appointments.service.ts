@@ -1,4 +1,4 @@
-import type { TreatmentAppointment } from "@prisma/client";
+﻿import type { TreatmentAppointment } from "@prisma/client";
 import type { AuthContext } from "@/platform/auth/context";
 import { requireCapability } from "@/platform/rbac";
 import { recordAudit } from "@/platform/audit";
@@ -9,6 +9,7 @@ import { guestsService } from "@/modules/guests/guests.service";
 import { treatmentsService } from "@/modules/treatments/treatments.service";
 import { resourcesService } from "@/modules/resources/resources.service";
 import { folioService } from "@/modules/folio/folio.service";
+import { reservationsService } from "@/modules/reservations/reservations.service";
 import { appointmentsRepository } from "@/modules/appointments/appointments.repository";
 import { computeEndTime, resourceMatchesTreatment } from "@/modules/appointments/conflicts";
 import type {
@@ -18,9 +19,9 @@ import type {
   AppointmentAvailabilityQuery,
 } from "@/modules/appointments/appointments.schema";
 
-async function getOrThrow(id: string) {
+async function getOrThrow(id: string, propertyId: string) {
   const appt = await appointmentsRepository.findById(id);
-  if (!appt) throw new NotFoundError("Appointment not found");
+  if (!appt || appt.propertyId !== propertyId) throw new NotFoundError("Appointment not found");
   return appt;
 }
 
@@ -83,7 +84,7 @@ export const appointmentsService = {
 
   async get(ctx: AuthContext, id: string) {
     requireCapability(ctx.role, "appointment:read");
-    const appt = await getOrThrow(id);
+    const appt = await getOrThrow(id, ctx.propertyId);
     assertOwnership(ctx, appt.therapistId);
     return appt;
   },
@@ -101,6 +102,11 @@ export const appointmentsService = {
     // Existence check only (no guest:read): keeps the booking path open to the
     // least-privilege AI_AGENT principal, which may book but cannot read guests (ADR 0006).
     await guestsService.requireExists(input.guestId);
+    // A linked stay must be this guest's own active reservation — completion bills
+    // the treatment to that reservation's folio, i.e. to whoever owns the stay.
+    if (input.reservationId) {
+      await reservationsService.requireActiveStay(ctx.propertyId, input.reservationId, input.guestId);
+    }
 
     const start = input.startTime;
     const end = computeEndTime(start, treatment.durationMinutes);
@@ -133,7 +139,7 @@ export const appointmentsService = {
   /** Reschedule and/or reassign. Only SCHEDULED appointments may be modified. */
   async update(ctx: AuthContext, id: string, input: UpdateAppointmentInput): Promise<TreatmentAppointment> {
     requireCapability(ctx.role, "appointment:write");
-    const before = await getOrThrow(id);
+    const before = await getOrThrow(id, ctx.propertyId);
     assertOwnership(ctx, before.therapistId);
     if (before.status !== "SCHEDULED") {
       throw new ConflictError(`Cannot modify an appointment with status ${before.status}`);
@@ -181,7 +187,7 @@ export const appointmentsService = {
 
   async complete(ctx: AuthContext, id: string): Promise<TreatmentAppointment> {
     requireCapability(ctx.role, "appointment:complete");
-    const before = await getOrThrow(id);
+    const before = await getOrThrow(id, ctx.propertyId);
     assertOwnership(ctx, before.therapistId);
     if (before.status !== "SCHEDULED") {
       throw new ConflictError(`Cannot complete an appointment with status ${before.status}`);
@@ -201,7 +207,7 @@ export const appointmentsService = {
 
   async cancel(ctx: AuthContext, id: string): Promise<TreatmentAppointment> {
     requireCapability(ctx.role, "appointment:write");
-    const before = await getOrThrow(id);
+    const before = await getOrThrow(id, ctx.propertyId);
     assertOwnership(ctx, before.therapistId);
     if (["COMPLETED", "CANCELLED"].includes(before.status)) {
       throw new ConflictError(`Cannot cancel an appointment with status ${before.status}`);
@@ -209,10 +215,21 @@ export const appointmentsService = {
     return this.applyStatus(ctx, id, "CANCELLED", before);
   },
 
+  /** Guest did not arrive: SCHEDULED → NO_SHOW (frees the slot, never bills). */
+  async noShow(ctx: AuthContext, id: string): Promise<TreatmentAppointment> {
+    requireCapability(ctx.role, "appointment:write");
+    const before = await getOrThrow(id, ctx.propertyId);
+    assertOwnership(ctx, before.therapistId);
+    if (before.status !== "SCHEDULED") {
+      throw new ConflictError(`Cannot mark an appointment with status ${before.status} as a no-show`);
+    }
+    return this.applyStatus(ctx, id, "NO_SHOW", before);
+  },
+
   async applyStatus(
     ctx: AuthContext,
     id: string,
-    next: "COMPLETED" | "CANCELLED",
+    next: "COMPLETED" | "CANCELLED" | "NO_SHOW",
     before: TreatmentAppointment,
   ): Promise<TreatmentAppointment> {
     const after = await appointmentsRepository.update(id, { status: next });

@@ -220,6 +220,13 @@ export default function SchedulePage() {
       reload();
     }
   }
+  async function noShow(id: string) {
+    const ok = await action.submit(() => api.post(`/api/appointments/${id}/no-show`));
+    if (ok !== undefined) {
+      setSelectedAppt(null);
+      reload();
+    }
+  }
 
   // Therapist columns (resource shown as the sub-label, like the Stitch "Room N").
   const columns = useMemo(() => {
@@ -505,6 +512,15 @@ export default function SchedulePage() {
               >
                 <Icon name="cancel" className="text-[18px]" /> Cancel
               </button>
+              {selectedAppt.status === "SCHEDULED" && (
+                <button
+                  className="btn-secondary"
+                  disabled={action.submitting}
+                  onClick={() => noShow(selectedAppt.id)}
+                >
+                  <Icon name="person_off" className="text-[18px]" /> No show
+                </button>
+              )}
               <button
                 className="btn-primary"
                 disabled={action.submitting}

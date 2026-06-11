@@ -6,6 +6,8 @@ import { eventBus } from "@/platform/events";
 import { ConflictError, NotFoundError, ValidationError } from "@/platform/errors";
 import { nightsBetween } from "@/platform/intervals";
 import { folioService } from "@/modules/folio/folio.service";
+import { guestsService } from "@/modules/guests/guests.service";
+import { housekeepingService } from "@/modules/housekeeping/housekeeping.service";
 import { reservationsRepository } from "@/modules/reservations/reservations.repository";
 import { computeUtilization } from "@/modules/reservations/grid";
 import type {
@@ -20,10 +22,19 @@ import type {
   UpdateRoomInput,
 } from "@/modules/reservations/reservations.schema";
 
-async function getOrThrow(id: string) {
+async function getOrThrow(id: string, propertyId: string) {
   const reservation = await reservationsRepository.findById(id);
-  if (!reservation) throw new NotFoundError("Reservation not found");
+  if (!reservation || reservation.propertyId !== propertyId) throw new NotFoundError("Reservation not found");
   return reservation;
+}
+
+/** Statuses in which a reservation's lifecycle is finished and it must not change. */
+const TERMINAL_STATUSES = ["CHECKED_OUT", "CANCELLED", "NO_SHOW"] as const;
+
+function assertMutable(reservation: Reservation): void {
+  if ((TERMINAL_STATUSES as readonly string[]).includes(reservation.status)) {
+    throw new ConflictError(`Cannot modify a reservation with status ${reservation.status}`);
+  }
 }
 
 /** Validate a room exists, belongs to the property, matches the type, and is free. */
@@ -67,7 +78,7 @@ export const reservationsService = {
 
   async get(ctx: AuthContext, id: string) {
     requireCapability(ctx.role, "reservation:read");
-    return getOrThrow(id);
+    return getOrThrow(id, ctx.propertyId);
   },
 
   async create(ctx: AuthContext, input: CreateReservationInput): Promise<Reservation> {
@@ -77,6 +88,8 @@ export const reservationsService = {
     if (input.checkOutDate <= input.checkInDate) {
       throw new ValidationError("checkOutDate must be after checkInDate");
     }
+    // Existence check (404, not a DB error) that also rejects GDPR-erased guests.
+    await guestsService.requireExists(input.guestId);
     const roomType = await reservationsRepository.roomTypeById(input.roomTypeId);
     if (!roomType || roomType.propertyId !== ctx.propertyId) {
       throw new NotFoundError("Room type not found");
@@ -111,7 +124,10 @@ export const reservationsService = {
 
   async update(ctx: AuthContext, id: string, input: UpdateReservationInput): Promise<Reservation> {
     requireCapability(ctx.role, "reservation:write");
-    const before = await getOrThrow(id);
+    const before = await getOrThrow(id, ctx.propertyId);
+    // A finished stay has already been billed (room charges + tourist tax post at
+    // check-out); silently editing dates/occupancy afterwards would desync the folio.
+    assertMutable(before);
     const checkIn = input.checkInDate ?? before.checkInDate;
     const checkOut = input.checkOutDate ?? before.checkOutDate;
     if (checkOut <= checkIn) throw new ValidationError("checkOutDate must be after checkInDate");
@@ -135,7 +151,8 @@ export const reservationsService = {
 
   async assignRoom(ctx: AuthContext, id: string, roomId: string): Promise<Reservation> {
     requireCapability(ctx.role, "reservation:write");
-    const before = await getOrThrow(id);
+    const before = await getOrThrow(id, ctx.propertyId);
+    assertMutable(before);
     await assertRoomBookable(ctx, roomId, before.roomTypeId, before.checkInDate, before.checkOutDate, id);
     const after = await reservationsRepository.update(id, { room: { connect: { id: roomId } } });
     await recordAudit({
@@ -153,19 +170,29 @@ export const reservationsService = {
   },
 
   async checkIn(ctx: AuthContext, id: string): Promise<Reservation> {
-    return this.transition(ctx, id, "CHECKED_IN", (r) => {
+    return this.transition(ctx, id, "CHECKED_IN", async (r) => {
       if (!r.roomId) throw new ValidationError("Assign a room before check-in");
       if (!["PENDING", "CONFIRMED"].includes(r.status)) {
         throw new ConflictError(`Cannot check in a reservation with status ${r.status}`);
+      }
+      const room = await reservationsRepository.roomById(r.roomId);
+      if (room?.housekeepingStatus === "OUT_OF_ORDER") {
+        throw new ConflictError("The assigned room is out of order; assign another room before check-in");
       }
     });
   },
 
   async checkOut(ctx: AuthContext, id: string): Promise<Reservation> {
     requireCapability(ctx.role, "reservation:write");
-    const before = await getOrThrow(id);
+    const before = await getOrThrow(id, ctx.propertyId);
     if (before.status !== "CHECKED_IN") {
       throw new ConflictError(`Cannot check out a reservation with status ${before.status}`);
+    }
+    // Guard before any state change: room/tax charges silently no-op on a closed
+    // folio, so checking out against one would lose revenue without a trace.
+    const folio = await folioService.findForReservation(id);
+    if (folio && folio.status !== "OPEN") {
+      throw new ConflictError("The folio for this reservation is already closed; it cannot receive check-out charges");
     }
     const after = await reservationsRepository.update(id, { status: "CHECKED_OUT" });
     await recordAudit({
@@ -195,8 +222,23 @@ export const reservationsService = {
       children: before.children,
       nights,
     });
+    // The vacated room needs cleaning: flag it dirty and open a housekeeping work order.
+    if (before.roomId && before.room) {
+      await reservationsRepository.updateRoom(before.roomId, { housekeepingStatus: "DIRTY" });
+      eventBus.emit({ type: "room.updated", entity: "room", entityId: before.roomId, propertyId: ctx.propertyId });
+      await housekeepingService.openCheckoutCleaning(ctx, { id: before.roomId, number: before.room.number });
+    }
     eventBus.emit({ type: "booking.checked-out", entity: "booking", entityId: id, propertyId: ctx.propertyId });
     return after;
+  },
+
+  /** Guest never arrived: PENDING/CONFIRMED → NO_SHOW (frees the room for resale). */
+  async noShow(ctx: AuthContext, id: string): Promise<Reservation> {
+    return this.transition(ctx, id, "NO_SHOW", (r) => {
+      if (!["PENDING", "CONFIRMED"].includes(r.status)) {
+        throw new ConflictError(`Cannot mark a reservation with status ${r.status} as a no-show`);
+      }
+    });
   },
 
   async cancel(ctx: AuthContext, id: string): Promise<Reservation> {
@@ -211,12 +253,12 @@ export const reservationsService = {
   async transition(
     ctx: AuthContext,
     id: string,
-    next: "CHECKED_IN" | "CHECKED_OUT" | "CANCELLED",
-    guard: (r: Reservation) => void,
+    next: "CHECKED_IN" | "CHECKED_OUT" | "CANCELLED" | "NO_SHOW",
+    guard: (r: Reservation) => void | Promise<void>,
   ): Promise<Reservation> {
     requireCapability(ctx.role, "reservation:write");
-    const before = await getOrThrow(id);
-    guard(before);
+    const before = await getOrThrow(id, ctx.propertyId);
+    await guard(before);
     const after = await reservationsRepository.update(id, { status: next });
     await recordAudit({
       actorStaffId: ctx.staffId,
@@ -351,6 +393,25 @@ export const reservationsService = {
   async listRooms(ctx: AuthContext) {
     requireCapability(ctx.role, "reservation:read");
     return reservationsRepository.roomsByType(ctx.propertyId);
+  },
+
+  /**
+   * Cross-module interface (no RBAC): validate that a reservation can host new
+   * guest activity (an appointment that will later bill to its folio). Ensures the
+   * stay exists in this property, belongs to THIS guest, and is not finished —
+   * otherwise a completed treatment would post its charge to someone else's bill
+   * or to a stay that can no longer receive charges.
+   */
+  async requireActiveStay(propertyId: string, reservationId: string, guestId: string): Promise<Reservation> {
+    const reservation = await reservationsRepository.findById(reservationId);
+    if (!reservation || reservation.propertyId !== propertyId) throw new NotFoundError("Reservation not found");
+    if (reservation.guestId !== guestId) {
+      throw new ValidationError("Reservation belongs to a different guest");
+    }
+    if (!["PENDING", "CONFIRMED", "CHECKED_IN"].includes(reservation.status)) {
+      throw new ConflictError(`Cannot link to a reservation with status ${reservation.status}`);
+    }
+    return reservation;
   },
 
   /** Rooms of the requested type with no blocking reservation overlapping [from, to). */

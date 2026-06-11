@@ -23,6 +23,15 @@ Required capability per endpoint is shown in brackets; see [RBAC matrix](superpo
 | POST | `/api/auth/logout` | authenticated | `{ refreshToken }` → revokes it |
 | GET | `/api/me` | authenticated | current staff profile |
 
+## Staff (management — Staff page)
+| Method | Path | Capability | Body / Notes |
+|---|---|---|---|
+| GET | `/api/staff` | appointment:read | slim picker list (`{ id, firstName, lastName, role }`); query: `role?` |
+| GET | `/api/staff/directory` | staff:manage | full profiles incl. email + deactivated accounts |
+| POST | `/api/staff` | staff:manage | `{ email, password, role, firstName, lastName }` — 409 on duplicate email; AI_AGENT not assignable |
+| PATCH | `/api/staff/:id` | staff:manage | `{ role?, firstName?, lastName?, isActive?, password? }`; deactivation/password reset revokes all sessions; self-deactivation and own-role change are 409 |
+| GET | `/api/staff/capabilities` | staff:manage | role → capability matrix for the Access panel |
+
 ## Guests (Phase 2)
 | Method | Path | Capability | Body / Notes |
 |---|---|---|---|
@@ -41,8 +50,9 @@ Required capability per endpoint is shown in brackets; see [RBAC matrix](superpo
 | PATCH | `/api/reservations/:id` | reservation:write | dates/occupancy/notes; re-checks room conflict |
 | POST | `/api/reservations/:id/assign-room` | reservation:write | `{ roomId }` — 409 on conflict |
 | POST | `/api/reservations/:id/check-in` | reservation:write | requires assigned room |
-| POST | `/api/reservations/:id/check-out` | reservation:write | auto-posts room-night charges to folio |
+| POST | `/api/reservations/:id/check-out` | reservation:write | auto-posts room-night charges + tourist tax; flags the room DIRTY and opens a checkout-cleaning task; 409 if the folio is already closed |
 | POST | `/api/reservations/:id/cancel` | reservation:write | |
+| POST | `/api/reservations/:id/no-show` | reservation:write | PENDING/CONFIRMED only; frees the room |
 | GET | `/api/reservations/availability` | reservation:read | query: `from, to, roomTypeId?` → free rooms |
 
 ## Treatments / Packages / Resources (Phase 3)
@@ -64,6 +74,7 @@ Required capability per endpoint is shown in brackets; see [RBAC matrix](superpo
 | PATCH | `/api/appointments/:id` | appointment:write | reschedule/reassign (SCHEDULED only); re-checks conflicts |
 | POST | `/api/appointments/:id/complete` | appointment:complete | auto-posts treatment charge to linked folio |
 | POST | `/api/appointments/:id/cancel` | appointment:write | |
+| POST | `/api/appointments/:id/no-show` | appointment:write | SCHEDULED only; never bills |
 | GET | `/api/appointments/availability` | appointment:read | query: `from, to, therapistId?/resourceId?` → busy intervals |
 
 ## Folio & Payments (Phase 4)

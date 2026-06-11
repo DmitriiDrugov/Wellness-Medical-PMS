@@ -175,6 +175,9 @@ export const guestsService = {
     requireCapability(ctx.role, "guest:write");
     const before = await getOrThrow(id);
     await guestsRepository.softDelete(id);
+    // Erasure also cuts portal access: disable the account and revoke its sessions.
+    const { guestAuthService } = await import("@/modules/guest-auth/guest-auth.service");
+    await guestAuthService.disableForGuest(id);
     await recordAudit({
       actorStaffId: ctx.staffId,
       propertyId: ctx.propertyId,

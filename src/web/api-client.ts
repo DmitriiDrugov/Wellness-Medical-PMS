@@ -88,7 +88,7 @@ async function parseEnvelope<T>(res: Response): Promise<ApiResult<T>> {
   return { data: (body?.data ?? null) as T, meta: body?.meta };
 }
 
-async function tryRefresh(): Promise<boolean> {
+async function doRefresh(): Promise<boolean> {
   const rt = getStoredRefreshToken();
   if (!rt) return false;
   try {
@@ -104,6 +104,19 @@ async function tryRefresh(): Promise<boolean> {
     clearTokens();
     return false;
   }
+}
+
+/**
+ * Single-flight refresh. Refresh tokens rotate (the presented one is revoked), so
+ * concurrent 401s must share ONE refresh call — a second parallel attempt would
+ * present the just-revoked token, fail, and wipe the freshly issued pair.
+ */
+let refreshInFlight: Promise<boolean> | null = null;
+function tryRefresh(): Promise<boolean> {
+  refreshInFlight ??= doRefresh().finally(() => {
+    refreshInFlight = null;
+  });
+  return refreshInFlight;
 }
 
 async function request<T>(method: string, path: string, body?: unknown, retry = true): Promise<ApiResult<T>> {

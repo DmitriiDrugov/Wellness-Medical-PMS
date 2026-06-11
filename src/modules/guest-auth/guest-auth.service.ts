@@ -83,4 +83,16 @@ export const guestAuthService = {
     if (!account) throw new NotFoundError("Guest account not found");
     return await toProfile(account);
   },
+
+  /**
+   * Cross-module hook (no RBAC): called when a guest is GDPR-erased. The portal
+   * account loses its credentials and every live refresh token is revoked, so the
+   * erased guest cannot keep using the portal.
+   */
+  async disableForGuest(guestId: string): Promise<void> {
+    const account = await guestAuthRepository.findAccountByGuestId(guestId);
+    if (!account) return;
+    await guestAuthRepository.disableAccount(account.id);
+    await guestAuthRepository.revokeAllRefreshTokens(account.id);
+  },
 };

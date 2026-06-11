@@ -121,7 +121,7 @@ export default function BookingPage() {
   const action = useMutation();
   const cancelMutation = useMutation();
 
-  async function lifecycle(id: string, op: "check-in" | "check-out") {
+  async function lifecycle(id: string, op: "check-in" | "check-out" | "no-show") {
     const ok = await action.submit(() => api.post(`/api/reservations/${id}/${op}`));
     if (ok !== undefined) { setSelected(null); reload(); }
   }
@@ -437,6 +437,11 @@ export default function BookingPage() {
             {selected.status === "CHECKED_IN" && (
               <button className="btn-primary" disabled={action.submitting} onClick={() => lifecycle(selected.id, "check-out")}>
                 <Icon name="logout" className="text-[18px]" /> Check out
+              </button>
+            )}
+            {(selected.status === "PENDING" || selected.status === "CONFIRMED") && (
+              <button className="btn-secondary" disabled={action.submitting} onClick={() => lifecycle(selected.id, "no-show")}>
+                <Icon name="person_off" className="text-[18px]" /> No show
               </button>
             )}
             {selected.status !== "CANCELLED" && selected.status !== "CHECKED_OUT" && selected.status !== "NO_SHOW" && (

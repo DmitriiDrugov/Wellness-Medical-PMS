@@ -1,9 +1,10 @@
-import type { HousekeepingTaskStatus } from "@prisma/client";
+import type { HousekeepingTask, HousekeepingTaskStatus, HousekeepingTaskType } from "@prisma/client";
 import type { AuthContext } from "@/platform/auth/context";
 import { requireCapability } from "@/platform/rbac";
 import { recordAudit } from "@/platform/audit";
 import { eventBus } from "@/platform/events";
-import { ConflictError, NotFoundError } from "@/platform/errors";
+import { ConflictError, NotFoundError, ValidationError } from "@/platform/errors";
+import { authRepository } from "@/modules/auth/auth.repository";
 import { reservationsRepository } from "@/modules/reservations/reservations.repository";
 import { propertyRepository } from "@/modules/property/property.repository";
 import { housekeepingRepository } from "@/modules/housekeeping/housekeeping.repository";
@@ -28,11 +29,51 @@ async function assertTargets(ctx: AuthContext, roomId?: string | null, areaId?: 
   }
 }
 
+/** Validate that an assignee is an active staff member of this property. */
+async function assertAssignee(ctx: AuthContext, staffId: string) {
+  const staff = await authRepository.findStaffById(staffId);
+  if (!staff || staff.propertyId !== ctx.propertyId || !staff.isActive) {
+    throw new ValidationError("assignedToStaffId must reference an active staff member in this property");
+  }
+}
+
 /** Timestamp side-effects of a status change. */
 function statusStamps(next: HousekeepingTaskStatus) {
   if (next === "IN_PROGRESS") return { startedAt: new Date() };
   if (next === "DONE") return { completedAt: new Date() };
   return {};
+}
+
+/** Room cleanliness implied by a finished work order, or null when none. */
+function roomStatusAfterTask(type: HousekeepingTaskType): "CLEAN" | "INSPECTED" | null {
+  if (type === "CLEANING" || type === "TURNDOWN") return "CLEAN";
+  if (type === "INSPECTION") return "INSPECTED";
+  return null;
+}
+
+/**
+ * Completing a cleaning/inspection work order updates the target room's
+ * cleanliness flag. OUT_OF_ORDER is a maintenance state cleared explicitly by a
+ * manager, never as a side-effect of one finished task.
+ */
+async function syncRoomAfterDone(
+  ctx: AuthContext,
+  task: Pick<HousekeepingTask, "id" | "roomId" | "type">,
+): Promise<void> {
+  if (!task.roomId) return;
+  const next = roomStatusAfterTask(task.type);
+  if (!next) return;
+  const room = await reservationsRepository.roomById(task.roomId);
+  if (!room || room.housekeepingStatus === "OUT_OF_ORDER" || room.housekeepingStatus === next) return;
+  await reservationsRepository.updateRoom(task.roomId, { housekeepingStatus: next });
+  await recordAudit({
+    actorStaffId: ctx.staffId, propertyId: ctx.propertyId,
+    action: "STATE_CHANGE", entityType: "Room", entityId: task.roomId,
+    before: { housekeepingStatus: room.housekeepingStatus },
+    after: { housekeepingStatus: next },
+    metadata: { auto: "housekeeping-task-done", taskId: task.id },
+  });
+  eventBus.emit({ type: "room.updated", entity: "room", entityId: task.roomId, propertyId: ctx.propertyId });
 }
 
 export const housekeepingService = {
@@ -58,6 +99,7 @@ export const housekeepingService = {
   async createTask(ctx: AuthContext, input: CreateTaskInput) {
     requireCapability(ctx.role, "housekeeping:manage");
     await assertTargets(ctx, input.roomId, input.areaId);
+    if (input.assignedToStaffId) await assertAssignee(ctx, input.assignedToStaffId);
     const task = await housekeepingRepository.create({
       propertyId: ctx.propertyId,
       title: input.title,
@@ -85,6 +127,7 @@ export const housekeepingService = {
         throw new ConflictError(`Cannot move a task from ${before.status} to ${input.status}`);
       }
     }
+    if (input.assignedToStaffId) await assertAssignee(ctx, input.assignedToStaffId);
     const after = await housekeepingRepository.update(id, {
       ...(input.title !== undefined ? { title: input.title } : {}),
       ...(input.type !== undefined ? { type: input.type } : {}),
@@ -97,6 +140,9 @@ export const housekeepingService = {
       actorStaffId: ctx.staffId, propertyId: ctx.propertyId,
       action: input.status ? "STATE_CHANGE" : "UPDATE", entityType: "HousekeepingTask", entityId: id, before, after,
     });
+    if (input.status === "DONE" && before.status !== "DONE") {
+      await syncRoomAfterDone(ctx, after);
+    }
     eventBus.emit({ type: "housekeeping.updated", entity: "housekeeping", entityId: id, propertyId: ctx.propertyId });
     return after;
   },
@@ -114,7 +160,38 @@ export const housekeepingService = {
       action: "STATE_CHANGE", entityType: "HousekeepingTask", entityId: id, before, after,
       metadata: { from: before.status, to: next },
     });
+    if (next === "DONE") {
+      await syncRoomAfterDone(ctx, after);
+    }
     eventBus.emit({ type: `housekeeping.${next.toLowerCase()}`, entity: "housekeeping", entityId: id, propertyId: ctx.propertyId });
     return after;
+  },
+
+  /**
+   * Cross-module hook (no RBAC — the caller already authorized the check-out):
+   * open a checkout-cleaning work order for the vacated room. Idempotent: an
+   * existing unfinished cleaning task for the room is reused, not duplicated.
+   */
+  async openCheckoutCleaning(
+    actor: Pick<AuthContext, "staffId" | "propertyId">,
+    room: { id: string; number: string },
+  ) {
+    const existing = await housekeepingRepository.findActiveCleaningTask(room.id);
+    if (existing) return existing;
+    const task = await housekeepingRepository.create({
+      propertyId: actor.propertyId,
+      title: `Checkout cleaning — Room ${room.number}`,
+      type: "CLEANING",
+      priority: "HIGH",
+      roomId: room.id,
+      createdByStaffId: actor.staffId,
+    });
+    await recordAudit({
+      actorStaffId: actor.staffId, propertyId: actor.propertyId,
+      action: "CREATE", entityType: "HousekeepingTask", entityId: task.id, after: task,
+      metadata: { auto: "checkout-cleaning" },
+    });
+    eventBus.emit({ type: "housekeeping.created", entity: "housekeeping", entityId: task.id, propertyId: actor.propertyId });
+    return task;
   },
 };

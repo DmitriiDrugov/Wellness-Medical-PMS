@@ -29,7 +29,11 @@ export const listTasksQuerySchema = z.object({
   assignedToStaffId: z.string().optional(),
   roomId: z.string().optional(),
   areaId: z.string().optional(),
-  mine: z.coerce.boolean().optional(),
+  // NOTE: not z.coerce.boolean() — that would turn the query string "false" into true.
+  mine: z
+    .enum(["true", "false"])
+    .transform((v) => v === "true")
+    .optional(),
 });
 
 export type CreateTaskInput = z.infer<typeof createTaskSchema>;

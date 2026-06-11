@@ -152,6 +152,11 @@ export const folioService = {
 
   // ---- Internal cross-module posting (no RBAC; caller already authorized) ----
 
+  /** The folio linked to a reservation, if any (used by check-out preconditions). */
+  async findForReservation(reservationId: string): Promise<Folio | null> {
+    return folioRepository.findByReservationId(reservationId);
+  },
+
   /** Find the folio for a reservation, creating an open one if none exists. */
   async ensureForReservation(input: { propertyId: string; reservationId: string; guestId: string }): Promise<Folio> {
     const existing = await folioRepository.findByReservationId(input.reservationId);

@@ -26,7 +26,8 @@ export type DomainEntity =
   | "room"
   | "area"
   | "housekeeping"
-  | "property";
+  | "property"
+  | "staff";
 
 export interface DomainEvent {
   /** e.g. "booking.created", "folio.charged", "appointment.completed". */

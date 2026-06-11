@@ -3,11 +3,10 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/web/auth-context";
-import { Sidebar } from "@/web/components/Sidebar";
 import { Topbar } from "@/web/components/Topbar";
 import { Icon } from "@/web/components/ui";
 
-/** Authenticated layout: guards the route, then renders sidebar + topbar + page. */
+/** Authenticated layout: guards the route, then renders the top nav + page. */
 export function AppShell({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   const router = useRouter();
@@ -28,12 +27,11 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex h-screen overflow-hidden">
-      <Sidebar role={user.role} />
-      <div className="flex flex-1 flex-col overflow-hidden">
-        <Topbar />
-        <main className="flex-1 overflow-y-auto px-6 py-6">{children}</main>
-      </div>
+    <div className="flex h-screen flex-col overflow-hidden">
+      <Topbar />
+      <main className="flex-1 overflow-y-auto px-6 py-6">
+        <div className="mx-auto w-full max-w-7xl">{children}</div>
+      </main>
     </div>
   );
 }

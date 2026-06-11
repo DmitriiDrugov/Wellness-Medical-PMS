@@ -36,6 +36,13 @@ export const housekeepingRepository = {
     return prisma.housekeepingTask.findUnique({ where: { id }, include: TASK_INCLUDE });
   },
 
+  /** An unfinished CLEANING work order already targeting the room, if any. */
+  findActiveCleaningTask(roomId: string): Promise<HousekeepingTask | null> {
+    return prisma.housekeepingTask.findFirst({
+      where: { roomId, type: "CLEANING", status: { in: ["OPEN", "IN_PROGRESS", "BLOCKED"] } },
+    });
+  },
+
   create(data: Prisma.HousekeepingTaskUncheckedCreateInput): Promise<HousekeepingTask> {
     return prisma.housekeepingTask.create({ data });
   },
